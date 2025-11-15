@@ -1,0 +1,96 @@
+{% extends "base_panel.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+  <div>
+    <h1 class="h4 mb-1 d-flex align-items-center gap-2">
+      <span class="badge bg-success-subtle text-success border border-success rounded-pill fw-normal px-2 py-1">
+        Nowa intencja
+      </span>
+      <span class="fw-semibold">
+        {{ msza.data }} &nbsp;{{ msza.godzina }}
+      </span>
+    </h1>
+    <div class="text-muted small">
+      {{ msza.miejsce }}{% if msza.celebrans %}, celebrans: {{ msza.celebrans }}{% endif %}
+    </div>
+  </div>
+
+  <div class="d-flex gap-2">
+    <a href="{{ msza.get_absolute_url }}" class="btn btn-outline-secondary btn-sm">
+      Powrót
+    </a>
+  </div>
+</div>
+
+<form id="intencja-form" method="post" novalidate class="mb-4">
+  {% csrf_token %}
+
+  {% if form.non_field_errors %}
+    <div class="alert alert-danger small mb-4">
+      {{ form.non_field_errors }}
+    </div>
+  {% endif %}
+<div class="row g-3 mb-3">
+  <div class="card shadow-sm border-0">
+    <div class="card-body p-4">
+      <div class="col-md-4">
+        <label class="form-label small text-muted fw-semibold">
+          {{ form.tresc.label }}
+        </label>
+        {{ form.tresc }}
+        {% if form.tresc.errors %}
+        <div class="text-danger small">{{ form.tresc.errors }}</div>
+        {% else %}
+        <div class="form-text small">
+          Przykład: "+ Jan Kowalski od żony i dzieci".
+        </div>
+        {% endif %}
+      </div>
+</div>
+
+<div class="row g-3 mb-3">
+       <div class="col-md-4">
+        <label class="form-label small text-muted fw-semibold">
+          {{ form.zamawiajacy.label }}
+        </label>
+        {{ form.zamawiajacy }}
+        {% if form.zamawiajacy.errors %}
+        <div class="text-danger small">{{ form.zamawiający.errors }}</div>
+        {% else %}
+        <div class="form-text small">Kto zamówił intencję.</div>
+        {% endif %}
+      </div>
+
+       <div class="col-md-4">
+        <label class="form-label small text-muted fw-semibold">
+          {{ form.ofiara.label }}
+        </label>
+        {{ form.ofiara }}
+        {% if form.ofiara.errors %}
+        <div class="text-danger small">{{ form.ofiara.errors }}</div>
+        {% else %}
+        <div class="form-text small">Kwota/dar (dla kancelarii, nie drukujemy).</div>
+        {% endif %}
+      </div>
+</div>
+      <div class="mb-3">
+        <label class="form-label small text-muted fw-semibold">
+          {{ form.uwagi.label }}
+        </label>
+        {{ form.uwagi }}
+        {% if form.uwagi.errors %}
+        <div class="text-danger small">{{ form.uwagi.errors }}</div>
+        {% else %}
+        <div class="form-text small">Np. "rezerwacja telefoniczna".</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-4 d-flex gap-2">
+    <button class="btn btn-primary">Zapisz</button>
+    <a href="{{ msza.get_absolute_url }}" class="btn btn-outline-secondary">Anuluj</a>
+  </div>
+</form>
+{% endblock %}

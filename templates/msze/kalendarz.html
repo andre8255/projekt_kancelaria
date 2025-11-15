@@ -1,0 +1,70 @@
+{% extends "base_panel.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+  <div>
+    <h1 class="h4 mb-1 fw-semibold">Kalendarz mszy</h1>
+    <div class="text-muted small">
+      Kolor zielony – termin wolny. Kolor czerwony – są już intencje.
+    </div>
+  </div>
+
+  <div class="d-flex gap-2">
+    <a href="{% url 'msza_nowa' %}" class="btn btn-primary btn-sm">
+      + Dodaj mszę
+    </a>
+    <a href="{% url 'msza_lista' %}" class="btn btn-outline-secondary btn-sm">
+      Lista mszy
+    </a>
+  </div>
+</div>
+
+<div class="card shadow-sm border-0">
+  <div class="card-body p-3">
+    <div id="kalendarz"></div>
+  </div>
+</div>
+
+<!-- FullCalendar CSS -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+
+<!-- FullCalendar JS -->
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const el = document.getElementById("kalendarz");
+
+  const kalendarz = new FullCalendar.Calendar(el, {
+    initialView: 'timeGridWeek',      // startujemy od widoku tygodnia
+    headerToolbar: {
+      left: 'prev,next today',
+      center: 'title',
+      right: 'dayGridMonth,timeGridWeek,timeGridDay'
+    },
+    slotMinTime: "06:00:00",
+    slotMaxTime: "22:00:00",
+    allDaySlot: false,
+    firstDay: 1,                      // poniedziałek jako pierwszy dzień tygodnia
+    locale: 'pl',
+    nowIndicator: true,
+
+    events: {
+      url: "{% url 'msza_kalendarz_dane' %}",
+      method: "GET",
+    },
+
+    eventClick: function(info) {
+      // Po kliknięciu w mszę przechodzimy do jej szczegółów:
+      // (np. dodanie intencji)
+      info.jsEvent.preventDefault();
+      if (info.event.url) {
+        window.location.href = info.event.url;
+      }
+    },
+  });
+
+  kalendarz.render();
+});
+</script>
+{% endblock %}

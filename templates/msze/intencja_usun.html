@@ -1,0 +1,17 @@
+{% extends "base_panel.html" %}
+{% block content %}
+<h1 class="h5 mb-3">Usuń intencję</h1>
+
+<div class="card shadow-sm border-0">
+  <div class="card-body small">
+    <p>Czy na pewno chcesz usunąć tę intencję?</p>
+    <p class="mb-3"><strong>{{ object.tresc }}</strong></p>
+
+    <form method="post" class="d-flex gap-2">
+      {% csrf_token %}
+      <button class="btn btn-danger btn-sm">Tak, usuń</button>
+      <a class="btn btn-outline-secondary btn-sm" href="{{ object.msza.get_absolute_url }}">Nie usuwaj</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

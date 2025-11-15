@@ -1,0 +1,191 @@
+{% extends "base_panel.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+  <div>
+    <h1 class="h4 mb-1 d-flex align-items-center gap-2">
+      <span class="badge bg-primary-subtle text-primary border border-primary rounded-pill fw-normal px-2 py-1">
+        {% if object %}Edycja{% else %}Nowa{% endif %}
+      </span>
+      <span class="fw-semibold">
+        Kartoteka rodziny
+      </span>
+    </h1>
+    <div class="text-muted small">
+      Dane adresowe i kontaktowe gospodarstwa domowego.
+    </div>
+  </div>
+
+  <div class="d-flex gap-2">
+    <a href="{% url 'rodzina_lista' %}" class="btn btn-outline-secondary btn-sm">
+     Powrót
+    </a>
+   
+  </div>
+</div>
+
+<form id="rodzina-form" method="post" novalidate class="mb-4">
+  {% csrf_token %}
+
+  {% if form.non_field_errors %}
+    <div class="alert alert-danger small mb-4">
+      {{ form.non_field_errors }}
+    </div>
+  {% endif %}
+
+  <div class="card shadow-sm border-0">
+    <div class="card-body p-4">
+
+      <!-- SEKCJA: kartoteka -->
+      <div class="mb-4">
+        <div class="fw-semibold mb-2">Rodzina / kartoteka</div>
+
+      <div class="row g-3 mb-3">
+         <div class="col-md-4">
+          <label class="form-label small text-muted fw-semibold">
+            {{ form.nazwa.label }}
+          </label>
+          {{ form.nazwa }}
+          {% if form.nazwa.errors %}
+            <div class="text-danger small">{{ form.nazwa.errors }}</div>
+          {% else %}
+            <div class="form-text small">Nazwisko rodziny.</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+      <hr class="text-muted my-4">
+
+      <!-- SEKCJA: adres -->
+      <div class="mb-4">
+        <div class="fw-semibold mb-2">Adres zamieszkania</div>
+      
+      <div class="row g-3 mb-3">
+        <div class="col-md-4">
+          <label class="form-label small text-muted fw-semibold">
+            {{ form.ulica.label }}
+          </label>
+          {{ form.ulica }}
+          {% if form.ulica.errors %}
+            <div class="text-danger small">{{ form.ulica.errors }}</div>
+          {% endif %}
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label small text-muted fw-semibold">
+            {{ form.nr_domu.label }}
+          </label>
+          {{ form.nr_domu }}
+          {% if form.nr_domu.errors %}
+            <div class="text-danger small">{{ form.nr_domu.errors }}</div>
+          {% endif %}
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label small text-muted fw-semibold">
+            {{ form.nr_mieszkania.label }}
+          </label>
+          {{ form.nr_mieszkania }}
+          {% if form.nr_mieszkania.errors %}
+            <div class="text-danger small">{{ form.nr_mieszkania.errors }}</div>
+          {% endif %}
+        </div>
+      </div>
+      <div class="row g-3 mb-3">
+         <div class="col-md-4">
+          <label class="form-label small text-muted fw-semibold">
+            {{ form.miejscowosc.label }}
+          </label>
+          {{ form.miejscowosc }}
+          {% if form.miejscowosc.errors %}
+            <div class="text-danger small">{{ form.miejscowosc.errors }}</div>
+          {% endif %}
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label small text-muted fw-semibold">
+            {{ form.kod_pocztowy.label }}
+          </label>
+          {{ form.kod_pocztowy }}
+          {% if form.kod_pocztowy.errors %}
+            <div class="text-danger small">{{ form.kod_pocztowy.errors }}</div>
+          {% endif %}
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label small text-muted fw-semibold">
+            {{ form.poczta.label }}
+          </label>
+          {{ form.poczta }}
+          {% if form.poczta.errors %}
+            <div class="text-danger small">{{ form.poczta.errors }}</div>
+         
+          {% endif %}
+        </div>
+      </div>
+       
+
+        
+      </div>
+
+      <hr class="text-muted my-4">
+
+      <!-- SEKCJA: kontakt -->
+      <div class="mb-4">
+        <div class="fw-semibold mb-2">Kontakt do rodziny</div>
+      <div class="row g-3 mb-3">
+        <div class="col-md-4">
+          <label class="form-label small text-muted fw-semibold">
+            {{ form.telefon_kontaktowy.label }}
+          </label>
+          {{ form.telefon_kontaktowy }}
+          {% if form.telefon_kontaktowy.errors %}
+            <div class="text-danger small">{{ form.telefon_kontaktowy.errors }}</div>
+          {% else %}
+            <div class="form-text small">Numer telefonu kontaktowego.</div>
+          {% endif %}
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label small text-muted fw-semibold">
+            {{ form.email_kontaktowy.label }}
+          </label>
+          {{ form.email_kontaktowy }}
+          {% if form.email_kontaktowy.errors %}
+            <div class="text-danger small">{{ form.email_kontaktowy.errors }}</div>
+          {% else %}
+            <div class="form-text small">Adres e-mail do korespondencji.</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    
+      <hr class="text-muted my-4">
+
+      <!-- SEKCJA: uwagi -->
+      <div class="mb-2">
+        <div class="fw-semibold mb-2">Uwagi wewnętrzne</div>
+
+        <div class="mb-3">
+          <label class="form-label small text-muted fw-semibold">
+            {{ form.uwagi.label }}
+          </label>
+          {{ form.uwagi }}
+          {% if form.uwagi.errors %}
+            <div class="text-danger small">{{ form.uwagi.errors }}</div>
+          {% else %}
+            <div class="form-text small">Notatki tylko dla kancelarii (nie drukuje się).</div>
+          {% endif %}
+        </div>
+      </div>
+
+    </div> <!-- /card-body -->
+  </div>   <!-- /card -->
+
+  <div class="mt-4 d-flex gap-2">
+    <button class="btn btn-primary">Zapisz</button>
+    <a href="{% url 'rodzina_lista' %}" class="btn btn-outline-secondary">Anuluj</a>
+  </div>
+</form>
+{% endblock %}

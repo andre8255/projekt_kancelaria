@@ -1,0 +1,101 @@
+{% extends "base_panel.html" %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+  <div>
+    <h1 class="h5 mb-0">Chrzty</h1>
+    <div class="text-muted small">Rejestr chrztów</div>
+  </div>
+
+  <div class="d-flex flex-wrap gap-2 ms-auto">
+    <a href="{% url 'chrzest_dodaj' %}" class="btn btn-primary btn-sm">
+      + Dodaj wpis
+    </a>
+  </div>
+</div>
+
+<form method="get" class="mb-3">
+  <div class="input-group input-group-sm" style="max-width:400px;">
+    <input class="form-control"
+           type="search"
+           name="q"
+           value="{{ request.GET.q }}"
+           placeholder="Nazwisko, rok, nr aktu…">
+    <button class="btn btn-outline-secondary">Szukaj</button>
+  </div>
+</form>
+
+<div class="card shadow-sm">
+  <div class="card-body p-0">
+    {% if chrzty %}
+      <div class="table-responsive">
+        <table class="table table-sm align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Rok / akt</th>
+              <th>Osoba ochrzczona</th>
+              <th>Data chrztu</th>
+              <th>Miejsce chrztu</th>
+              <th class="text-end">Akcje</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for wpis in chrzty %}
+            <tr>
+
+             
+                 <!-- Rok / akt -->
+              <td>
+                {{ wpis.rok }}/{{ wpis.akt_nr }}
+              </td>
+              <!-- Osoba -->
+              <td>
+                {{ wpis.ochrzczony.nazwisko }} {{ wpis.ochrzczony.imie_pierwsze }}
+              </td>
+
+            <!-- Data chrztu -->
+              <td>
+                {% if wpis.data_chrztu %}
+                  {{ wpis.data_chrztu }}
+                {% elif wpis.rok_chrztu %}
+                  {{ wpis.rok_chrztu }}
+                {% else %}
+                  —
+                {% endif %}
+              </td>
+              <!-- Data urodzenia -->
+              <td>
+                {% if wpis.miejsce_chrztu %}
+                  {{ wpis.miejsce_chrztu }}
+                {% elif wpis.miejsce_chrztu %}
+                  {{ wpis.miejsce_chrztu }}
+                {% else %}
+                  —
+                {% endif %}
+              </td>
+
+              <!-- Akcje -->
+              <td class="text-end">
+                <div class="btn-group btn-group-sm" role="group">
+                  <a href="{% url 'chrzest_szczegoly' wpis.pk %}" class="btn btn-outline-secondary">
+                    Szczegóły
+                  </a>
+                  <a href="{% url 'chrzest_usun' wpis.pk %}" class="btn btn-outline-danger">
+                    Usuń
+                  </a>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="p-3 text-muted small">
+        Brak wpisów chrztu.
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,172 @@
+{% extends "base_print.html" %}
+{% block title %}Świadectwo Chrztu – {{ chrzest.rok }}/{{ chrzest.akt_nr }}{% endblock %}
+
+{% block content %}
+<style>
+  @page { size: A4; margin: 15mm; }
+
+  .doc {
+    max-width: 720px;
+    margin: 0 auto;
+    color: #063267;
+    font-family: "Times New Roman", serif;
+    font-size: 11pt;
+  }
+
+  h1 { text-align: center; margin: 0.2cm 0 0.1cm; }
+  .subtitle { text-align: center; margin-bottom: 0.5cm; }
+
+  .bookref { text-align: right; margin-right: 4cm; }
+
+  .seal {
+    float: left;
+    width: 5cm; height: 1.7cm;
+    border: 1px dashed #acabab;
+    color: #c3c4c5;
+    text-align: center;
+    line-height: 1.7cm;
+    margin-right: 0.8cm;
+    font-size: 11pt;
+  }
+
+  /* Dane automatyczne: ten sam font i rozmiar co tekst, tylko pogrubione */
+  .user-data { font-weight: 705; color: #000; }
+
+  .tiny { font-size: 10pt; color: #575757; margin: 2px 0 8px; }
+  .field-label { font-weight: 700; white-space: nowrap; }
+  .field-label::after { content: ": "; }   /* dwukropek dokładany z CSS */
+  .user-data { font-weight: 700; color: #000; }  
+  table.data-table { width: 100%; border-collapse: collapse; }
+  table.data-table td { vertical-align: top; padding: 6px 4px; }
+
+  /* układ w wierszu: lewa wartość + prawa sekcja „Wyznanie” */
+  .row-split {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;           /* mała przerwa między lewą a prawą częścią */
+  }
+  .row-split .left {
+    min-width: 40%;      /* żeby lewa część nie zawijała za szybko */
+  }
+  .row-split .right {    /* prawa część (wyznanie) trzyma się prawej */
+    white-space: nowrap;
+  }
+
+  /* dwukropek dokładany CSS-em – bez spacji po nim */
+  .field-label::after { content: ": "; }
+
+
+
+  
+  .block { margin-top: 1cm; }
+</style>
+
+<div class="doc">
+  <div class="seal">Pieczęć parafii</div>
+  <h1>ŚWIADECTWO CHRZTU</h1>
+  <div class="subtitle">Testimonium baptismi / Certificate of Baptism </div>
+
+  <div class="bookref">
+  <span class="field-label">Rok i numer w księdze chrztów</span><span class="user-data">{{ chrzest.rok }}/{{ chrzest.akt_nr }}</span><br></div>
+  <table class="data-table">
+  <td colspan="2" class="tiny" style="text-align: right">Annus et numerus libri baptisatorum/ Year and number in the Register of Baptisms</td></table>
+
+
+<table class="data-table">
+  <!-- 1) Imię i nazwisko – wartość od razu po „:” -->
+  <tr>
+    <td class="field-label" style="width:25%;">1. Imię i nazwisko</td><td><span class="user-data">{{ chrzest.ochrzczony.nazwisko }} {{ chrzest.ochrzczony.imie_pierwsze }}</span></td>
+  </tr>
+  <tr><td colspan="2" class="tiny">Nomen, cognomen/ First and last name</td></tr>
+
+  <!-- 2) Ojciec + wyznanie -->
+  <tr>
+  <td class="field-label">2. Imię i nazwisko ojca</td>
+  <td>
+    <div class="row-split">
+      <div class="left">
+        <span class="user-data">{{ chrzest.ojciec }}</span>
+      </div>
+      <div class="right">
+        <span class="field-label">Wyznanie</span><span class="user-data">{% if chrzest.ojciec_wyznanie %}{{ chrzest.ojciec_wyznanie }}{% else %}&nbsp;{% endif %}</span>
+      </div>
+    </div>
+  </td>
+</tr>
+  <tr><td colspan="2" class="tiny"> Nomen, cognomen patris/ Father's name</td></tr>
+
+  <!-- 3) Matka + wyznanie -->
+  <tr>
+  <td class="field-label">3. Imię i nazwisko matki</td>
+  <td>
+    <div class="row-split">
+      <div class="left">
+        <span class="user-data">
+          {{ chrzest.matka }}{% if chrzest.nazwisko_matki_rodowe %} z domu {{ chrzest.nazwisko_matki_rodowe }}{% endif %}
+        </span>
+      </div>
+      <div class="right">
+        <span class="field-label">Wyznanie</span><span class="user-data">{% if chrzest.matka_wyznanie %}{{ chrzest.matka_wyznanie }}{% else %}&nbsp;{% endif %}</span>
+      </div>
+    </div>
+  </td>
+</tr>
+  <tr><td colspan="2" class="tiny">Nomen, cognomen matris/ Mother's name</td></tr>
+
+  <!-- 4) Data i miejsce urodzenia -->
+  <tr>
+    <td class="field-label">4. Data i miejsce urodzenia</td>
+    <td>
+      <span class="user-data">
+        {% if chrzest.data_urodzenia %}{{ chrzest.data_urodzenia }}{% elif chrzest.rok_urodzenia %}{{ chrzest.rok_urodzenia }}{% endif %}{% if chrzest.miejsce_urodzenia %}, {{ chrzest.miejsce_urodzenia }}{% endif %}
+      </span>
+    </td>
+  </tr>
+  <tr><td colspan="2" class="tiny">Date and place of birth / Geburtsdatum und Geburtsort / Dies et locus nativitatis</td></tr>
+
+  <!-- 5) Data i miejsce chrztu -->
+  <tr>
+    <td class="field-label">5. Data i miejsce chrztu</td>
+    <td>
+      <span class="user-data">
+        {% if chrzest.data_chrztu %}{{ chrzest.data_chrztu }}{% elif chrzest.rok_chrztu %}{{ chrzest.rok_chrztu }}{% endif %}{% if chrzest.miejsce_chrztu %}, {{ chrzest.miejsce_chrztu }}{% endif %}
+      </span>
+    </td>
+  </tr>
+  <tr><td colspan="2" class="tiny">Date and place of baptism / Taufdatum und Taufort / Dies et locus baptismi</td></tr>
+
+  <!-- 6) Bierzmowanie: data + parafia -->
+  <tr>
+    <td class="field-label">6. Data i parafia bierzmowania</td>
+    <td>
+      <span class="user-data">
+        {% if bierzmowanie %}
+          {% if bierzmowanie.data_bierzmowania %}{{ bierzmowanie.data_bierzmowania|date:"d.m.Y" }}{% elif bierzmowanie.rok %}{{ bierzmowanie.rok }}{% endif %}{% if bierzmowanie.parafia %}, {{ bierzmowanie.parafia.nazwa }}{% elif bierzmowanie.parafia_nazwa_reczna %}, {{ bierzmowanie.parafia_nazwa_reczna }}{% endif %}
+        {% else %}—{% endif %}
+      </span>
+    </td>
+  </tr>
+  <tr><td colspan="2" class="tiny">Date and parish of Confirmation / Datum und Pfarrei der Firmung / Dies et parochia confirmationis</td></tr>
+
+  <!-- 7) Uwagi -->
+  <tr>
+    <td class="field-label">7. Uwagi w księdze chrztów</td>
+    <td><span class="user-data">{% if chrzest.uwagi_wew %}{{ chrzest.uwagi_wew|linebreaksbr }}{% endif %}</span></td>
+  </tr>
+  <tr><td colspan="2" class="tiny">Notes in the Register of Baptisms / Anmerkungen im Taufregister / Adnotationes in libro bapt.</td></tr>
+</table>
+
+<!-- Miejsce i data wystawienia – bez spacji po „:” i z tłumaczeniem -->
+<div class="block">
+  <span class="field-label">Miejsce i data wystawienia</span><span class="user-data">{% if chrzest.miejsce_wydania %}{{ chrzest.miejsce_wydania }}, {% endif %}{{ today|default:request.user.date_joined|date:"Y-m-d" }}</span>
+  <div class="tiny">Place and date of issue / Ausstellungsort und -datum / Locus et dies editionis</div>
+
+  <div style="float:right; width: 7cm; text-align:center; margin-top: 2cm;">
+    <span class="user-data" style="display:inline-block; width:100%;">&nbsp;</span><br>
+    Proboszcz / Parochus / Parish Priest / Pfarrer
+  </div>
+  <div style="clear:both;"></div>
+</div>
+</div>
+{% endblock %}

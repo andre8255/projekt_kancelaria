@@ -1,0 +1,92 @@
+{% extends "base_panel.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+  <div>
+    <h1 class="h4 mb-1 fw-semibold">Msze</h1>
+    <div class="text-muted small">Przegląd terminów mszy i zajętości intencji.</div>
+  </div>
+
+  <div class="d-flex gap-2">
+    <a href="{% url 'msza_nowa' %}" class="btn btn-primary btn-sm">+ Nowa msza</a>
+  </div>
+</div>
+
+<form method="get" class="mb-3">
+  <div class="row g-2 align-items-end">
+    <div class="col-auto">
+      <label class="form-label small text-muted fw-semibold">Data</label>
+      <input type="date" name="data" value="{{ filtr_data }}" class="form-control form-control-sm">
+    </div>
+
+    <div class="col-auto">
+      <label class="form-label small text-muted fw-semibold">Zajętość</label>
+      <select name="status" class="form-select form-select-sm">
+        <option value="" {% if not filtr_status %}selected{% endif %}>Wszystkie</option>
+        <option value="wolna" {% if filtr_status == "wolna" %}selected{% endif %}>Wolne</option>
+        <option value="zajeta" {% if filtr_status == "zajeta" %}selected{% endif %}>Zajęte</option>
+      </select>
+    </div>
+
+    <div class="col-auto">
+      <label class="form-label small text-muted fw-semibold">Szukaj</label>
+      <input type="search" name="q" value="{{ filtr_q }}" class="form-control form-control-sm" placeholder="Miejsce / celebrans">
+    </div>
+
+    <div class="col-auto">
+      <button class="btn btn-outline-secondary btn-sm">Filtruj</button>
+    </div>
+  </div>
+</form>
+
+
+<div class="card shadow-sm border-0">
+  <div class="table-responsive">
+    <table class="table table-sm align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Data</th>
+          <th>Godzina</th>
+          <th>Miejsce</th>
+          <th>Celebrans</th>
+          <th>Intencje</th>
+          <th class="text-end">Akcje</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for msza in msze %}
+          <tr>
+            <td>{{ msza.data }}</td>
+            <td>{{ msza.godzina }}</td>
+            <td>{{ msza.miejsce }}</td>
+            <td>{{ msza.celebrans }}</td>
+            <td>
+              {% if msza.ile_intencji %}
+                {{ msza.ile_intencji }} int.
+              {% else %}
+                <span class="text-success fw-semibold">wolna</span>
+              {% endif %}
+            </td>
+            <td class="text-end">
+              <a class="btn btn-outline-secondary "
+                 href="{% url 'msza_szczegoly' msza.pk %}">
+                 Szczegóły
+              </a>
+
+              <a class="btn btn-outline-danger"
+               href="{% url 'msza_usun' msza.pk %}">
+              Usuń
+             </a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="6" class="text-muted p-3 small">Brak mszy.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+ 
+</div>
+{% endblock %}

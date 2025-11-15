@@ -1,0 +1,66 @@
+{% extends "base_panel.html" %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+  <div>
+    <h1 class="h5 mb-0">I Komunie Święte</h1>
+    <div class="text-muted small">Rejestr przyjęcia I Komunii Św.</div>
+  </div>
+
+  <div class="d-flex flex-wrap gap-2 ms-auto">
+    <a href="{% url 'komunia_dodaj' %}" class="btn btn-primary btn-sm">
+      + Dodaj wpis
+    </a>
+  </div>
+</div>
+
+<form method="get" class="mb-3">
+  <div class="input-group input-group-sm" style="max-width:400px;">
+    <input class="form-control" type="search" name="q" value="{{ request.GET.q }}"
+           placeholder="Nazwisko, parafia, rok…">
+    <button class="btn btn-outline-secondary">Szukaj</button>
+  </div>
+</form>
+
+<div class="card shadow-sm">
+  <div class="card-body p-0">
+    {% if komunie %}
+      <div class="table-responsive">
+        <table class="table table-sm align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Rok</th>
+              <th>Osoba</th>
+              <th>Parafia</th>
+              <th class="text-end">Akcje</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for k in komunie %}
+            <tr>
+              <td>{{ k.rok|default:"—" }}</td>
+              <td>
+                {{ k.osoba.nazwisko }} {{ k.osoba.imie_pierwsze }}
+              </td>
+              
+              <td>{{ k.parafia|default:"—" }}</td>
+              
+              <td class="text-end">
+                <div class="btn-group btn-group-sm" role="group">
+                  <a href="{% url 'komunia_szczegoly' k.pk %}" class="btn btn-outline-secondary">Szczegóły</a>
+                  <a href="{% url 'komunia_usun' k.pk %}" class="btn btn-outline-danger">Usuń</a>
+                  
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="p-3 text-muted small">Brak wpisów.</div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

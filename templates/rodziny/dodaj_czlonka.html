@@ -1,0 +1,114 @@
+{% extends "base_panel.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+  <div>
+    <h1 class="h4 mb-1 d-flex align-items-center gap-2">
+      <span class="badge bg-success-subtle text-success border border-success rounded-pill fw-normal px-2 py-1">
+        Nowy członek
+      </span>
+      <span class="fw-semibold">Przypisz osobę do rodziny</span>
+    </h1>
+    <div class="text-muted small">
+      Rodzina: <strong>{{ rodzina.nazwa }}</strong>
+    </div>
+  </div>
+
+  <div class="d-flex gap-2">
+    <a href="{{ rodzina.get_absolute_url }}" class="btn btn-outline-secondary btn-sm">Anuluj</a>
+    <button form="czlonek-form" class="btn btn-primary btn-sm">Dodaj</button>
+  </div>
+</div>
+
+<form id="czlonek-form" method="post" novalidate class="mb-4">
+  {% csrf_token %}
+
+  {% if form.non_field_errors %}
+    <div class="alert alert-danger small mb-4">{{ form.non_field_errors }}</div>
+  {% endif %}
+
+  <div class="card shadow-sm border-0">
+    <div class="card-body p-4">
+
+      <div class="mb-4">
+        <div class="fw-semibold mb-2">Dane przypisania do rodziny</div>
+
+        {# --- OSOBA --- #}
+        <div class="row g-3 mb-3">
+        <div class="col-md-4">
+          <div class="d-flex justify-content-between align-items-start">
+            <label class="form-label small text-muted fw-semibold mb-0">
+              {{ form.osoba.label }}
+            </label>
+
+            {# Pokaż przycisk tylko gdy osoba nie jest z góry ustalona #}
+            {% if not osoba %}
+              <a href="{% url 'osoba_nowa' %}" target="_blank"
+                 class="btn btn-outline-primary btn-sm ms-2">
+                + Nowa osoba
+              </a>
+            {% endif %}
+          </div>
+
+          {% if osoba %}
+            {# render „read-only” + ukryte pole z pk #}
+            <input class="form-control" value="{{ osoba.nazwisko }} {{ osoba.imie_pierwsze }}" readonly>
+            <input type="hidden" name="{{ form.osoba.html_name }}" value="{{ osoba.pk }}">
+          {% else %}
+            {{ form.osoba }}
+          {% endif %}
+
+          {% if form.osoba.errors %}
+            <div class="text-danger small">{{ form.osoba.errors }}</div>
+          {% elif not osoba %}
+            <div class="form-text small">
+              Jeśli tej osoby nie ma jeszcze w bazie, kliknij „+ Nowa osoba”
+              (otworzy się w nowej karcie), zapisz, wróć tutaj i odśwież stronę.
+            </div>
+          {% endif %}
+        </div>
+</div>
+ <div class="row g-3 mb-3">
+        {# --- ROLA --- #}
+        <div class="col-md-4">
+          <label class="form-label small text-muted fw-semibold">{{ form.rola.label }}</label>
+          {{ form.rola }}
+          {% if form.rola.errors %}
+            <div class="text-danger small">{{ form.rola.errors }}</div>
+          {% else %}
+            <div class="form-text small">Np. mąż, żona, dziecko, inna.</div>
+          {% endif %}
+        </div>
+
+        {# --- STATUS --- #}
+        <div class="col-md-4">
+          <label class="form-label small text-muted fw-semibold">{{ form.status.label }}</label>
+          {{ form.status }}
+          {% if form.status.errors %}
+            <div class="text-danger small">{{ form.status.errors }}</div>
+          {% else %}
+            <div class="form-text small">Czy aktualnie mieszka w tym domu.</div>
+          {% endif %}
+        </div>
+</div>
+        {# --- UWAGI --- #}
+        <div class="mb-3">
+          <label class="form-label small text-muted fw-semibold">{{ form.uwagi.label }}</label>
+          {{ form.uwagi }}
+          {% if form.uwagi.errors %}
+            <div class="text-danger small">{{ form.uwagi.errors }}</div>
+          {% else %}
+            <div class="form-text small">Notatka wewnętrzna (nie drukuje się na dokumentach).</div>
+          {% endif %}
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="mt-4 d-flex gap-2">
+    <button class="btn btn-primary">Dodaj</button>
+    <a href="{{ rodzina.get_absolute_url }}" class="btn btn-outline-secondary">Anuluj</a>
+  </div>
+</form>
+{% endblock %}

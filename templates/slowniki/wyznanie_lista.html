@@ -1,0 +1,48 @@
+{% extends "base_panel.html" %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+  <h1 class="h5 mb-0">Wyznania</h1>
+
+  <div class="d-flex flex-wrap gap-2 ms-auto">
+    <a href="{% url 'slownik_wyznanie_nowe' %}" class="btn btn-primary btn-sm">
+      + Nowe wyznanie
+    </a>
+  </div>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-body p-0">
+    {% if wyznania %}
+      <div class="table-responsive">
+       <table class="table table-sm align-middle mb-0">
+  <thead class="table-light">
+    <tr>
+      <th>Nazwa</th>
+      <th class="text-end">Akcje</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for w in wyznania %}
+    <tr>
+      <td>{{ w.nazwa }}</td>
+      <td class="text-end">
+        <div class="btn-group btn-group-sm" role="group">
+          <a href="{% url 'slownik_wyznanie_edytuj' w.pk %}" class="btn btn-outline-secondary">Edytuj</a>
+          <a href="{% url 'slownik_wyznanie_usun' w.pk %}" class="btn btn-outline-danger">Usuń</a>
+        </div>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+      </div>
+    {% else %}
+      <div class="p-3 text-muted small">
+        Brak wyznań w słowniku.
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

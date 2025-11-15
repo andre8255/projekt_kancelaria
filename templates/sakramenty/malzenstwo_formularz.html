@@ -1,0 +1,215 @@
+{% extends "base_panel.html" %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+  <div>
+    <h1 class="h5 mb-0">
+      <span class="badge bg-primary-subtle text-primary border border-primary rounded-pill fw-normal px-2 py-1">
+        {% if object %}Edycja{% else %}Nowa{% endif %}
+      </span>
+      <span class="fw-semibold">
+        Małżeństwo
+      </span>
+    </h1>
+
+   
+    {% if osoba %}
+      <div class="text-muted small">
+        Osoba: <strong>{{ osoba.nazwisko }} {{ osoba.imie_pierwsze }}</strong>
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="d-flex flex-wrap gap-2 ms-auto">
+    
+      {% if malzonek_a %}
+    
+        <a href="{% url 'osoba_szczegoly' malzonek_a.pk %}" 
+        class="btn btn-outline-secondary btn-sm">
+          Powrót
+        </a>
+      {% else %}
+        <a href="{% url 'malzenstwo_lista' %}"  
+        class="btn btn-outline-secondary btn-sm">
+          Powrót
+        </a>
+      {% endif %}
+  </div>
+</div>
+
+<form method="post" class="card shadow-sm">
+  {% csrf_token %}
+
+  <div class="card-body small">
+
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger small">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    {# --- MAŁŻONEK A --- #}
+<div class="row g-3 mb-3">
+<div class="col-md-4">
+  <div class="d-flex justify-content-between align-items-start">
+    <label class="form-label small fw-semibold text-muted mb-0">
+      Małżonek A
+    </label>
+   
+    {% if not malzonek_a %}
+      <a href="{% url 'osoba_nowa' %}" target="_blank" class="btn btn-outline-primary btn-sm ms-2">
+        + Nowa osoba
+      </a>
+    {% endif %}
+  </div>
+
+  {% if malzonek_a %}
+    {# przypadek: wchodzimy z profilu osoby → pole zablokowane #}
+    <input class="form-control" value="{{ malzonek_a.nazwisko }} {{ malzonek_a.imie_pierwsze }}" readonly>
+    <input type="hidden" name="{{ form.malzonek_a.html_name }}" value="{{ malzonek_a.pk }}">
+  {% else %}
+    {{ form.malzonek_a }}
+  {% endif %}
+
+  {% if form.malzonek_a.errors %}
+    <div class="text-danger small">{{ form.malzonek_a.errors }}</div>
+  {% endif %}
+  <div class="form-text small text-muted">
+    Jeśli osoby nie ma na liście, dodaj ją w nowej karcie, zapisz, wróć i odśwież.
+  </div>
+</div>
+
+
+    {# --- MAŁŻONEK B --- #}
+    <div class="col-md-4">
+      <div class="d-flex justify-content-between align-items-start">
+        <label class="form-label small fw-semibold text-muted mb-0">
+          Małżonek B
+        </label>
+
+        <a href="{% url 'osoba_nowa' %}"
+           target="_blank"
+           class="btn btn-outline-primary btn-sm ms-2">
+          + Nowa osoba
+        </a>
+      </div>
+
+      {{ form.malzonek_b }}
+      {% if form.malzonek_b.errors %}
+        <div class="text-danger small">{{ form.malzonek_b.errors }}</div>
+      {% endif %}
+    {% if form.malzonek_a.errors %}
+    <div class="text-danger small">{{ form.malzonek_a.errors }}</div>
+  {% endif %}
+  <div class="form-text small text-muted">
+    Jeśli osoby nie ma na liście, dodaj ją w nowej karcie, zapisz, wróć i odśwież.
+  </div>
+
+</div>  
+    </div>
+
+    <hr class="my-3">
+
+    {# --- ROK / NR AKTU / DATA ŚLUBU w jednym rzędzie --- #}
+    <div class="row g-3">
+      <div class="col-md-4">
+        <label class="form-label small fw-semibold text-muted">{{ form.rok.label }}</label>
+        {{ form.rok }}
+        {% if form.rok.errors %}
+          <div class="text-danger small">{{ form.rok.errors }}</div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label small fw-semibold text-muted">{{ form.akt_nr.label }}</label>
+        {{ form.akt_nr }}
+        {% if form.akt_nr.errors %}
+          <div class="text-danger small">{{ form.akt_nr.errors }}</div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label small fw-semibold text-muted">{{ form.data_slubu.label }}</label>
+        {{ form.data_slubu }}
+        {% if form.data_slubu.errors %}
+          <div class="text-danger small">{{ form.data_slubu.errors }}</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <hr class="my-3">
+<div class="row g-3 mb-3">
+    {# --- PARAFIA ŚLUBU --- #}
+<div class="col-md-4">
+  <div class="d-flex justify-content-between align-items-start">
+    <label class="form-label small fw-semibold text-muted mb-0">
+      {{ form.parafia.label }}
+    </label>
+
+    <a href="{% url 'slownik_parafia_nowa' %}"
+       target="_blank"
+       class="btn btn-outline-primary btn-sm ms-2">
+      + Nowa parafia
+    </a>
+  </div>
+
+  {{ form.parafia }}
+  {% if form.parafia.errors %}
+    <div class="text-danger small">{{ form.parafia.errors }}</div>
+  {% endif %}
+
+</div>
+
+{# --- ŚWIADEK URZĘDOWY / ASYSTUJĄCY --- #}
+<div class="col-md-4">
+  <div class="d-flex justify-content-between align-items-start">
+    <label class="form-label small fw-semibold text-muted mb-0">
+      {{ form.swiadek_urzedowy.label }}
+    </label>
+
+    <a href="{% url 'slownik_duchowny_nowy' %}"
+       target="_blank"
+       class="btn btn-outline-primary btn-sm ms-2">
+      + Nowy duchowny
+    </a>
+  </div>
+
+  {{ form.swiadek_urzedowy }}
+  {% if form.swiadek_urzedowy.errors %}
+    <div class="text-danger small">{{ form.swiadek_urzedowy.errors }}</div>
+  {% endif %}
+</div>
+
+    {# --- UWAGI --- #}
+    <div class="mb-3">
+      <label class="form-label small fw-semibold text-muted">
+        {{ form.uwagi_wew.label }}
+      </label>
+      {{ form.uwagi_wew }}
+      {% if form.uwagi_wew.errors %}
+        <div class="text-danger small">{{ form.uwagi_wew.errors }}</div>
+      {% endif %}
+    </div>
+
+  </div>
+
+  <div class="mt-4 d-flex gap-2">
+
+    <button class="btn btn-primary btn-sm">
+      Zapisz
+    </button>
+
+      {% if osoba %}
+        <a href="{% url 'osoba_szczegoly' osoba.pk %}" 
+        class="btn btn-outline-secondary btn-sm">
+        Anuluj
+      </a>
+      {% else %}
+        <a href="{% url 'malzenstwo_lista' %}" 
+        class="btn btn-outline-secondary btn-sm">
+        Anuluj
+      </a>
+      {% endif %}
+    
+  </div>
+</form>
+
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends "base_panel.html" %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+  <div>
+    <h1 class="h5 mb-1 d-flex align-items-center gap-2">
+      <span class="badge bg-danger-subtle text-danger border border-danger rounded-pill fw-normal px-2 py-1">
+        Usuń z rodziny
+      </span>
+    </h1>
+    <div class="text-muted small">
+      Czy na pewno chcesz usunąć
+      <strong>{{ czlonek.osoba.nazwisko }} {{ czlonek.osoba.imie_pierwsze }}</strong>
+      (rola: {{ czlonek.get_rola_display }})
+      z rodziny <strong>{{ rodzina.nazwa }}</strong>?
+    </div>
+  </div>
+
+  <div class="d-flex gap-2">
+    <a href="{{ rodzina.get_absolute_url }}" class="btn btn-outline-secondary btn-sm">
+      Anuluj
+    </a>
+  </div>
+</div>
+
+<form method="post" class="mb-4">
+  {% csrf_token %}
+
+  <div class="card shadow-sm border-0">
+    <div class="card-body p-4">
+      <p class="small mb-4">
+        Ta operacja nie usuwa osoby z bazy parafian.
+        Usuwa tylko przypisanie tej osoby do tej rodziny / kartoteki.
+      </p>
+
+      <div class="d-flex gap-2">
+        <button class="btn btn-danger btn-sm">Tak, usuń z rodziny</button>
+        <a href="{{ rodzina.get_absolute_url }}" class="btn btn-outline-secondary btn-sm">
+          Nie usuwaj
+        </a>
+      </div>
+    </div>
+  </div>
+</form>
+
+{% endblock %}

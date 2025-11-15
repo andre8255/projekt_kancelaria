@@ -1,0 +1,48 @@
+{% extends "base_panel.html" %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-start mb-3">
+  <h1 class="h5 mb-0">Zgon</h1>
+
+  <div class="d-flex flex-wrap gap-2 ms-auto">
+    <a href="{% url 'zgon_druk' zgon.pk %}" target="_blank" class="btn btn-outline-primary btn-sm">Drukuj</a>
+    <a href="{% url 'zgon_edytuj' zgon.pk %}" class="btn btn-outline-secondary btn-sm">Edytuj</a>
+    <a href="{% url 'zgon_usun' zgon.pk %}" class="btn btn-outline-danger btn-sm">Usuń</a>
+    <a href="{% url 'zgon_lista' %}" class="btn btn-outline-secondary btn-sm">Powrót</a>
+  </div>
+</div>
+
+<div class="card shadow-sm small">
+  <div class="card-header fw-semibold">
+    Dane zgonu
+  </div>
+  <div class="card-body">
+    <p><strong>Zmarły/a:</strong>
+      {{ zgon.osoba.nazwisko }} {{ zgon.osoba.imie_pierwsze }}
+    </p>
+
+    <p><strong>Rok / akt:</strong>
+      {{ zgon.rok|default:"brak" }} / {{ zgon.akt_nr|default:"–" }}
+    </p>
+
+    <p><strong>Data zgonu:</strong>
+      {{ zgon.data_zgonu|default:"brak" }}
+    </p>
+
+    <p><strong>Miejsce zgonu:</strong>
+      {{ zgon.miejsce_zgonu|default:"brak" }}
+    </p>
+
+    <p><strong>Data pogrzebu:</strong>
+      {{ zgon.data_pogrzebu|default:"brak" }}
+    </p>
+
+    <p><strong>Cmentarz:</strong>
+      {{ zgon.cmentarz|default:"brak" }}
+    </p>
+
+    <p><strong>Uwagi wewnętrzne:</strong><br>{{ zgon.uwagi_wew|default:"—" }}</p>
+  </div>
+</div>
+
+{% endblock %}

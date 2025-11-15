@@ -1,0 +1,48 @@
+{% extends "base_panel.html" %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+  <div>
+    <h1 class="h5 mb-1">{{ parafia.nazwa }}</h1>
+    <div class="text-muted small">
+      {{ parafia.miejscowosc|default:"—" }}
+    </div>
+  </div>
+
+  <div class="d-flex gap-2">
+    <a href="{% url 'slownik_parafia_edycja' parafia.pk %}" class="btn btn-outline-secondary btn-sm">Edytuj</a>
+    <a href="{% url 'slownik_parafia_usun' parafia.pk %}" class="btn btn-outline-danger btn-sm">Usuń</a>
+    <a href="{% url 'slownik_parafia_lista' %}" class="btn btn-outline-secondary btn-sm">Powrót</a>
+  
+    
+  </div>
+</div>
+
+<div class="card shadow-sm border-0">
+  <div class="card-body small">
+    <dl class="row mb-0">
+      <dt class="col-sm-3">Nazwa</dt>
+      <dd class="col-sm-9">{{ parafia.nazwa }}</dd>
+        {% if parafia.diecezja %}
+        <dt class="col-sm-3">Diecezja</dt>
+        <dd class="col-sm-9">{{ parafia.diecezja }}</dd>
+      <dt class="col-sm-3">Miejscowość</dt>
+      <dd class="col-sm-9">{{ parafia.miejscowosc|default:"—" }}</dd>
+
+      <dt class="col-sm-3">Ulica, nr </dt>
+      <dd class="col-sm-9">{{ parafia.ulica|default:"—" }} {{ parafia.nr_domu|default:"" }} {{ parafia.nr_mieszkania|default:" " }}</dd>
+      <dt class="col-sm-3">Kod pocztowy, poczta</dt>
+       <dd class="col-sm-9">{{ parafia.kod_pocztowy|default:"—" }} {{ parafia.poczta|default:"" }}</dd>
+      <dt class="col-sm-3">Telefon</dt>
+      <dd class="col-sm-9">{{ parafia.telefon|default:"—" }}</dd>
+      <dt class="col-sm-3">E-mail</dt>
+      <dd class="col-sm-9">{{ parafia.email|default:"—" }}</dd>
+       <dt class="col-sm-3">Uwagi</dt>
+       <dd class="col-sm-9">{{ parafia.uwagi|default:"—" }}</dd>
+
+      {% endif %}
+    </dl>
+  </div>
+</div>
+
+{% endblock %}

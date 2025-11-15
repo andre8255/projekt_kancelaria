@@ -1,0 +1,529 @@
+{% extends "base_panel.html" %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+  <h1 class="h5 mb-0">
+    {{ osoba.nazwisko }} {{ osoba.imie_pierwsze }}
+  </h1>
+
+  <div class="d-flex flex-wrap gap-2 ms-auto">
+    <a href="{% url 'osoba_edytuj' osoba.pk %}" class="btn btn-outline-secondary btn-sm">
+      Edytuj
+    </a>
+
+    <a href="{% url 'osoba_usun' osoba.pk %}" class="btn btn-outline-danger btn-sm">
+      Usuń
+    </a>
+
+    <a href="{% url 'osoba_lista' %}" class="btn btn-outline-secondary btn-sm">
+      Powrót
+    </a>
+  </div>
+</div>
+
+<div class="row g-4">
+
+  <!-- LEWA KOLUMNA: Dane osobowe + Adres -->
+  <div class="col-12 col-lg-4 d-flex flex-column gap-3">
+
+    <!-- Dane osobowe -->
+    <div class="card shadow-sm">
+      <div class="card-header fw-semibold">Dane osobowe</div>
+      <div class="card-body small">
+
+        <p class="mb-2">
+          <strong>Imię:</strong>
+          {{ osoba.imie_pierwsze }}
+          {% if osoba.imie_drugie %} {{ osoba.imie_drugie }}{% endif %}
+          {% if osoba.imie_bierzmowanie %} (z bierzmowania: {{ osoba.imie_bierzmowanie }}){% endif %}
+        </p>
+
+        {% if osoba.nazwisko_rodowe %}
+        <p class="mb-2">
+          <strong>Nazwisko rodowe:</strong>
+          {{ osoba.nazwisko_rodowe }}
+        </p>
+        {% endif %}
+
+        <p class="mb-2">
+          <strong>Rodzice:</strong>
+          {% if osoba.imie_ojca or osoba.nazwisko_ojca or osoba.imie_matki or osoba.nazwisko_matki or osoba.nazwisko_matki_rodowe %}
+            {{ osoba.imie_ojca|default:"" }} {{ osoba.nazwisko_ojca|default:"" }} / {{ osoba.imie_matki|default:"" }} {{ osoba.nazwisko_matki|default:"" }} z domu {{ osoba.nazwisko_matki_rodowe|default:"" }}
+          {% else %}
+            <span class="text-muted">brak danych</span>
+          {% endif %}
+        </p>
+
+        <p class="mb-2">
+          <strong>Data urodzenia:</strong>
+          {% if osoba.data_urodzenia %}
+            {{ osoba.data_urodzenia }}
+          {% else %}
+            <span class="text-muted">brak</span>
+          {% endif %}
+        </p>
+
+        <p class="mb-2">
+          <strong>Miejsce urodzenia:</strong>
+          {% if osoba.miejsce_urodzenia %}
+            {{ osoba.miejsce_urodzenia }}
+          {% else %}
+            <span class="text-muted">brak</span>
+          {% endif %}
+        </p>
+
+        <p class="mb-2">
+  <strong>Wyznanie:</strong>
+  {% if osoba.wyznanie %}
+    {{ osoba.wyznanie }}
+  {% else %}
+    <span class="text-muted">brak</span>
+  {% endif %}
+</p>
+
+        <p class="mb-2">
+          <strong>Telefon:</strong>
+          {% if osoba.telefon %}
+            {{ osoba.telefon }}
+          {% else %}
+            <span class="text-muted">brak</span>
+          {% endif %}
+        </p>
+
+        <p class="mb-0">
+          <strong>Email:</strong>
+          {% if osoba.email %}
+            {{ osoba.email }}
+          {% else %}
+            <span class="text-muted">brak</span>
+          {% endif %}
+        </p>
+
+      </div>
+    </div>
+
+    <!-- Adres -->
+    <div class="card shadow-sm">
+      <div class="card-header fw-semibold">Adres</div>
+      <div class="card-body small">
+        <p class="mb-2">
+          {% if osoba.ulica or osoba.nr_domu %}
+            {{ osoba.ulica }} {{ osoba.nr_domu }}{% if osoba.nr_mieszkania %}/{{ osoba.nr_mieszkania }}{% endif %}
+          {% else %}
+            <span class="text-muted">brak adresu</span>
+          {% endif %}
+        </p>
+
+        <p class="mb-2">
+          {% if osoba.kod_pocztowy or osoba.miejscowosc %}
+            {{ osoba.kod_pocztowy }} {{ osoba.miejscowosc }}
+          {% endif %}
+        </p>
+
+        <p class="mb-0">
+          {% if osoba.poczta %}
+            Poczta: {{ osoba.poczta }}
+          {% endif %}
+        </p>
+      </div>
+    </div>
+
+  </div><!-- /col-md-6 LEFT -->
+
+  <!-- PRAWA KOLUMNA: Sakramenty -->
+  <div class="col-12 col-lg-8">
+    <div class="card shadow-sm h-100">
+      <div class="card-header fw-semibold d-flex justify-content-between align-items-start flex-wrap gap-2">
+        <span>Sakramenty/Akta</span>
+
+        <div class="d-flex flex-wrap gap-2">
+          <a href="{% url 'chrzest_dodaj_dla_osoby' osoba.pk %}" class="btn btn-outline-primary btn-sm">
+            + Chrzest
+          </a>
+
+          <a href="{% url 'komunia_dodaj_dla_osoby' osoba.pk %}" class="btn btn-outline-primary btn-sm">
+            + I Komunia
+          </a>
+          
+          <a href="{% url 'bierzmowanie_dodaj_dla_osoby' osoba.pk %}" class="btn btn-outline-primary btn-sm">
+            + Bierzmowanie
+          </a>
+
+          <a href="{% url 'malzenstwo_dodaj_dla_osoby' osoba.pk %}" class="btn btn-outline-primary btn-sm">
+            + Małżeństwo
+          </a>
+
+          <a href="{% url 'namaszczenie_dodaj_dla_osoby' osoba.pk %}" class="btn btn-outline-primary btn-sm">
+            + Namaszczenie
+          </a>
+
+          <a href="{% url 'zgon_dodaj_dla_osoby' osoba.pk %}" class="btn btn-outline-danger btn-sm">
+            + Zgon
+          </a>
+        </div>
+      </div>
+
+      <div class="card-body small">
+
+        {# ===================== CHRZEST ===================== #}
+        <div class="mb-4">
+          <div class="fw-semibold mb-1">Chrzest</div>
+
+          {% if chrzty_osoby %}
+            <div class="table-responsive">
+              <table class="table table-sm align-middle mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th>Rok / akt</th>
+                    <th>Data chrztu</th>
+                    <th>Miejsce chrztu</th>
+                    <th class="text-end">Akcje</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for ch in chrzty_osoby %}
+                    <tr>
+                      <td>{{ ch.rok }}/{{ ch.akt_nr }}</td>
+
+                      <td>
+                        {% if ch.data_chrztu %}
+                          {{ ch.data_chrztu }}
+                        {% elif ch.rok_chrztu %}
+                          {{ ch.rok_chrztu }}
+                        {% else %}
+                          <span class="text-muted">brak</span>
+                        {% endif %}
+                      </td>
+
+                      <td>
+                        {% if ch.miejsce_chrztu %}
+                          {{ ch.miejsce_chrztu }}
+                        {% else %}
+                          <span class="text-muted">brak</span>
+                        {% endif %}
+                      </td>
+
+                      <td class="text-end">
+  <div class="btn-group btn-group-sm" role="group">
+    <a class="btn btn-outline-secondary"
+       href="{% url 'chrzest_szczegoly' ch.pk %}">
+      Szczegóły
+    </a>
+    <a class="btn btn-outline-secondary"
+       href="{% url 'chrzest_edytuj' ch.pk %}">
+      Edytuj
+    </a>
+    <a class="btn btn-outline-danger"
+       href="{% url 'chrzest_usun' ch.pk %}">
+      Usuń
+    </a>
+  </div>
+</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <div class="text-muted">Brak wpisanego chrztu.</div>
+          {% endif %}
+        </div>
+
+        <hr>
+
+        {# ===================== I KOMUNIA ŚWIĘTA ===================== #}
+        <div class="mb-4">
+          <div class="fw-semibold mb-1">I Komunia Święta</div>
+
+          {% if komunia_osoby %}
+            <div class="table-responsive">
+              <table class="table table-sm align-middle mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th>Rok</th>
+                    <th>Parafia</th>
+                    <th class="text-end">Akcje</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>{{ komunia_osoby.rok|default:"brak" }}</td>
+                    <td>{{ komunia_osoby.parafia|default:"brak" }}</td>
+                    <td class="text-end">
+  <div class="btn-group btn-group-sm" role="group">
+    <a class="btn btn-outline-secondary"
+       href="{% url 'komunia_szczegoly' komunia_osoby.pk %}">
+      Szczegóły
+    </a>
+    <a class="btn btn-outline-secondary"
+       href="{% url 'komunia_edytuj' komunia_osoby.pk %}">
+      Edytuj
+    </a>
+    <a class="btn btn-outline-danger"
+       href="{% url 'komunia_usun' komunia_osoby.pk %}">
+      Usuń
+    </a>
+  </div>
+</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <div class="text-muted">Brak wpisanej I Komunii.</div>
+          {% endif %}
+        </div>
+
+        <hr>
+
+        {# ===================== BIERZMOWANIE ===================== #}
+        <div class="mb-4">
+          <div class="fw-semibold mb-1">Bierzmowanie</div>
+
+          {% if bierzmowanie_osoby %}
+            <div class="table-responsive">
+              <table class="table table-sm align-middle mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th>Rok / akt</th>
+                    <th>Data</th>
+                    <th>Parafia</th>
+                    <th>Szafarz</th>
+                    <th>Świadek</th>
+                    <th class="text-end">Akcje</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      {{ bierzmowanie_osoby.rok|default:"brak" }}
+                      /
+                      {{ bierzmowanie_osoby.akt_nr|default:"–" }}
+                    </td>
+
+                    <td>
+                      {% if bierzmowanie_osoby.data_bierzmowania %}
+                        {{ bierzmowanie_osoby.data_bierzmowania }}
+                      {% else %}
+                        <span class="text-muted">brak</span>
+                      {% endif %}
+                    </td>
+
+                    <td>{{ bierzmowanie_osoby.parafia|default:"brak" }}</td>
+                    <td>{{ bierzmowanie_osoby.szafarz|default:"brak" }}</td>
+                    <td>{{ bierzmowanie_osoby.swiadek|default:"brak" }}</td>
+
+                    <td class="text-end">
+  <div class="btn-group btn-group-sm" role="group">
+    <a class="btn btn-outline-secondary"
+       href="{% url 'bierzmowanie_szczegoly' bierzmowanie_osoby.pk %}">
+      Szczegóły
+    </a>
+    <a class="btn btn-outline-secondary"
+       href="{% url 'bierzmowanie_edytuj' bierzmowanie_osoby.pk %}">
+      Edytuj
+    </a>
+    <a class="btn btn-outline-danger"
+       href="{% url 'bierzmowanie_usun' bierzmowanie_osoby.pk %}">
+      Usuń
+    </a>
+  </div>
+</td
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <div class="text-muted">Brak wpisanego bierzmowania.</div>
+          {% endif %}
+        </div>
+
+        <hr>
+
+        {# ===================== MAŁŻEŃSTWO ===================== #}
+        <div class="mb-4">
+          <div class="fw-semibold mb-1">Małżeństwo</div>
+
+          {% if malzenstwa_osoby %}
+            <div class="table-responsive">
+              <table class="table table-sm mb-0 align-middle">
+                <thead class="table-light">
+                  <tr>
+                    <th>Rok / akt</th>
+                    <th>Małżonek</th>
+                    <th>Data ślubu</th>      
+                    <th>Świadek urzędowy</th>
+                    <th class="text-end">Akcje</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for m in malzenstwa_osoby %}
+                    <tr>
+                      <td>{{ m.rok|default:"brak" }}/{{ m.akt_nr|default:"–" }}</td>
+                      <td>
+                        {% if m.malzonek_a.pk == osoba.pk %}
+                          {{ m.malzonek_b.nazwisko }} {{ m.malzonek_b.imie_pierwsze }}
+                        {% else %}
+                          {{ m.malzonek_a.nazwisko }} {{ m.malzonek_a.imie_pierwsze }}
+                        {% endif %}
+                      </td>
+
+                      <td>{{ m.data_slubu|default:"brak" }}</td>
+                      
+                      <td>{{ m.swiadek_urzedowy|default:"brak" }}</td>
+                      <td class="text-end">
+  <div class="btn-group btn-group-sm" role="group">
+    <a class="btn btn-outline-secondary"
+       href="{% url 'malzenstwo_szczegoly' m.pk %}">
+      Szczegóły
+    </a>
+    <a class="btn btn-outline-secondary"
+       href="{% url 'malzenstwo_edytuj' m.pk %}">
+      Edytuj
+    </a>
+    <a class="btn btn-outline-danger"
+       href="{% url 'malzenstwo_usun' m.pk %}">
+      Usuń
+    </a>
+  </div>
+</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <div class="text-muted">Brak wpisanego małżeństwa.</div>
+          {% endif %}
+        </div>
+
+        <hr>
+
+        {# ===================== NAMASZCZENIE CHORYCH ===================== #}
+        <div class="mb-4">
+          <div class="fw-semibold mb-1">Namaszczenie chorych / posługa</div>
+
+          {% if namaszczenia_osoby %}
+            <div class="table-responsive">
+              <table class="table table-sm mb-0 align-middle">
+                <thead class="table-light">
+                  <tr>
+                    <th>Data</th>
+                    <th>Miejsce</th>
+                    <th>Szafarz</th>
+                    <th>Udzielone</th>
+                    <th class="text-end">Akcje</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for n in namaszczenia_osoby %}
+                    <tr>
+                      <td>{{ n.data|default:"brak" }}</td>
+                      <td>{{ n.miejsce|default:"brak" }}</td>
+                      <td>{{ n.szafarz|default:"brak" }}</td>
+                      <td class="small">
+                        {% if n.spowiedz %}Spowiedź✔ {% endif %}
+                        {% if n.komunia %}Komunia✔ {% endif %}
+                        {% if n.namaszczenie %}Namaszczenie✔{% endif %}
+                        {% if not n.spowiedz and not n.komunia and not n.namaszczenie %}
+                          <span class="text-muted">brak</span>
+                        {% endif %}
+                      </td>
+                      <td class="text-end">
+  <div class="btn-group btn-group-sm" role="group">
+    <a class="btn btn-outline-secondary"
+       href="{% url 'namaszczenie_szczegoly' n.pk %}">
+      Szczegóły
+    </a>
+    <a class="btn btn-outline-secondary"
+       href="{% url 'namaszczenie_edytuj' n.pk %}">
+      Edytuj
+    </a>
+    <a class="btn btn-outline-danger"
+       href="{% url 'namaszczenie_usun' n.pk %}">
+      Usuń
+    </a>
+  </div>
+</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <div class="text-muted">Brak wpisanej posługi chorym.</div>
+          {% endif %}
+        </div>
+
+        <hr>
+
+        {# ===================== ZGON ===================== #}
+        <div class="mb-2">
+          <div class="fw-semibold mb-1">Zgon</div>
+
+          {% if zgon_osoby %}
+            <div class="table-responsive">
+              <table class="table table-sm mb-0 align-middle">
+                <thead class="table-light">
+                  <tr>
+                    <th>Rok / akt</th>
+                    <th>Data zgonu</th>
+                    <th>Pogrzeb</th>
+                    <th>Cmentarz</th>
+                    <th class="text-end">Akcje</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      {{ zgon_osoby.rok|default:"brak" }}
+                      /
+                      {{ zgon_osoby.akt_nr|default:"–" }}
+                    </td>
+                    <td>{{ zgon_osoby.data_zgonu|default:"brak" }}</td>
+                    <td>
+                      {% if zgon_osoby.data_pogrzebu %}
+                        {{ zgon_osoby.data_pogrzebu }}
+                      {% else %}
+                        <span class="text-muted">brak</span>
+                      {% endif %}
+                    </td>
+                    <td>{{ zgon_osoby.cmentarz|default:"brak" }}</td>
+                    <td class="text-end">
+  <div class="btn-group btn-group-sm" role="group">
+    <a class="btn btn-outline-secondary"
+       href="{% url 'zgon_szczegoly' zgon_osoby.pk %}">
+      Szczegóły
+    </a>
+    <a class="btn btn-outline-secondary"
+       href="{% url 'zgon_edytuj' zgon_osoby.pk %}">
+      Edytuj
+    </a>
+    <a class="btn btn-outline-danger"
+       href="{% url 'zgon_usun' zgon_osoby.pk %}">
+      Usuń
+    </a>
+  </div>
+</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="mt-1">
+              <span class="badge text-bg-danger-subtle border border-danger-subtle text-danger">
+                zgon odnotowany
+              </span>
+            </div>
+          {% else %}
+            <div class="text-muted">Brak wpisu o zgonie.</div>
+          {% endif %}
+        </div>
+
+      </div> <!-- /card-body -->
+    </div> <!-- /card -->
+  </div><!-- /col-md-6 PRAWA KOLUMNA -->
+
+</div><!-- /row -->
+
+{% endblock %}

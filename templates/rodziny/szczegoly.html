@@ -1,0 +1,234 @@
+{% extends "base_panel.html" %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-start mb-3">
+  <h1 class="h5 mb-0">{{ rodzina.nazwa }}</h1>
+
+  <div class="ms-3 d-flex flex-wrap gap-2">
+    <a href="{% url 'rodzina_edytuj' rodzina.pk %}" class="btn btn-outline-secondary btn-sm">
+      Edytuj
+    </a>
+
+    <a href="{% url 'rodzina_usun' rodzina.pk %}" class="btn btn-outline-danger btn-sm">
+      Usuń
+    </a>
+
+    <a href="{% url 'rodzina_lista' %}" class="btn btn-outline-secondary btn-sm">
+      Powrót
+    </a>
+  </div>
+</div>
+
+<div class="row g-4">
+
+  <!-- Adres -->
+  <div class="col-md-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-header fw-semibold">Adres</div>
+      <div class="card-body small">
+        <p class="mb-1">
+          {{ rodzina.ulica }} {{ rodzina.nr_domu }}{% if rodzina.nr_mieszkania %}/{{ rodzina.nr_mieszkania }}{% endif %}
+        </p>
+        <p class="mb-1">
+          {{ rodzina.kod_pocztowy }} {{ rodzina.miejscowosc }}
+        </p>
+        <p class="mb-0 text-muted small">
+          Poczta: {{ rodzina.poczta }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Kontakt -->
+  <div class="col-md-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-header fw-semibold">Kontakt</div>
+      <div class="card-body small">
+        {% if rodzina.telefon_kontaktowy %}
+          <p class="mb-1">Telefon: {{ rodzina.telefon_kontaktowy }}</p>
+        {% endif %}
+
+        {% if rodzina.email_kontaktowy %}
+          <p class="mb-1">Email: {{ rodzina.email_kontaktowy }}</p>
+        {% endif %}
+
+        {% if rodzina.uwagi %}
+          <p class="mb-0">
+            <strong>Uwagi:</strong><br>
+            <span class="text-muted" style="white-space: pre-line;">
+              {{ rodzina.uwagi }}
+            </span>
+          </p>
+        {% endif %}
+
+        {% if not rodzina.telefon_kontaktowy and not rodzina.email_kontaktowy and not rodzina.uwagi %}
+          <p class="mb-0 text-muted small">Brak danych kontaktowych.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Członkowie rodziny -->
+  <div class="col-12">
+    <div class="card shadow-sm border-0">
+      <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <span class="fw-semibold">Członkowie rodziny</span>
+
+        <div class="d-flex flex-wrap gap-2">
+          <a href="{% url 'rodzina_dodaj_czlonka' rodzina.pk %}"
+             class="btn btn-primary btn-sm">
+            + Dodaj członka
+          </a>
+
+          <a href="{% url 'rodzina_lista' %}" class="btn btn-outline-secondary btn-sm">
+            Powrót
+          </a>
+        </div>
+      </div>
+
+      <div class="card-body p-0">
+
+        {% if czlonkowie_posortowani %}
+          <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th scope="col">Rola</th>
+                  <th scope="col">Osoba</th>
+                  <th scope="col">Status zamieszkania</th>
+                  <th scope="col">Sakramenty</th>
+                  <th class="text-end">Akcje</th>
+                </tr>
+              </thead>
+              <tbody>
+
+                {% for w in czlonkowie_posortowani %}
+                  <tr>
+
+                    <!-- Rola -->
+                    <td>
+                      {% if w.rola_display %}
+                        <span class="badge text-bg-light border">
+                          {{ w.rola_display }}
+                        </span>
+                      {% else %}
+                        <span class="text-muted">—</span>
+                      {% endif %}
+                    </td>
+
+                    <!-- Osoba -->
+                    <td>
+                      <div class="fw-semibold">
+                        {{ w.osoba.nazwisko }} {{ w.osoba.imie_pierwsze }}
+                      </div>
+                      <div class="text-muted small">
+                        {% if w.osoba.data_urodzenia %}
+                          ur. {{ w.osoba.data_urodzenia }}
+                        {% endif %}
+                      </div>
+                    </td>
+
+                    <!-- Status zamieszkania -->
+                    <td>
+                      {% if w.status_display %}
+                        <span class="badge text-bg-light border">
+                          {{ w.status_display }}
+                        </span>
+                      {% else %}
+                        <span class="text-muted small">—</span>
+                      {% endif %}
+                    </td>
+
+                    <!-- Sakramenty -->
+                    <td class="small text-muted">
+
+                      <div>
+                        Chrzest:
+                        {% if w.sakramenty.chrzest %}
+                          <span class="text-success fw-semibold">tak</span>
+                        {% else %}
+                          <span class="text-danger">nie</span>
+                        {% endif %}
+                      </div>
+
+                      <div>
+                        Komunia:
+                        {% if w.sakramenty.komunia %}
+                          <span class="text-success fw-semibold">tak</span>
+                        {% else %}
+                          <span class="text-danger">nie</span>
+                        {% endif %}
+                      </div>
+
+                      <div>
+                        Bierzmowanie:
+                        {% if w.sakramenty.bierzmowanie %}
+                          <span class="text-success fw-semibold">tak</span>
+                        {% else %}
+                          <span class="text-danger">nie</span>
+                        {% endif %}
+                      </div>
+
+                      <div>
+                        Małżeństwo:
+                        {% if w.sakramenty.malzenstwo %}
+                          <span class="text-success fw-semibold">tak</span>
+                        {% else %}
+                          <span class="text-danger">nie</span>
+                        {% endif %}
+                      </div>
+
+                      <div>
+                        Namaszczenie:
+                        {% if w.sakramenty.namaszczenie %}
+                          <span class="text-success fw-semibold">tak</span>
+                        {% else %}
+                          <span class="text-danger">nie</span>
+                        {% endif %}
+                      </div>
+
+                      <div>
+                        Zgon:
+                        {% if w.sakramenty.zgon %}
+                          <span class="text-success fw-semibold">tak</span>
+                        {% else %}
+                          <span class="text-danger">nie</span>
+                        {% endif %}
+                      </div>
+
+                    </td>
+
+                    <!-- Akcje -->
+                    <td class="text-end">
+                      <div class="btn-group btn-group-sm" role="group">
+                        <a href="{% url 'osoba_szczegoly' w.osoba.pk %}"
+                           class="btn btn-outline-secondary">
+                          Szczegóły osoby
+                        </a>
+
+                        <a href="{% url 'rodzina_czlonek_usun' w.relacja.pk %}"
+                           class="btn btn-outline-danger">
+                          Usuń z rodziny
+                        </a>
+                      </div>
+                    </td>
+
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+        {% else %}
+          <div class="p-3 text-muted small">
+            Brak przypisanych członków.
+          </div>
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends "base_panel.html" %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-start mb-3">
+  <h1 class="h5 mb-0">Bierzmowanie</h1>
+
+  <div class="d-flex flex-wrap gap-2">
+      <a href="{% url 'bierzmowanie_druk' bierzmowanie.pk %}" target="_blank" class="btn btn-outline-primary btn-sm">
+      Drukuj
+    </a>
+
+    <a href="{% url 'bierzmowanie_edytuj' bierzmowanie.pk %}" class="btn btn-outline-secondary btn-sm">
+      Edytuj
+    </a>
+    <a href="{% url 'bierzmowanie_usun' bierzmowanie.pk %}" class="btn btn-outline-danger btn-sm">
+      Usuń
+    </a>
+    <a href="{% url 'bierzmowanie_lista' %}" class="btn btn-outline-secondary btn-sm">
+      Powrót
+    </a>
+  </div>
+</div>
+
+<div class="card shadow-sm small">
+  <div class="card-header fw-semibold">
+    Dane bierzmowania
+  </div>
+  <div class="card-body">
+    <p><strong>Osoba:</strong> {{ bierzmowanie.osoba.nazwisko }} {{ bierzmowanie.osoba.imie_pierwsze }}</p>
+
+    <p><strong>Rok / akt:</strong>
+      {{ bierzmowanie.rok|default:"brak" }} / {{ bierzmowanie.akt_nr|default:"–" }}
+    </p>
+
+    <p><strong>Data bierzmowania:</strong>
+      {% if bierzmowanie.data_bierzmowania %}
+        {{ bierzmowanie.data_bierzmowania }}
+      {% else %}
+        brak
+      {% endif %}
+    </p>
+
+    <p><strong>Parafia:</strong> {{ bierzmowanie.parafia|default:"brak" }}</p>
+
+    <p><strong>Szafarz:</strong> {{ bierzmowanie.szafarz|default:"brak" }}</p>
+
+    <p><strong>Świadek:</strong> {{ bierzmowanie.swiadek|default:"brak" }}</p>
+
+    <p><strong>Uwagi wewnętrzne:</strong><br>{{ bierzmowanie.uwagi_wew|default:"—" }}</p>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,202 @@
+{% extends "base_panel.html" %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+  <div>
+    <h1 class="h5 mb-1">
+      <span class="badge bg-primary-subtle text-primary border border-primary rounded-pill fw-normal px-2 py-1">
+        {% if object %}Edycja{% else %}Nowa{% endif %}
+      </span>
+      <span class="fw-semibold">
+        Namaszczenie chorych
+      </span>
+    </h1>
+
+    {% if osoba %}
+      <div class="text-muted small">
+        Uzupełnij wpis namaszczenia chorego: <strong>{{ osoba.nazwisko }} {{ osoba.imie_pierwsze }}</strong>
+      </div>
+    {% endif %}
+</div>
+
+  <div class="d-flex flex-wrap gap-2 ms-auto">
+      {% if osoba %}
+        <a href="{% url 'osoba_szczegoly' osoba.pk %}"
+           class="btn btn-outline-secondary btn-sm">
+          Powrót
+        </a>
+      {% else %}
+        <a href="{% url 'namaszczenie_lista' %}"
+          class="btn btn-outline-secondary btn-sm">
+          Powrót
+        </a>
+    {% endif %}
+  </div>
+</div>
+
+
+<form method="post" class="card shadow-sm">
+  {% csrf_token %}
+
+  <div class="card-body small">
+
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger small">{{ form.non_field_errors }}</div>
+    {% endif %}
+    
+<div class="row g-3 mb-3">
+    {# --- OSOBA --- #}
+   <div class="col-md-4">
+      <div class="d-flex justify-content-between align-items-start">
+        <label class="form-label small fw-semibold text-muted mb-0">
+          {{ form.osoba.label }}
+        </label>
+
+        <a href="{% url 'osoba_nowa' %}"
+           target="_blank"
+           class="btn btn-outline-primary btn-sm ms-2">
+          + Nowa osoba
+        </a>
+      </div>
+
+      {{ form.osoba }}
+      {% if form.osoba.errors %}
+        <div class="text-danger small">{{ form.osoba.errors }}</div>
+      {% endif %}
+
+      <div class="form-text small text-muted">
+        Jeśli chorego nie ma jeszcze w bazie, dodaj go jako osobę w nowej karcie,
+        zapisz, wróć tutaj i odśwież.
+      </div>
+    </div>
+</div>
+
+    {# --- WIERSZ: data / miejsce / szafarz --- #}
+    <div class="row g-3">
+
+      <div class="col-md-4">
+        <label class="form-label small fw-semibold text-muted">
+          {{ form.data.label }}
+        </label>
+        {{ form.data }}
+        {% if form.data.errors %}
+          <div class="text-danger small">{{ form.data.errors }}</div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label small fw-semibold text-muted">
+          {{ form.miejsce.label }}
+        </label>
+        {{ form.miejsce }}
+        {% if form.miejsce.errors %}
+          <div class="text-danger small">{{ form.miejsce.errors }}</div>
+        {% endif %}
+        {% if form.miejsce.help_text %}
+          <div class="form-text small">{{ form.miejsce.help_text }}</div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-4">
+  <div class="d-flex justify-content-between align-items-start">
+    <label class="form-label small fw-semibold text-muted mb-0">
+      {{ form.szafarz.label }}
+    </label>
+
+    <a href="{% url 'slownik_duchowny_nowy' %}"
+       target="_blank"
+       class="btn btn-outline-primary btn-sm ms-2">
+      + Nowy duchowny
+    </a>
+  </div>
+
+  {{ form.szafarz }}
+  {% if form.szafarz.errors %}
+    <div class="text-danger small">{{ form.szafarz.errors }}</div>
+  {% endif %}
+
+  <div class="form-text small text-muted">
+    Jeśli szafarza nie ma na liście, dodaj go w Słownikach → Duchowni.<br>
+    Możesz też kliknąć „+ Nowy duchowny”, zapisać, wrócić tutaj i odświeżyć.
+  </div>
+</div>
+    </div>
+
+    <hr class="my-3">
+
+    {# --- CHECKBOXY: spowiedź / komunia / namaszczenie --- #}
+    <div class="row g-3">
+      <div class="col-md-4">
+        <div class="form-check">
+          {{ form.spowiedz }}
+          <label class="form-check-label small fw-semibold text-muted ms-1">
+            {{ form.spowiedz.label }}
+          </label>
+        </div>
+        {% if form.spowiedz.errors %}
+          <div class="text-danger small">{{ form.spowiedz.errors }}</div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-4">
+        <div class="form-check">
+          {{ form.komunia }}
+          <label class="form-check-label small fw-semibold text-muted ms-1">
+            {{ form.komunia.label }}
+          </label>
+        </div>
+        {% if form.komunia.errors %}
+          <div class="text-danger small">{{ form.komunia.errors }}</div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-4">
+        <div class="form-check">
+          {{ form.namaszczenie }}
+          <label class="form-check-label small fw-semibold text-muted ms-1">
+            {{ form.namaszczenie.label }}
+          </label>
+        </div>
+        {% if form.namaszczenie.errors %}
+          <div class="text-danger small">{{ form.namaszczenie.errors }}</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <hr class="my-3">
+
+    {# --- UWAGI --- #}
+    <div class="mb-3">
+      <label class="form-label small fw-semibold text-muted">
+        {{ form.uwagi_wew.label }}
+      </label>
+      {{ form.uwagi_wew }}
+      {% if form.uwagi_wew.errors %}
+        <div class="text-danger small">{{ form.uwagi_wew.errors }}</div>
+      {% endif %}
+    </div>
+
+  </div>
+
+  <div class="mt-4 d-flex gap-2">
+
+    <button class="btn btn-primary btn-sm">
+      Zapisz
+    </button>
+
+      {% if osoba %}
+        <a href="{% url 'osoba_szczegoly' osoba.pk %}" 
+        class="btn btn-outline-secondary btn-sm">
+        Anuluj
+      </a>
+      {% else %}
+        <a href="{% url 'namaszczenie_lista' %}" 
+        class="btn btn-outline-secondary btn-sm">
+        Anuluj
+      </a>
+      {% endif %}
+    
+  </div>
+</form>
+
+{% endblock %}
