@@ -130,6 +130,14 @@ class MszaUsunView(LoginRequiredMixin, DeleteView):
         messages.success(request, "Msza została usunięta.")
         return super().delete(request, *args, **kwargs)
 
+class MszaListaDrukView(MszaListaView):
+    # 1. Podmieniamy szablon na wersję do druku
+    template_name = "msze/druki/msza_lista_druk.html"
+
+    # 2. Wyłączamy paginację (drukujemy wszystkie wyniki)
+    paginate_by = None
+
+
 class IntencjaNowaView(LoginRequiredMixin, FormView):
     template_name = "msze/intencja_formularz.html"
     form_class = IntencjaForm

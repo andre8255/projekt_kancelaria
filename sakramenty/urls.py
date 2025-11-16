@@ -54,10 +54,16 @@ urlpatterns = [
     # --- DRUKI (widoki "print-friendly") ---
 
     path("panel/chrzty/<int:pk>/druk/", views.ChrzestDrukView.as_view(), name="chrzest_druk"),
+    path("chrzty/lista/druk/", views.ChrzestListaDrukView.as_view(), name="chrzest_lista_druk"),
     path("panel/komunie/<int:pk>/druk/", views.KomuniaDrukView.as_view(), name="komunia_druk"),
+    path("komunie/lista/druk/", views.KomuniaListaDrukView.as_view(), name="komunia_lista_druk"),
     path("panel/bierzmowania/<int:pk>/druk/", views.BierzmowanieDrukView.as_view(), name="bierzmowanie_druk"),
+    path("bierzmowania/lista/druk/", views.BierzmowanieListaDrukView.as_view(), name="bierzmowanie_lista_druk"),
     path("panel/malzenstwa/<int:pk>/druk/", views.MalzenstwoDrukView.as_view(), name="malzenstwo_druk"),
+    path("malzenstwa/lista/druk/", views.MalzenstwoListaDrukView.as_view(), name="malzenstwo_lista_druk"),
     path("panel/namaszczenie/<int:pk>/druk/", views.NamaszczenieDrukView.as_view(), name="namaszczenie_druk"),
+    path("namaszczenia/lista/druk/", views.NamaszczenieListaDrukView.as_view(), name="namaszczenie_lista_druk"),
     path("panel/zgony/<int:pk>/druk/", views.ZgonDrukView.as_view(), name="zgon_druk"),
+    path("zgony/lista/druk/", views.ZgonListaDrukView.as_view(), name="zgon_lista_druk"),
 ]
 

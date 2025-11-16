@@ -1,10 +1,12 @@
 #sakramenty/forms.py
+from django.utils import timezone
 from django import forms
 from django.db import transaction   
 from .models import Chrzest, PierwszaKomunia,Bierzmowanie,Malzenstwo,NamaszczenieChorych,Zgon
 from osoby.models import Osoba
 from slowniki.models import Parafia, Duchowny 
 from django.db.models import Q
+
 
 class BootstrapFormMixin:
     def __init__(self, *args, **kwargs):
@@ -92,23 +94,61 @@ class ChrzestForm(BootstrapFormMixin, forms.ModelForm):
 
 
 class PierwszaKomuniaForm(BootstrapFormMixin, forms.ModelForm):
+    
     class Meta:
         model = PierwszaKomunia
-        fields = ["osoba","rok", "parafia", "uwagi_wew"]
+        fields = ["osoba", "rok", "parafia", "uwagi_wew"]
 
+        # -----------------------------------------------------------------
+        # POPRAWKA: Definicje 'widgets', 'labels' i 'help_texts'
+        # muszą znajdować się tutaj, wewnątrz klasy Meta.
+        # -----------------------------------------------------------------
+        
         widgets = {
+            # Pole 'rok' jest konfigurowane w __init__ poniżej,
+            # więc tutaj definiujemy tylko 'uwagi_wew'.
             "uwagi_wew": forms.Textarea(attrs={"rows": 3}),
         }
+        
         labels = {
             "rok": "Rok I Komunii",
             "parafia": "Parafia (miejsce Komunii)",
             "uwagi_wew": "Uwagi (tylko do kancelarii)",
         }
+        
         help_texts = {
             "rok": "Np. 1998. Możesz wpisać tylko rok.",
             "parafia": "Np. Parafia św. Leonarda Opata w Mykanowie",
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # --- Logika dla pola 'rok' (Opcja 2) ---
+        
+        biezacy_rok = timezone.now().year
+        ZAKRES_LAT = range(biezacy_rok - 100, biezacy_rok + 6)
+
+        # Tworzymy listę wyborów, dodając pustą opcję na górze
+        wybory_lat = [('', '---------')] + [(r, r) for r in reversed(ZAKRES_LAT)]
+
+        # Ustawiamy widżet 'rok' na listę rozwijaną
+        self.fields['rok'].widget = forms.Select(
+            choices=wybory_lat,
+            attrs={'class': 'form-select form-select-sm'} # Klasy Bootstrapa
+        )
+
+        # Ustaw domyślny rok tylko dla nowych formularzy (nie przy edycji)
+        if not self.instance.pk:
+            self.fields['rok'].initial = biezacy_rok
+            
+        # -----------------------------------------------------------------
+        # USUNIĘTO: Błędne definicje widgets, labels i help_texts
+        # (przeniesione do Meta)
+        # -----------------------------------------------------------------
+
     def clean(self):
+        # Ta metoda była już poprawna
         cleaned = super().clean()
         osoba = cleaned.get("osoba")
         if osoba:
@@ -169,6 +209,22 @@ class BierzmowanieForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        biezacy_rok = timezone.now().year
+        ZAKRES_LAT = range(biezacy_rok - 100, biezacy_rok + 6)
+
+        # Tworzymy listę wyborów, dodając pustą opcję na górze
+        wybory_lat = [('', '---------')] + [(r, r) for r in reversed(ZAKRES_LAT)]
+
+        # Ustawiamy widżet 'rok' na listę rozwijaną
+        self.fields['rok'].widget = forms.Select(
+            choices=wybory_lat,
+            attrs={'class': 'form-select form-select-sm'} # Klasy Bootstrapa
+        )
+
+        # Ustaw domyślny rok tylko dla nowych formularzy (nie przy edycji)
+        if not self.instance.pk:
+            self.fields['rok'].initial = biezacy_rok
+
         # Rok ma być opcjonalny (uzupełnimy z daty)
         self.fields["rok"].required = False
         self.fields["rok"].widget.attrs.pop("required", None)

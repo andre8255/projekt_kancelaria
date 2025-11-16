@@ -1,0 +1,90 @@
+{% extends "base_print.html" %}
+{% block title %}Wykaz Mszy{% endblock %}
+
+{% block content %}
+<style>
+  @page {
+    size: A4 landscape; /* Lista jest szeroka, lepiej wygląda poziomo */
+    margin: 15mm;
+  }
+  .doc {
+    max-width: 100%;
+    margin: 0 auto;
+    color: #000;
+    font-family: "Times New Roman", serif;
+    font-size: 10pt;
+  }
+  h1 {
+    text-align: center;
+    margin-bottom: 1cm;
+    color: #063267;
+    font-weight: 700;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  th, td {
+    border: 1px solid #999;
+    padding: 6px 8px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: #f4f4f4;
+    color: #000;
+    font-weight: 700;
+  }
+  tbody tr:nth-child(even) {
+    background: #fdfdfd;
+  }
+</style>
+
+<div class="doc">
+  <h1>Wykaz Mszy</h1>
+
+  {% if request.GET.data or request.GET.status or request.GET.q %}
+    <p style="text-align: center; font-style: italic; font-size: 9pt;">
+      Lista filtrowana.
+      {% if request.GET.data %} Data: {{ request.GET.data }}.{% endif %}
+      {% if request.GET.status %} Status: {{ request.GET.status }}.{% endif %}
+      {% if request.GET.q %} Fraza: "{{ request.GET.q }}".{% endif %}
+    </p>
+  {% endif %}
+
+  {% if msze %}
+    <table>
+      <thead>
+        <tr>
+          <th>Lp.</th>
+          <th>Data</th>
+          <th>Godzina</th>
+          <th>Miejsce</th>
+          <th>Celebrans</th>
+          <th>Status (Intencje)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for msza in msze %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ msza.data|date:"d.m.Y" }}</td>
+          <td>{{ msza.godzina|time:"H:i" }}</td>
+          <td>{{ msza.miejsce|default:"—" }}</td>
+          <td>{{ msza.celebrans|default:"—" }}</td>
+          <td>
+            {% if msza.ile_intencji > 0 %}
+              {{ msza.ile_intencji }} int. (Zajęta)
+            {% else %}
+              <span style="color: #006400;">Wolna</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p style="text-align: center;">Brak mszy pasujących do filtrów.</p>
+  {% endif %}
+</div>
+{% endblock %}

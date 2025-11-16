@@ -8,6 +8,11 @@
   </div>
 
   <div class="d-flex gap-2">
+    <a href="{% url 'msza_lista_druk' %}?{{ request.GET.urlencode }}" 
+       target="_blank" 
+       class="btn btn-outline-secondary btn-sm">
+      🖨️ Drukuj listę
+    </a>
     <a href="{% url 'msza_nowa' %}" class="btn btn-primary btn-sm">+ Nowa msza</a>
   </div>
 </div>

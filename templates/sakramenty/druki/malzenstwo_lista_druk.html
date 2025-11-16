@@ -1,0 +1,103 @@
+{% extends "base_print.html" %}
+{% block title %}Wykaz Małżeństw{% endblock %}
+
+{% block content %}
+<style>
+  /* Ten sam styl co przy drukowaniu listy chrztów */
+  @page {
+    size: A4 landscape; /* Lista jest szeroka, lepiej wygląda poziomo */
+    margin: 15mm;
+  }
+  .doc {
+    max-width: 100%;
+    margin: 0 auto;
+    color: #000;
+    font-family: "Times New Roman", serif;
+    font-size: 10pt;
+  }
+  h1 {
+    text-align: center;
+    margin-bottom: 1cm;
+    color: #063267;
+    font-weight: 700;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  th, td {
+    border: 1px solid #999;
+    padding: 6px 8px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: #f4f4f4;
+    color: #000;
+    font-weight: 700;
+  }
+  tbody tr:nth-child(even) {
+    background: #fdfdfd;
+  }
+</style>
+
+<div class="doc">
+  <h1>Wykaz Małżeństw</h1>
+
+  {% if request.GET.q %}
+    <p style="text-align: center; font-style: italic;">
+      Lista filtrowana dla frazy: "{{ request.GET.q }}"
+    </p>
+  {% endif %}
+
+  {% if malzenstwa %}
+    <table>
+      <thead>
+        <tr>
+          <th>Lp.</th>
+          <th>Rok / akt</th>
+          <th>Małżonkowie</th>
+          <th>Data ślubu</th>
+          <th>Parafia ślubu</th>
+          <th>Świadek urzędowy</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for m in malzenstwa %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ m.rok|default:"—" }}/{{ m.akt_nr|default:"—" }}</td>
+          <td>
+            {{ m.malzonek_a.nazwisko }} {{ m.malzonek_a.imie_pierwsze }}
+            <br>
+            {{ m.malzonek_b.nazwisko }} {{ m.malzonek_b.imie_pierwsze }}
+          </td>
+          <td>{{m.data_slubu|date:"d.m.Y"|default:"—"}}</td>
+          <td>
+            {% if m.parafia %}
+              {{ m.parafia.nazwa }}
+              {% if m.parafia.miejscowosc %}, {{ m.parafia.miejscowosc }}{% endif %}
+            {% elif m.parafia_opis_reczny %}
+              {{ m.parafia_opis_reczny }}
+            {% else %}
+              —
+            {% endif %}
+          </td>
+          <td>
+            {% if m.swiadek_urzedowy %}
+              {{ m.swiadek_urzedowy }}
+            {% elif m.swiadek_urzedowy_opis_reczny %}
+              {{ m.swiadek_urzedowy_opis_reczny }}
+            {% else %}
+              —
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p style="text-align: center;">Brak wpisów pasujących do filtrów.</p>
+  {% endif %}
+</div>
+{% endblock %}

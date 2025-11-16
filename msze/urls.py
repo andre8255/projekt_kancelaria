@@ -14,4 +14,5 @@ urlpatterns = [
 
     path("msze/kalendarz/", views.KalendarzMszyView.as_view(), name="msza_kalendarz"),
     path("msze/kalendarz/dane/", views.kalendarz_mszy_dane, name="msza_kalendarz_dane"),
+    path("msze/lista/druk/", views.MszaListaDrukView.as_view(), name="msza_lista_druk"),
 ]

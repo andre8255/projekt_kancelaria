@@ -1,0 +1,94 @@
+{% extends "base_print.html" %}
+{% block title %}Wykaz Chrztów{% endblock %}
+
+{% block content %}
+<style>
+  /* Ustawienia dla strony do druku */
+  @page {
+    size: A4 landscape; /* Lista jest szeroka, lepiej wygląda poziomo */
+    margin: 15mm;
+  }
+
+  .doc {
+    max-width: 100%; /* Użyj pełnej szerokości strony */
+    margin: 0 auto;
+    color: #000; /* Na wydrukach list czarny jest czytelniejszy */
+    font-family: "Times New Roman", serif;
+    font-size: 10pt; /* Mniejsza czcionka, żeby zmieścić więcej */
+  }
+
+  h1 {
+    text-align: center;
+    margin-bottom: 1cm;
+    color: #063267; /* Kolor z Twoich pozostałych wydruków */
+    font-weight: 700;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th, td {
+    border: 1px solid #999; /* Wyraźne ramki tabeli */
+    padding: 6px 8px;
+    text-align: left;
+  }
+
+  th {
+    background: #f4f4f4; /* Lekkie tło dla nagłówków */
+    color: #000;
+    font-weight: 700;
+  }
+
+  tbody tr:nth-child(even) {
+    background: #fdfdfd; /* Delikatna "zebra" dla czytelności */
+  }
+</style>
+
+<div class="doc">
+  <h1>Wykaz Chrztów</h1>
+
+  {% if request.GET.q %}
+    <p style="text-align: center; font-style: italic;">
+      Lista filtrowana dla frazy: "{{ request.GET.q }}"
+    </p>
+  {% endif %}
+
+  {% if chrzty %}
+    <table>
+      <thead>
+        <tr>
+          <th>Lp.</th>
+          <th>Rok / akt</th>
+          <th>Osoba ochrzczona</th>
+          <th>Data ur.</th> <th>Data chrztu</th>
+          <th>Parafia/Miejsce chrztu</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for wpis in chrzty %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ wpis.rok }}/{{ wpis.akt_nr }}</td>
+          <td>{{ wpis.ochrzczony.nazwisko }} {{ wpis.ochrzczony.imie_pierwsze }}</td>
+          <td>{{ wpis.ochrzczony.data_urodzenia|date:"d.m.Y"|default:"—" }}</td>
+          <td>{{ wpis.data_chrztu|date:"d.m.Y"|default:wpis.rok_chrztu|default:"—" }}</td>
+          <td>
+            {% if wpis.parafia %}
+              {{ wpis.parafia.nazwa }}, {{ wpis.parafia.miejscowosc }}
+            {% elif wpis.miejsce_chrztu %}
+              {{ wpis.miejsce_chrztu }}
+            {% else %}
+              —
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p style="text-align: center;">Brak wpisów chrztu pasujących do filtrów.</p>
+  {% endif %}
+</div>
+{% endblock %}
