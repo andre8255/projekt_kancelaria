@@ -1,5 +1,7 @@
+from django.utils.dateparse import parse_datetime, parse_date
 from django.http import JsonResponse
 from django.utils.timezone import make_aware
+from django.urls import reverse
 from django.contrib import messages
 from datetime import datetime, time
 from django.views.generic import TemplateView, DeleteView
@@ -68,7 +70,38 @@ class MszaNowaView(LoginRequiredMixin, CreateView):
     model = Msza
     form_class = MszaForm
     template_name = "msze/msza_formularz.html"
-    success_url = reverse_lazy("msza_lista")
+
+    def get_initial(self):
+            # Pobieramy 'initial' z nadrzędnej klasy
+            initial = super().get_initial()
+            
+            # Pobieramy nasz parametr 'data' z adresu URL
+            data_str = self.request.GET.get('data')
+            
+            if data_str:
+                # 1. Próbujemy sparsować pełną datę i czas (np. z widoku tygodnia)
+                klikniety_czas = parse_datetime(data_str)
+                
+                if klikniety_czas:
+                    # SUKCES: Mamy datę i godzinę
+                    # WAŻNE: Użyj nazw pól, które masz w swoim formularzu
+                    initial['data'] = klikniety_czas.date()
+                    initial['godzina'] = klikniety_czas.time()
+                else:
+                    # 2. Jeśli się nie udało, próbujemy sparsować samą datę (np. z widoku miesiąca)
+                    kliknieta_data = parse_date(data_str)
+                    if kliknieta_data:
+                        # SUKCES: Mamy samą datę
+                        initial['data'] = kliknieta_data
+                        # Pole 'godzina' pozostanie puste, co jest poprawne
+                        
+            return initial
+
+    def get_success_url(self):
+        # ... (twoja logika przekierowania po zapisie)
+        return reverse('msza_lista')
+    
+
 
 class MszaEdycjaView(LoginRequiredMixin, UpdateView):
     model = Msza

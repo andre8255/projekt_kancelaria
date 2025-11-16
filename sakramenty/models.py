@@ -62,6 +62,16 @@ class Chrzest(models.Model):
         help_text=""
     )
 
+    # Parafia może być słownikowa ALBO wpisana ręcznie
+    parafia = models.ForeignKey(
+        "slowniki.Parafia",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="chrzty",
+        verbose_name="Parafia chrztu"
+    )
+
     # Rodzice
     ojciec = models.CharField(
         "Ojciec (imię i nazwisko)",

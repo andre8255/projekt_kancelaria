@@ -40,9 +40,31 @@
       {% endif %}
     </p>
 
-    <p><strong>Parafia:</strong> {{ bierzmowanie.parafia|default:"brak" }}</p>
+    <p><strong>Parafia:</strong>
+  {% if bierzmowanie.parafia %}
+    
+    {{ bierzmowanie.parafia.nazwa }}
+    
+    {% if bierzmowanie.parafia.miejscowosc %}
+      - {{ bierzmowanie.parafia.miejscowosc }}
+    {% endif %}
 
-    <p><strong>Szafarz:</strong> {{ bierzmowanie.szafarz|default:"brak" }}</p>
+  {% elif bierzmowanie.parafia_nazwa_reczna %}
+    {{ bierzmowanie.parafia_nazwa_reczna }}
+  {% else %}
+    <span class="text-muted">—</span>
+  {% endif %}
+</p>
+
+   <p><strong>Szafarz:</strong>
+      {% if bierzmowanie.szafarz %}
+        {{ bierzmowanie.szafarz }}
+      {% elif bierzmowanie.szafarz_opis_reczny %}
+        {{ bierzmowanie.szafarz_opis_reczny }}
+      {% else %}
+        <span class="text-muted">—</span>
+      {% endif %}
+    </p>
 
     <p><strong>Świadek:</strong> {{ bierzmowanie.swiadek|default:"brak" }}</p>
 

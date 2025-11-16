@@ -939,6 +939,7 @@ class ChrzestDrukView(LoginRequiredMixin, DetailView):
 
         ctx["bierzmowanie"] = bierzm
         ctx["today"] = timezone.localdate()
+        ctx["http_request"] = self.request
         return ctx
 
 
@@ -950,9 +951,30 @@ class KomuniaDrukView(LoginRequiredMixin, DetailView):
 
 class BierzmowanieDrukView(LoginRequiredMixin, DetailView):
     model = Bierzmowanie
-    template_name = "sakramenty/druki/bierzmowanie_druk.html"
+    template_name = "sakramenty/druki/bierzmowanie_druk.html" # Upewnij się, że ścieżka jest poprawna
     context_object_name = "bierzmowanie"
+    
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        
+        # Pobieramy obiekt 'osoba' z bieżącego bierzmowania
+        osoba = self.object.osoba 
 
+        # --- NOWA LOGIKA ---
+        # 1. Znajdujemy powiązany rekord chrztu dla tej osoby
+        chrzest = Chrzest.objects.filter(ochrzczony=osoba).first()
+        
+        # 2. Dodajemy chrzest do kontekstu szablonu
+        ctx["chrzest"] = chrzest
+        # --- KONIEC NOWEJ LOGIKI ---
+
+        ctx["today"] = timezone.localdate()
+        
+        # Dodajemy też request, na wypadek gdybyś go potrzebował (jak w poprzednim widoku)
+        ctx["http_request"] = self.request
+        
+        return ctx
+    
 class MalzenstwoDrukView(LoginRequiredMixin, DetailView):
     model = Malzenstwo
     template_name = "sakramenty/druki/malzenstwo_druk.html"

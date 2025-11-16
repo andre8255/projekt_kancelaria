@@ -3,105 +3,155 @@
 
 {% block content %}
 <style>
-    body {
-        color: #063267;
-        font-family: 'Times New Roman', serif;
-        max-width: 700px;
-        margin: 0 auto;
-    }
-    h1 {
-        text-align: center;
-        font-weight: bold;
-    }
-    .seal {
-        float: left;
-        width: 200px;
-        height: 60px;
-        border: 1px dashed #666;
-        text-align: center;
-        font-size: 0.95em;
-        margin-right: 18px;
-        margin-bottom: 12px;
-    }
-    .field-label {
-        font-weight: bold;
-        min-width: 180px;
-        white-space: nowrap;
-    }
-    .field-value {
-        border-bottom: 1px dotted #888;
-        color: black;
-        min-width: 8cm;
-        display: inline-block;
-    }
-    table {
-        width: 100%;
-        font-size: 1em;
-        border-spacing: 0;
-        margin-bottom: 1.5em;
-    }
-    td {
-        vertical-align: top;
-        padding: 4px 8px;
-    }
+  @page { size: A4; margin: 15mm; }
+
+  .doc {
+    max-width: 720px;
+    margin: 0 auto;
+    color: #063267;
+    font-family: "Times New Roman", serif;
+    font-size: 11pt;
+  }
+
+  h1 { text-align: center; margin: 0.2cm 0 0.1cm; }
+  .subtitle { text-align: center; margin-bottom: 0.5cm; }
+
+  .bookref { text-align: right; margin-right: 4cm; }
+
+  .seal {
+    float: left;
+    width: 5cm; height: 1.7cm;
+    border: 1px dashed #acabab;
+    color: #c3c4c5;
+    text-align: center;
+    line-height: 1.7cm;
+    margin-right: 0.8cm;
+    font-size: 11pt;
+  }
+
+  .user-data { font-weight: 705; color: #000; }
+  .field-label { font-weight: 700; white-space: nowrap; }
+  /* Dwukropek dodawany automatycznie */
+  .field-label::after { content: ": "; }
+  
+  table.data-table { width: 100%; border-collapse: collapse; margin-top: 1cm; }
+  table.data-table td { vertical-align: top; padding: 6px 4px; }
+  
+  .block { margin-top: 1cm; }
 </style>
 
-<div class="seal">Pieczęć parafii</div>
+<div class="doc">
+  <div class="seal">Pieczęć parafii</div>
+  <h1>ŚWIADECTWO BIERZMOWANIA</h1>
+  <br>
+  <div class="bookref">
+    <span class="field-label">Rok i nr w księdze bierzmowania</span>
+    <span class="user-data">{{ bierzmowanie.rok }}/{{ bierzmowanie.akt_nr }}</span>
+  </div>
+  
+  <div style="clear:both;"></div>
 
-<h1>ŚWIADECTWO BIERZMOWANIA</h1>
-<br>
-<div><b>Rok i nr w księdze bierzmowania:</b> <span class="field-value">{{ bierzmowanie.rok }}/{{ bierzmowanie.akt_nr }}</span></div>
-<br>
-
-<table>
+  <table class="data-table">
     <tr>
-        <td class="field-label"> Imię i nazwisko bierzmowanego:</td>
-        <td class="field-value">{{ bierzmowanie.osoba.imie }}</td>
+      <td class="field-label" style="width:35%;">Imię i nazwisko bierzmowanego</td>
+      <td><span class="user-data">{{ bierzmowanie.osoba|default:"—" }}</span></td>
     </tr>
 
     <tr>
-        <td class="field-label">Imię z bierzmowania:</td>
-        <td class="field-value">{{ bierzmowanie.imie_bierzmowania }}</td>
-    </tr>
-
-
-    <tr>
-        <td class="field-label">Data i miejsce urodzenia:</td>
-        <td class="field-value">{{ bierzmowanie.data_urodzenia }}</td>
+      <td class="field-label">Imię z bierzmowania</td>
+      <td><span class="user-data">{{ bierzmowanie.imie_bierzmowania|default:"—" }}</span></td>
     </tr>
 
     <tr>
-        <td class="field-label">Data chrztu:</td>
-        <td class="field-value">{{ bierzmowanie.miejsce_urodzenia }}</td>
+      <td class="field-label">Data i miejsce urodzenia</td>
+      <td>
+        <span class="user-data">
+          {% if chrzest.data_urodzenia %}{{ chrzest.data_urodzenia }}
+          {% elif chrzest.rok_urodzenia %}rok {{ chrzest.rok_urodzenia }}
+          {% else %}—{% endif %}
+          {% if chrzest.miejsce_urodzenia %}, {{ chrzest.miejsce_urodzenia }}{% endif %}
+        </span>
+      </td>
     </tr>
 
     <tr>
-        <td class="field-label">Miejsce i data bierzmowania:</td>
-        <td class="field-value">{{ bierzmowanie.miejsce_bierzmowania }}, {{ bierzmowanie.data_bierzmowania }} </td>
+      <td class="field-label">Data chrztu</td>
+      <td>
+        <span class="user-data">
+          {% if chrzest.data_chrztu %}{{ chrzest.data_chrztu }}
+          {% elif chrzest.rok_chrztu %}rok {{ chrzest.rok_chrztu }}
+          {% else %}—{% endif %}
+          
+          {% if chrzest.rok and chrzest.akt_nr %}
+            ,&nbsp; &nbsp;&nbsp;nr aktu {{ chrzest.rok }}/{{ chrzest.akt_nr }}
+          {% endif %}
+        </span>
+      </td>
     </tr>
 
     <tr>
-        <td class="field-label">Szafarz bierzmowania:</td>
-        <td class="field-value">{{ bierzmowanie.szafarz }}</td>
+      <td class="field-label">Nazwa i adres parafii chrztu</td>
+      <td>
+        <span class="user-data">
+          {% if bierzmowanie.parafia %}
+    
+    {{ bierzmowanie.parafia.nazwa }}
+    
+    {% if bierzmowanie.parafia.miejscowosc %}
+      - {{ bierzmowanie.parafia.miejscowosc }}
+    {% endif %}
+
+  {% elif bierzmowanie.parafia_nazwa_reczna %}
+    {{ bierzmowanie.parafia_nazwa_reczna }}
+  {% else %}
+    <span class="text-muted">—</span>
+  {% endif %}
+        </span>
+      </td>
     </tr>
 
     <tr>
-        <td class="field-label">Świadek bierzmowania</td>
-        <td class="field-value">{{ bierzmowanie.swiadek }}</td>
+      <td class="field-label">Miejsce i data bierzmowania</td>
+      <td>
+        <span class="user-data">
+          {% if bierzmowanie.data_bierzmowania %}{{ bierzmowanie.data_bierzmowania }}{% endif %}
+          {% if bierzmowanie.miejsce_bierzmowania %},&nbsp;&nbsp;  {{ bierzmowanie.miejsce_bierzmowania }}{% endif %}
+        </span>
+      </td>
     </tr>
 
-</table>
+    <tr>
+      <td class="field-label">Szafarz bierzmowania</td>
+      <td>
+        <span class="user-data">
+          {% if bierzmowanie.szafarz %}{{ bierzmowanie.szafarz }}
+          {% elif bierzmowanie.szafarz_opis_reczny %}{{ bierzmowanie.szafarz_opis_reczny }}
+          {% else %}—{% endif %}
+        </span>
+      </td>
+    </tr>
 
-<div>
+    <tr>
+      <td class="field-label">Świadek bierzmowania</td>
+      <td><span class="user-data">{{ bierzmowanie.swiadek|default:"—" }}</span></td>
+    </tr>
+  </table>
+
+  <div class="block">
     <b>Potwierdzam zgodność z księgą bierzmowania</b>
-</div>
-<br>
-    <span class="field-label">Miejsce i data:</span>
-    <span class="user-data">{% if chrzest.miejsce_wydania %}{{ chrzest.miejsce_wydania }}, {% endif %}{{ today|default:request.user.date_joined|date:"Y-m-d" }}</span>
-    <br><br>
-<div style="float:right; text-align:center; margin-right:50px;">
-    <div style="border-bottom:1px solid #888; width:150px; height:18px;"></div>
-    Proboszcz / Parochus / Parish Priest / Pfarrer
-</div>
+  </div>
 
+  <div class="block">
+    <span class="field-label">Miejsce i data wystawienia</span>
+    <span class="user-data">
+      {% if bierzmowanie.miejsce_wydania %}{{ bierzmowanie.miejsce_wydania }}, {% endif %}{{ today|date:"Y-m-d" }}
+    </span>
+  </div>
+
+  <div style="float:right; width: 7cm; text-align:center; margin-top: 2cm;">
+    <span class="user-data" style="display:inline-block; width:100%; border-bottom: 1px dotted #000; height: 1.5em;">&nbsp;</span><br>
+    Podpis duszpasterza
+  </div>
+  <div style="clear:both;"></div>
+</div>
 {% endblock %}

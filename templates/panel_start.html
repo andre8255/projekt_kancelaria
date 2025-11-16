@@ -1,5 +1,3 @@
-<!--templates/panel_start.html-->
-
 {% extends "base_panel.html" %}
 {% block content %}
 
@@ -7,85 +5,148 @@
   .mini-cal { --gap: .5rem; }
   .mini-cal .week { display: grid; grid-template-columns: repeat(7, 1fr); gap: var(--gap); }
   .mini-cal .day {
-    position: relative; padding: .5rem .4rem; border-radius: .75rem;
-    background: #fff; border: 1px solid #eef1f4; min-height: 72px;
-    transition: transform .08s ease, box-shadow .08s ease;
+    position: relative; padding: .6rem .5rem; border-radius: .6rem;
+    background: #fff; border: 1px solid #eef1f4; min-height: 80px;
+    transition: transform .1s ease, box-shadow .1s ease, border-color .1s ease;
+    display: flex; flex-direction: column; justify-content: space-between;
   }
-  .mini-cal .day:hover { transform: translateY(-1px); box-shadow: 0 4px 18px rgba(0,0,0,.06); }
-  .mini-cal .dm-muted { opacity: .5; }
+  .mini-cal .day:hover {
+    transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,.07);
+    border-color: #e0e0e0;
+  }
+  .mini-cal .dm-muted { opacity: .5; background: #fdfdfd; }
   .mini-cal .dow { font-size: .72rem; letter-spacing: .02em; color: #6c757d; }
-  .mini-cal .num { font-weight: 600; }
+  .mini-cal .num { font-weight: 600; font-size: 0.85rem; }
   .mini-cal .today {
-    outline: 2px solid #0d6efd22; box-shadow: inset 0 0 0 1.5px #0d6efd33;
-    background: linear-gradient(180deg, #f8fbff, #ffffff);
+    background: #eef5ff; border-color: #aaccff; box-shadow: none;
   }
-  .mini-cal .chips { display: flex; gap: .25rem; flex-wrap: wrap; margin-top: .35rem; }
-  .chip { font-size: .68rem; padding: .1rem .38rem; border-radius: 999px; border: 1px solid transparent; }
-  .chip-all { color: #495057; background: #f1f3f5; border-color: #e9ecef; }
-  .chip-busy { color: #842029; background: #f8d7da; border-color: #f1aeb5; }
+  .mini-cal .today .num { color: #0d6efd; font-weight: 700; }
+  .mini-cal .day-status { display: flex; align-items: center; gap: .35rem; }
+  .mini-cal .status-text { font-size: .7rem; font-weight: 500; color: #555; }
   .mini-cal .dot {
     width: .45rem; height: .45rem; border-radius: 50%; display: inline-block; vertical-align: middle;
   }
   .dot-free { background:#198754; } .dot-busy { background:#dc3545; }
   .legend { gap: .5rem; }
   .mini-cal a { text-decoration: none; color: inherit; }
+
+  /* Dodatkowe style dla ładniejszych kafelków */
+  .stat-card .icon-box {
+    width: 50px; height: 50px;
+    display: grid; place-items: center;
+    border-radius: .75rem;
+    font-size: 1.5rem;
+  }
+  .stat-card-osoby .icon-box { background-color: #e6f0ff; color: #0d6efd; }
+  .stat-card-rodziny .icon-box { background-color: #e6f9f0; color: #198754; }
+  .stat-card-chrzty .icon-box { background-color: #eef1f4; color: #495057; }
+  .stat-card-bierzm .icon-box { background-color: #fff0e6; color: #fd7e14; }
+  .stat-card-sluby .icon-box { background-color: #fde7ea; color: #dc3545; }
+
+
+  /* Nowe style dla podświetlenia dni */
+.mini-cal .day-free {
+  background: #f6fef9; /* Bardzo jasny zielony */
+}
+.mini-cal .day-busy {
+  background: #fef7f7; /* Bardzo jasny czerwony */
+}
+
+/* Poprawka, aby styl .today wygrywał z tłem */
+.mini-cal .today.day-free,
+.mini-cal .today.day-busy {
+  background: linear-gradient(180deg, #f8fbff, #ffffff);
+}
+
+/* Poprawka, aby najechanie myszką zawsze dawało białe tło */
+.mini-cal .day:hover {
+  background: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 18px rgba(0,0,0,.06);
+}
 </style>
-
-
-
-
 <!--
-{# KAFELKI #}
-<div class="row g-3 mb-4">
-  <div class="col-sm-6 col-lg-3">
-    <div class="card shadow-sm border-0">
-      <div class="card-body">
-        <div class="text-muted small">Osoby</div>
-        <div class="h4 mb-0">{{ stats.osoby }}</div>
-      </div>
-    </div>
-  </div>
-  <div class="col-sm-6 col-lg-3">
-    <div class="card shadow-sm border-0">
-      <div class="card-body">
-        <div class="text-muted small">Rodziny</div>
-        <div class="h4 mb-0">{{ stats.rodziny }}</div>
-      </div>
-    </div>
-  </div>
-  <div class="col-sm-6 col-lg-2">
-    <div class="card shadow-sm border-0">
-      <div class="card-body">
-        <div class="text-muted small">Chrzty</div>
-        <div class="h4 mb-0">{{ stats.chrzty }}</div>
-      </div>
-    </div>
-  </div>
-  <div class="col-sm-6 col-lg-2">
-    <div class="card shadow-sm border-0">
-      <div class="card-body">
-        <div class="text-muted small">Bierzm.</div>
-        <div class="h4 mb-0">{{ stats.bierzmowania }}</div>
-      </div>
-    </div>
-  </div>
-  <div class="col-sm-6 col-lg-2">
-    <div class="card shadow-sm border-0">
-      <div class="card-body">
-        <div class="text-muted small">Śluby</div>
-        <div class="h4 mb-0">{{ stats.sluby }}</div>
-      </div>
+{# SZYBKIE AKCJE - "ODKOMENTOWANE" I ŁADNIEJSZE #}
+<div class="card shadow-sm border-0 mb-4" style="background: linear-gradient(135deg, #f8f9fa, #ffffff);">
+  <div class="card-body p-4 p-md-4">
+    <h3 class="fw-light mb-1">Witaj w panelu!</h3>
+    <p class="text-muted small">Wybierz jedną z szybkich akcji, aby rozpocząć.</p>
+    <div class="d-flex flex-wrap gap-2 mt-3">
+      <a href="{% url 'osoba_nowa' %}" class="btn btn-primary btn-sm"><i class="bi bi-person-plus-fill me-1"></i> Nowa osoba</a>
+      <a href="{% url 'chrzest_dodaj' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-droplet-half me-1"></i> Nowy chrzest</a>
+      <a href="{% url 'malzenstwo_dodaj' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-heart-fill me-1"></i> Nowe małżeństwo</a>
+      <a href="{% url 'msza_nowa' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-calendar-plus-fill me-1"></i> Nowa msza</a>
     </div>
   </div>
 </div>
-
-{# SZYBKIE AKCJE #}
-<div class="card shadow-sm border-0 mb-4">
-  <div class="card-body d-flex flex-wrap gap-2">
-    <a href="{% url 'osoba_nowa' %}" class="btn btn-primary btn-sm">+ Nowa osoba</a>
-    <a href="{% url 'chrzest_dodaj' %}" class="btn btn-outline-primary btn-sm">+ Nowy chrzest</a>
-    <a href="{% url 'malzenstwo_dodaj' %}" class="btn btn-outline-primary btn-sm">+ Nowe małżeństwo</a>
-    <a href="{% url 'msza_nowa' %}" class="btn btn-outline-primary btn-sm">+ Nowa msza</a>
+-->
+<!--
+{# KAFELKI - "ODKOMENTOWANE" I Z IKONAMI #}
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-lg-3">
+    <div class="card shadow-sm border-0 h-100 stat-card stat-card-osoby">
+      <div class="card-body d-flex align-items-center">
+        <div class="icon-box me-3 flex-shrink-0">
+          <i class="bi bi-people-fill"></i>
+        </div>
+        <div>
+          <div class="text-muted small">Osoby</div>
+          <div class="h4 mb-0">{{ stats.osoby }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card shadow-sm border-0 h-100 stat-card stat-card-rodziny">
+      <div class="card-body d-flex align-items-center">
+        <div class="icon-box me-3 flex-shrink-0">
+          <i class="bi bi-house-heart-fill"></i>
+        </div>
+        <div>
+          <div class="text-muted small">Rodziny</div>
+          <div class="h4 mb-0">{{ stats.rodziny }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-4 col-lg-2">
+    <div class="card shadow-sm border-0 h-100 stat-card stat-card-chrzty">
+      <div class="card-body d-flex align-items-center">
+        <div class="icon-box me-3 flex-shrink-0">
+          <i class="bi bi-droplet-fill"></i>
+        </div>
+        <div>
+          <div class="text-muted small">Chrzty</div>
+          <div class="h4 mb-0">{{ stats.chrzty }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-4 col-lg-2">
+    <div class="card shadow-sm border-0 h-100 stat-card stat-card-bierzm">
+      <div class="card-body d-flex align-items-center">
+        <div class="icon-box me-3 flex-shrink-0">
+          <i class="bi bi-wind"></i>
+        </div>
+        <div>
+          <div class="text-muted small">Bierzm.</div>
+          <div class="h4 mb-0">{{ stats.bierzmowania }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-4 col-lg-2">
+    <div class="card shadow-sm border-0 h-100 stat-card stat-card-sluby">
+      <div class="card-body d-flex align-items-center">
+        <div class="icon-box me-3 flex-shrink-0">
+          <i class="bi bi-gem"></i>
+        </div>
+        <div>
+          <div class="text-muted small">Śluby</div>
+          <div class="h4 mb-0">{{ stats.sluby }}</div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 -->
@@ -106,7 +167,7 @@
       <div class="week mb-2">
       {% for dow in dni_tyg %}
     <div class="text-center dow">{{ dow }}</div>
-     {% endfor %}
+      {% endfor %}
       </div>
 
 
@@ -115,17 +176,19 @@
         <div class="week mb-2">
           {% for day in week %}
             {# link do listy mszy z filtrem daty #}
-            <a class="day {% if day.is_other_month %}dm-muted{% endif %} {% if day.is_today %}today{% endif %}"
-               href="{% url 'msza_lista' %}?data={{ day.date|date:'Y-m-d' }}"
-               title="{% if day.all %}Msze: {{ day.all }}, zajęte: {{ day.busy }}{% else %}Brak mszy{% endif %}">
+            <a class="day {% if day.is_other_month %}dm-muted{% endif %} {% if day.is_today %}today{% endif %} {% if day.all > day.busy %}day-free{% elif day.busy > 0 %}day-busy{% endif %}"
+   href="{% url 'msza_lista' %}?data={{ day.date|date:'Y-m-d' }}"
+   title="{% if day.all %}Msze: {{ day.all }}, zajęte: {{ day.busy }}{% else %}Brak mszy{% endif %}">
               <div class="d-flex justify-content-between align-items-start">
-                <span class="num">{{ day.date.day }}</span>
-                {% if day.busy %}
-                  <span class="dot dot-busy" aria-hidden="true"></span>
-                {% elif day.all %}
-                  <span class="dot dot-free" aria-hidden="true"></span>
-                {% endif %}
-              </div>
+  <span class="num">{{ day.date.day }}</span>
+
+  {# POPRAWIONA LOGIKA KROPKI #}
+  {% if day.all > day.busy %}
+    <span class="dot dot-free" aria-hidden="true"></span>
+  {% elif day.busy > 0 %}
+    <span class="dot dot-busy" aria-hidden="true"></span>
+  {% endif %}
+</div>
 
               {% if day.all %}
                 <div class="chips">
@@ -147,8 +210,6 @@
     </div>
   </div>
 </div>
-
-
 
 <div class="row g-4">
   {# Najbliższe msze #}

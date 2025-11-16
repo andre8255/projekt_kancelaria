@@ -29,7 +29,7 @@ class ChrzestForm(BootstrapFormMixin, forms.ModelForm):
             "rok", "akt_nr",
             "ochrzczony",                 # <— tu wracamy do ochrzczony
             "data_urodzenia", "rok_urodzenia", "miejsce_urodzenia",
-            "data_chrztu", "rok_chrztu", "miejsce_chrztu",
+            "data_chrztu", "rok_chrztu", "miejsce_chrztu","parafia",
             "ojciec", "ojciec_wyznanie",
             "matka", "nazwisko_matki_rodowe", "matka_wyznanie",
             "uwagi_wew",
@@ -428,12 +428,35 @@ class ZgonForm(BootstrapFormMixin, forms.ModelForm):
         self.fields["uwagi_wew"].label = "Uwagi (wewnętrzne)"
 
     def clean(self):
-        cleaned = super().clean()
-        osoba = cleaned.get("osoba")
-        if osoba:
-            qs = Zgon.objects.filter(osoba=osoba)
-            if self.instance.pk:
-                qs = qs.exclude(pk=self.instance.pk)
-            if qs.exists():
-                raise forms.ValidationError("Ta osoba ma już wpis zgonu.")
-        return cleaned
+        """
+        Walidacja sprawdzająca, czy data zgonu nie jest 
+        wcześniejsza niż data urodzenia.
+        """
+        cleaned_data = super().clean()
+        
+        data_zgonu = cleaned_data.get("data_zgonu")
+        osoba = cleaned_data.get("osoba") # Pobieramy osobę z formularza
+
+        # Jeśli formularz jest w trybie edycji (UpdateView), 
+        # 'osoba' może nie być w cleaned_data, więc bierzemy ją z instancji.
+        if not osoba and self.instance.pk:
+            osoba = self.instance.osoba
+        
+        # Jeśli nie mamy osoby (np. błąd wyboru), nie możemy nic sprawdzić
+        if not osoba:
+            return cleaned_data
+
+        # Zakładamy, że Twój model Osoba ma pole 'data_urodzenia'
+        # (co wynika z kodu Twoich poprzednich widoków)
+        data_urodzenia = getattr(osoba, 'data_urodzenia', None)
+
+        # Sprawdzamy logikę
+        if data_zgonu and data_urodzenia:
+            if data_zgonu < data_urodzenia:
+                # Jeśli data zgonu jest wcześniejsza, zgłaszamy błąd
+                self.add_error(
+                    'data_zgonu', 
+                    'Data zgonu nie może być wcześniejsza niż data urodzenia tej osoby.'
+                )
+
+        return cleaned_data

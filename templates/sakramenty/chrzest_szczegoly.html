@@ -6,9 +6,6 @@
   <h1 class="h5 mb-0">Chrzest</h1>
 
   <div class="d-flex flex-wrap gap-2">
-    <a href="{% url 'chrzest_druk' chrzest.pk %}" target="_blank" class="btn btn-outline-primary btn-sm">
-      Drukuj
-    </a>
     <a href="{% url 'chrzest_edytuj' chrzest.pk %}" class="btn btn-outline-secondary btn-sm">
       Edytuj
     </a>
@@ -24,7 +21,6 @@
 
 <div class="row g-4">
 
-  <!-- Karta: Podstawowe dane aktu -->
   <div class="col-md-6">
     <div class="card shadow-sm border-0 h-100">
       <div class="card-header fw-semibold">
@@ -59,7 +55,6 @@
     </div>
   </div>
 
-  <!-- Karta: Dane ochrzczonego -->
   <div class="col-md-6">
     <div class="card shadow-sm border-0 h-100">
       <div class="card-header fw-semibold">
@@ -99,7 +94,6 @@
   </div>
 
 
-  <!-- Karta: Rodzice -->
   <div class="col-md-12">
     <div class="card shadow-sm border-0">
       <div class="card-header fw-semibold">
@@ -107,7 +101,6 @@
       </div>
       <div class="card-body small row g-4">
 
-        <!-- Ojciec -->
         <div class="col-md-6">
           <div class="border rounded p-3 h-100">
             <div class="text-muted small fw-semibold text-uppercase mb-2">
@@ -134,7 +127,6 @@
           </div>
         </div>
 
-        <!-- Matka -->
         <div class="col-md-6">
           <div class="border rounded p-3 h-100">
             <div class="text-muted small fw-semibold text-uppercase mb-2">
@@ -175,7 +167,6 @@
   </div>
 
 
-  <!-- Karta: Uwagi kancelaryjne -->
   <div class="col-md-12">
     <div class="card shadow-sm border-0">
       <div class="card-header fw-semibold">
@@ -191,6 +182,54 @@
     </div>
   </div>
 
-</div>
+  <div class="col-md-12">
+    <div class="card shadow-sm border-0">
+      <div class="card-header fw-semibold">
+        Drukuj świadectwo
+      </div>
+      <div class="card-body">
+        <p class="card-text small text-muted">
+          Wybierz adnotację, która ma się pojawić w punkcie 7. (Uwagi) na wydruku.
+        </p>
+
+        <div class="mb-3">
+          <label for="print_purpose" class="form-label small">Cel wydruku:</label>
+          <select id="print_purpose" class="form-select form-select-sm" style="max-width: 350px;">
+            <option value="" selected>(Brak adnotacji)</option>
+            <option value="Do ślubu">Do ślubu</option>
+            <option value="Do bierzmowania">Do bierzmowania</option>
+            <option value="Święcenia kapłańskie">Święcenia kapłańskie</option>
+            <option value="Wystąpienie z kościoła">Wystąpienie z kościoła</option>
+            <option value="uwagi_wew">(Pokaż uwagi wewnętrzne z księgi)</option>
+          </select>
+        </div>
+
+        <button id="print_button" class="btn btn-primary btn-sm">
+          Generuj wydruk
+        </button>
+      </div>
+    </div>
+  </div>
+  </div> <script>
+document.getElementById('print_button').addEventListener('click', function() {
+  // 1. Pobierz wybraną wartość z listy
+  var cel = document.getElementById('print_purpose').value;
+
+  // 2. Ustal bazowy adres URL (taki sam jak w starym przycisku "Drukuj")
+  var baseUrl = "{% url 'chrzest_druk' chrzest.pk %}";
+  var finalUrl = baseUrl;
+
+  // 3. Dodaj wartość jako parametr URL
+  if (cel === 'uwagi_wew') {
+    finalUrl += '?cel=uwagi_wew';
+  } else if (cel) {
+    finalUrl += '?cel=' + encodeURIComponent(cel);
+  }
+  
+  // 4. Otwórz stronę wydruku w nowej karcie
+  window.open(finalUrl, '_blank');
+});
+</script>
+
 
 {% endblock %}

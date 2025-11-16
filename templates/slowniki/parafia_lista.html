@@ -29,7 +29,8 @@
         <tr>
           <th>Nazwa</th>
           <th>Miejscowość</th>
-           <th>Diecezja<th>
+          <th>Diecezja</th>
+          <th>Telefon</th>
           <th class="text-end">Akcje</th>
         </tr>
       </thead>
@@ -39,7 +40,7 @@
             <td>{{ p.nazwa }}</td>
             <td>{{ p.miejscowosc|default:"—" }}</td>
             <td>{{ p.diecezja|default:"—" }}</td>
-
+            <td>{{ p.telefon|default:"—" }}</td>
             
             
             <td class="text-end">
