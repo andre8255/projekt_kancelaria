@@ -57,6 +57,7 @@ urlpatterns = [
     path("panel/komunie/<int:pk>/druk/", views.KomuniaDrukView.as_view(), name="komunia_druk"),
     path("panel/bierzmowania/<int:pk>/druk/", views.BierzmowanieDrukView.as_view(), name="bierzmowanie_druk"),
     path("panel/malzenstwa/<int:pk>/druk/", views.MalzenstwoDrukView.as_view(), name="malzenstwo_druk"),
+    path("panel/namaszczenie/<int:pk>/druk/", views.NamaszczenieDrukView.as_view(), name="namaszczenie_druk"),
     path("panel/zgony/<int:pk>/druk/", views.ZgonDrukView.as_view(), name="zgon_druk"),
 ]
 

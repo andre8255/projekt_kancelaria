@@ -294,6 +294,8 @@ class MalzenstwoForm(BootstrapFormMixin, forms.ModelForm):
             "swiadek_urzedowy",
             "swiadek_urzedowy_opis_reczny",
 
+            "swiadek_a",
+            "swiadek_b",
             "uwagi_wew",
         ]
         widgets = {

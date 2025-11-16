@@ -38,6 +38,31 @@
   table.data-table td { vertical-align: top; padding: 6px 4px; }
   
   .block { margin-top: 1cm; }
+
+  /* --- Stopka (też niebieska) --- */
+  .footer-block { margin-top: 2cm; }
+  .footer-left { float: left; width: 40%; }
+  .footer-right { float: right; width: 55%; text-align: center; }
+  .footer-clear { clear: both; }
+  
+  .stamp {
+    font-size: 10pt;
+    color: #aaa;
+    border: 1px dashed #aaa;
+    width: 3.5cm;
+    height: 3.5cm;
+    line-height: 3.5cm;
+    text-align: center;
+    border-radius: 50%;
+    display: block;
+    margin: 0 auto;
+  }
+  .footer-left .la { font-size: 10pt; color: #555; }
+  .footer-right .la { font-size: 10pt; color: #555; }
+  .signature {
+    height: 1.5cm;
+    border-bottom: 1px dotted #000;
+    margin-bottom: 2px;}
 </style>
 
 <div class="doc">
@@ -137,21 +162,22 @@
     </tr>
   </table>
 
-  <div class="block">
-    <b>Potwierdzam zgodność z księgą bierzmowania</b>
+  <div class="footer-block">
+    <div class="footer-left">
+      <br>
+      <span style="font-weight: 700;">Miejsce i data:</span>
+      <span class="user-data">
+        {% if bierzmowanie.parafia %}{{ bierzmowanie.parafia.miejscowosc }}, {% endif %}{{ today|date:"d.m.Y" }}
+      </span>
+      
+    </div>
+    
+    <div class="footer-right">
+     
+      <div class="signature">&nbsp;</div>
+      Podpis Duszpasterza
+    </div>
+    <div class="footer-clear"></div>
   </div>
-
-  <div class="block">
-    <span class="field-label">Miejsce i data wystawienia</span>
-    <span class="user-data">
-      {% if bierzmowanie.miejsce_wydania %}{{ bierzmowanie.miejsce_wydania }}, {% endif %}{{ today|date:"Y-m-d" }}
-    </span>
-  </div>
-
-  <div style="float:right; width: 7cm; text-align:center; margin-top: 2cm;">
-    <span class="user-data" style="display:inline-block; width:100%; border-bottom: 1px dotted #000; height: 1.5em;">&nbsp;</span><br>
-    Podpis duszpasterza
-  </div>
-  <div style="clear:both;"></div>
 </div>
 {% endblock %}

@@ -18,27 +18,50 @@
     Dane małżeństwa
   </div>
   <div class="card-body">
-    <p><strong>Małżonek A:</strong>
+    <p><strong>Małżonek A: </strong>
       {{ malzenstwo.malzonek_a.nazwisko }} {{ malzenstwo.malzonek_a.imie_pierwsze }}
     </p>
 
-    <p><strong>Małżonek B:</strong>
+    <p><strong>Małżonek B: </strong>
       {{ malzenstwo.malzonek_b.nazwisko }} {{ malzenstwo.malzonek_b.imie_pierwsze }} z domu {{ malzenstwo.malzonek_b.nazwisko_rodowe }} 
     </p>
 
-    <p><strong>Rok / akt:</strong>
-      {{ malzenstwo.rok|default:"brak" }} / {{ malzenstwo.akt_nr|default:"–" }}
+    <p><strong>Rok/akt: </strong>
+      {{ malzenstwo.rok|default:"brak" }}/{{ malzenstwo.akt_nr|default:"–" }}
     </p>
 
     <p><strong>Parafia ślubu:</strong>
-      {{ malzenstwo.parafia|default:"brak" }}
+     {% if malzenstwo.parafia %}
+    
+    {{ malzenstwo.parafia.nazwa }}
+    
+    {% if malzenstwo.parafia.miejscowosc %}
+      - {{ malzenstwo.parafia.miejscowosc }}
+    {% endif %}
+
+  {% elif malzenstwo.parafia_nazwa_reczna %}
+    {{ malzenstwo.parafia_nazwa_reczna }}
+  {% else %}
+    <span class="text-muted">—</span>
+  {% endif %}
     </p>
 
-    <p><strong>Świadek urzędowy / asystujący:</strong>
-      {{ malzenstwo.swiadek_urzedowy|default:"brak" }}
+    <p><strong>Świadek urzędowy/asystujący: </strong>
+      {% if malzenstwo.swiadek_urzedowy %}
+        {{ malzenstwo.swiadek_urzedowy }}
+      {% elif malzenstwo.swiadek_urzedowy_opis_reczny %}
+        {{ malzenstwo.swiadek_urzedowy_opis_reczny }}
+      {% else %}
+        <span class="text-muted">—</span>
+      {% endif %}
     </p>
 
-    <p><strong>Uwagi wewnętrzne:</strong><br>{{ malzenstwo.uwagi_wew|default:"—" }}</p>
+    <p><strong>Świadkowie:</strong>
+       {{ malzenstwo.swiadek_a|default:"—" }} / 
+      {{ malzenstwo.swiadek_b|default:"—" }}
+    </p>
+
+    <p><strong>Uwagi wewnętrzne: </strong><br>{{ malzenstwo.uwagi_wew|default:"—" }}</p>
   </div>
 </div>
 

@@ -370,6 +370,24 @@ class Malzenstwo(models.Model):
         help_text="Kapłan/diakon, który asystował przy zawarciu małżeństwa."
     )
 
+    # --- DODAJ TE DWA POLA ---
+    swiadek_a = models.CharField(
+        "Świadek A (np. małżonka)",
+        max_length=200,
+        blank=True
+    )
+    swiadek_b = models.CharField(
+        "Świadek B (np. małżonka)",
+        max_length=200,
+        blank=True
+    )
+    # --- KONIEC NOWYCH PÓL ---
+
+    uwagi_wew = models.TextField(
+        "Uwagi (wewnętrzne)",
+        blank=True
+    )
+
     uwagi_wew = models.TextField(
         "Uwagi (wewnętrzne)",
         blank=True

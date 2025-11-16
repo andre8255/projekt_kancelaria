@@ -1,0 +1,116 @@
+{% extends "base_print.html" %}
+{% block title %}Pamiątka Odwiedzin Chorych – {{ namaszczenie.osoba }}{% endblock %}
+
+{% block content %}
+<style>
+  @page { size: A4; margin: 15mm; }
+
+  .doc {
+    /* Używamy węższego layoutu, bo to pamiątka */
+    max-width: 600px; 
+    margin: 2cm auto; /* Wyśrodkowanie na stronie */
+    color: #063267; /* Niebieski kolor tekstu (jak przy chrzcie) */
+    font-family: "Times New Roman", serif;
+    font-size: 14pt; /* Nieco większa czcionka dla czytelności */
+    line-height: 1.6;
+  }
+
+  h1 {
+    text-align: center;
+    margin-bottom: 1cm;
+    font-size: 1.6em;
+    font-weight: 700;
+  }
+  
+  /* Linie na dane (Imię, Miejsce) */
+  .data-line {
+    font-weight: 700;
+    color: #000; /* Wypełnione dane na czarno */
+    font-size: 1.2em;
+    border-bottom: 1px dotted #000;
+    min-height: 1.5em; /* Odstęp, nawet jeśli puste */
+    text-align: center;
+    margin-bottom: 0.5cm;
+  }
+  
+  .section-title {
+    font-weight: 700;
+    margin-top: 1.5cm;
+    margin-bottom: 0.5cm;
+    font-size: 1.1em;
+  }
+
+  /* Style dla "checkboxów" */
+  .check-item {
+    font-size: 1.2em;
+    font-weight: 700;
+    color: #000; /* Tekst sakramentów na czarno */
+    margin-bottom: 0.5cm;
+  }
+  .check-box {
+    font-size: 1.5em; /* Powiększa symbol ☐/☑ */
+    vertical-align: middle;
+    margin-right: 10px;
+    color: #000;
+  }
+
+  /* Stopka */
+  .footer {
+    margin-top: 2cm;
+  }
+  .footer-label {
+    font-size: 1.1em;
+    color: #063267; /* Etykieta niebieska */
+  }
+  .footer-line {
+    font-weight: 700;
+    color: #000; /* Podpis czarny */
+    font-size: 1.2em;
+    border-bottom: 1px dotted #000;
+    min-height: 1.5em;
+  }
+</style>
+
+<div class="doc">
+  <h1>PAMIĄTKA ODWIEDZIN CHORYCH</h1>
+  
+  <div style="font-size: 1.1em; text-align: center;">dla</div>
+  
+  <div class="data-line">
+    {{ namaszczenie.osoba }}
+  </div>
+
+  <div class="section-title">PRZYJĘTE SAKRAMENTY ŚWIĘTE:</div>
+  
+  <div class="check-item">
+    {% if namaszczenie.spowiedz %}
+      <span class="check-box">☑</span> SPOWIEDŹ ŚWIĘTA
+    {% else %}
+      <span class="check-box">☐</span> SPOWIEDŹ ŚWIĘTA
+    {% endif %}
+  </div>
+  
+  <div class="check-item">
+    {% if namaszczenie.komunia %}
+      <span class="check-box">☑</span> KOMUNIA ŚWIĘTA
+    {% else %}
+      <span class="check-box">☐</span> KOMUNIA ŚWIĘTA
+    {% endif %}
+  </div>
+  
+  <div class="check-item">
+    {% if namaszczenie.namaszczenie %}
+      <span class="check-box">☑</span> OSTATNIE NAMASZCZENIE
+    {% else %}
+      <span class="check-box">☐</span> OSTATNIE NAMASZCZENIE
+    {% endif %}
+  </div>
+  
+  <div class="footer">
+    <div class="footer-label">Data: {{ namaszczenie.data|date:"d.m.Y"|default:"..........................." }}r.</div>
+    
+    <div class="footer-label" style="margin-top: 1cm;">Podpis Księdza:...................................................</div>
+  </div>
+  
+</div>
+{% endblock %}

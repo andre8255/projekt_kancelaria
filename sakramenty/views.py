@@ -977,10 +977,55 @@ class BierzmowanieDrukView(LoginRequiredMixin, DetailView):
     
 class MalzenstwoDrukView(LoginRequiredMixin, DetailView):
     model = Malzenstwo
-    template_name = "sakramenty/druki/malzenstwo_druk.html"
+    template_name = "sakramenty/druki/malzenstwo_druk.html" # Upewnij się, że ścieżka jest poprawna
     context_object_name = "malzenstwo"
+    
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        malzenstwo = self.object # Pobieramy obiekt małżeństwa
+        
+        # --- NOWA LOGIKA ---
+        # Pobieramy rekord chrztu dla małżonka A
+        chrzest_a = Chrzest.objects.filter(ochrzczony=malzenstwo.malzonek_a).first()
+        # Pobieramy rekord chrztu dla małżonka B
+        chrzest_b = Chrzest.objects.filter(ochrzczony=malzenstwo.malzonek_b).first()
+        
+        ctx["chrzest_a"] = chrzest_a
+        ctx["chrzest_b"] = chrzest_b
+        # --- KONIEC NOWEJ LOGIKI ---
+        
+        ctx["today"] = timezone.localdate()
+        ctx["http_request"] = self.request
+        
+        return ctx
 
 class ZgonDrukView(LoginRequiredMixin, DetailView):
     model = Zgon
-    template_name = "sakramenty/druki/zgon_druk.html"
+    template_name = "sakramenty/druki/zgon_druk.html" # Popraw ścieżkę, jeśli trzeba
     context_object_name = "zgon"
+    
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        zgon = self.object # Pobieramy obiekt zgonu
+        
+        # --- POTRZEBNA LOGIKA ---
+        # 1. Pobieramy rekord chrztu dla zmarłej osoby, aby mieć dane rodziców
+        chrzest = Chrzest.objects.filter(ochrzczony=zgon.osoba).first()
+        ctx["chrzest"] = chrzest
+        
+        # 2. Przekazujemy datę i request (dla spójności)
+        ctx["today"] = timezone.localdate()
+        ctx["http_request"] = self.request
+        
+        return ctx
+    
+class NamaszczenieDrukView(LoginRequiredMixin, DetailView):
+    model = NamaszczenieChorych
+    # Zmień ścieżkę, jeśli Twój plik jest w innym miejscu
+    template_name = "sakramenty/druki/namaszczenie_druk.html" 
+    context_object_name = "namaszczenie"
+    
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["today"] = timezone.localdate()
+        return ctx
