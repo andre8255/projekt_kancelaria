@@ -1,20 +1,6 @@
 # osoby/models.py
 from django.db import models
 from django.urls import reverse
-from slowniki.models import Wyznanie
-
-class Wyznanie(models.Model):
-    nazwa = models.CharField("Wyznanie", max_length=120, unique=True)
-    skrot = models.CharField("Skrót", max_length=40, blank=True)
-
-    class Meta:
-        verbose_name = "Wyznanie"
-        verbose_name_plural = "Wyznania"
-        ordering = ["nazwa"]
-
-    def __str__(self):
-        return self.nazwa
-
 
 class Osoba(models.Model):
     nazwisko = models.CharField(max_length=120)
