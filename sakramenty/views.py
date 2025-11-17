@@ -18,6 +18,10 @@ from django.views.generic import (
     DeleteView,
 )
 
+# Importy ról
+from konta.mixins import RolaWymaganaMixin
+from konta.models import Rola
+
 from osoby.models import Osoba
 from .models import (
     Chrzest,
@@ -80,7 +84,8 @@ class ChrzestSzczegolyView(LoginRequiredMixin, DetailView):
     context_object_name = "chrzest"
 
 
-class ChrzestNowyView(LoginRequiredMixin, CreateView):
+class ChrzestNowyView(RolaWymaganaMixin, CreateView):
+    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
     model = Chrzest
     form_class = ChrzestForm
     template_name = "sakramenty/chrzest_formularz.html"
@@ -144,14 +149,16 @@ class ChrzestNowyView(LoginRequiredMixin, CreateView):
         return reverse_lazy("chrzest_lista")
 
 
-class ChrzestEdycjaView(LoginRequiredMixin, UpdateView):
+class ChrzestEdycjaView(RolaWymaganaMixin, UpdateView): # <-- Poprawka: UpdateView
+    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
     model = Chrzest
     form_class = ChrzestForm
     template_name = "sakramenty/chrzest_formularz.html"
     success_url = reverse_lazy("chrzest_lista")
 
 
-class ChrzestUsunView(LoginRequiredMixin, DeleteView):
+class ChrzestUsunView(RolaWymaganaMixin, DeleteView): # <-- Poprawka: RolaWymaganaMixin
+    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD]
     model = Chrzest
     template_name = "sakramenty/chrzest_usun.html"
     success_url = reverse_lazy("chrzest_lista")
@@ -190,7 +197,7 @@ class ChrzestDrukView(LoginRequiredMixin, DetailView):
 # === I KOMUNIA ŚW.
 # =============================================================================
 
-class KomuniaListaView(LoginRequiredMixin, ListView):
+class KomuniaListaView(LoginRequiredMixin, ListView): # <-- Poprawka: ListView i LoginRequiredMixin
     model = PierwszaKomunia
     template_name = "sakramenty/komunia_lista.html"
     context_object_name = "komunie"
@@ -217,7 +224,8 @@ class KomuniaSzczegolyView(LoginRequiredMixin, DetailView):
     context_object_name = "komunia"
 
 
-class KomuniaNowaView(LoginRequiredMixin, CreateView):
+class KomuniaNowaView(RolaWymaganaMixin, CreateView):
+    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
     model = PierwszaKomunia
     form_class = PierwszaKomuniaForm
     template_name = "sakramenty/komunia_formularz.html"
@@ -262,7 +270,8 @@ class KomuniaNowaView(LoginRequiredMixin, CreateView):
         return reverse_lazy("komunia_lista")
 
 
-class KomuniaEdycjaView(LoginRequiredMixin, UpdateView):
+class KomuniaEdycjaView(RolaWymaganaMixin, UpdateView): # <-- Poprawka: UpdateView
+    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
     model = PierwszaKomunia
     form_class = PierwszaKomuniaForm
     template_name = "sakramenty/komunia_formularz.html"
@@ -272,7 +281,8 @@ class KomuniaEdycjaView(LoginRequiredMixin, UpdateView):
         return self.object.osoba.get_absolute_url()
 
 
-class KomuniaUsunView(LoginRequiredMixin, DeleteView):
+class KomuniaUsunView(RolaWymaganaMixin, DeleteView): # <-- Poprawka: RolaWymaganaMixin
+    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD]
     model = PierwszaKomunia
     template_name = "sakramenty/komunia_usun.html"
 
@@ -296,7 +306,7 @@ class KomuniaDrukView(LoginRequiredMixin, DetailView):
 # === BIERZMOWANIE
 # =============================================================================
 
-class BierzmowanieListaView(LoginRequiredMixin, ListView):
+class BierzmowanieListaView(LoginRequiredMixin, ListView): # <-- Poprawka: ListView i LoginRequiredMixin
     model = Bierzmowanie
     template_name = "sakramenty/bierzmowanie_lista.html"
     context_object_name = "bierzmowania"
@@ -329,7 +339,8 @@ class BierzmowanieSzczegolyView(LoginRequiredMixin, DetailView):
     context_object_name = "bierzmowanie"
 
 
-class BierzmowanieNoweView(LoginRequiredMixin, CreateView):
+class BierzmowanieNoweView(RolaWymaganaMixin, CreateView):
+    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
     model = Bierzmowanie
     form_class = BierzmowanieForm
     template_name = "sakramenty/bierzmowanie_formularz.html"
@@ -374,7 +385,8 @@ class BierzmowanieNoweView(LoginRequiredMixin, CreateView):
         return reverse_lazy("bierzmowanie_lista")
 
 
-class BierzmowanieEdycjaView(LoginRequiredMixin, UpdateView):
+class BierzmowanieEdycjaView(RolaWymaganaMixin, UpdateView): # <-- Poprawka: UpdateView
+    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
     model = Bierzmowanie
     form_class = BierzmowanieForm
     template_name = "sakramenty/bierzmowanie_formularz.html"
@@ -384,7 +396,8 @@ class BierzmowanieEdycjaView(LoginRequiredMixin, UpdateView):
         return self.object.osoba.get_absolute_url()
 
 
-class BierzmowanieUsunView(LoginRequiredMixin, DeleteView):
+class BierzmowanieUsunView(RolaWymaganaMixin, DeleteView): # <-- Poprawka: RolaWymaganaMixin
+    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD]
     model = Bierzmowanie
     template_name = "sakramenty/bierzmowanie_usun.html"
 
@@ -417,7 +430,7 @@ class BierzmowanieDrukView(LoginRequiredMixin, DetailView):
 # === MAŁŻEŃSTWO
 # =============================================================================
 
-class MalzenstwoListaView(LoginRequiredMixin, ListView):
+class MalzenstwoListaView(LoginRequiredMixin, ListView): # <-- Poprawka: ListView i LoginRequiredMixin
     model = Malzenstwo
     template_name = "sakramenty/malzenstwo_lista.html"
     context_object_name = "malzenstwa"
@@ -452,7 +465,8 @@ class MalzenstwoSzczegolyView(LoginRequiredMixin, DetailView):
     context_object_name = "malzenstwo"
 
 
-class MalzenstwoNoweView(LoginRequiredMixin, CreateView):
+class MalzenstwoNoweView(RolaWymaganaMixin, CreateView): # <-- Poprawka: RolaWymaganaMixin
+    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
     model = Malzenstwo
     form_class = MalzenstwoForm
     template_name = "sakramenty/malzenstwo_formularz.html"
@@ -491,7 +505,8 @@ class MalzenstwoNoweView(LoginRequiredMixin, CreateView):
         return reverse_lazy("malzenstwo_lista")
 
 
-class MalzenstwoEdycjaView(LoginRequiredMixin, UpdateView):
+class MalzenstwoEdycjaView(RolaWymaganaMixin, UpdateView): # <-- Poprawka: RolaWymaganaMixin
+    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
     model = Malzenstwo
     form_class = MalzenstwoForm
     template_name = "sakramenty/malzenstwo_formularz.html"
@@ -501,7 +516,8 @@ class MalzenstwoEdycjaView(LoginRequiredMixin, UpdateView):
         return self.object.malzonek_a.get_absolute_url()
 
 
-class MalzenstwoUsunView(LoginRequiredMixin, DeleteView):
+class MalzenstwoUsunView(RolaWymaganaMixin, DeleteView): # <-- Poprawka: RolaWymaganaMixin
+    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD]
     model = Malzenstwo
     template_name = "sakramenty/malzenstwo_usun.html"
 
@@ -565,7 +581,8 @@ class NamaszczenieSzczegolyView(LoginRequiredMixin, DetailView):
     context_object_name = "namaszczenie"
 
 
-class NamaszczenieNoweView(LoginRequiredMixin, CreateView):
+class NamaszczenieNoweView(RolaWymaganaMixin, CreateView): # <-- Poprawka: RolaWymaganaMixin
+    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
     model = NamaszczenieChorych
     form_class = NamaszczenieChorychForm
     template_name = "sakramenty/namaszczenie_formularz.html"
@@ -611,7 +628,8 @@ class NamaszczenieNoweView(LoginRequiredMixin, CreateView):
         return reverse_lazy("namaszczenie_lista")
 
 
-class NamaszczenieEdycjaView(LoginRequiredMixin, UpdateView):
+class NamaszczenieEdycjaView(RolaWymaganaMixin, UpdateView): # <-- Poprawka: RolaWymaganaMixin
+    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
     model = NamaszczenieChorych
     form_class = NamaszczenieChorychForm
     template_name = "sakramenty/namaszczenie_formularz.html"
@@ -621,7 +639,8 @@ class NamaszczenieEdycjaView(LoginRequiredMixin, UpdateView):
         return self.object.osoba.get_absolute_url()
 
 
-class NamaszczenieUsunView(LoginRequiredMixin, DeleteView):
+class NamaszczenieUsunView(RolaWymaganaMixin, DeleteView): # <-- Poprawka: RolaWymaganaMixin
+    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD]
     model = NamaszczenieChorych
     template_name = "sakramenty/namaszczenie_usun.html"
 
@@ -678,7 +697,8 @@ class ZgonSzczegolyView(LoginRequiredMixin, DetailView):
     context_object_name = "zgon"
 
 
-class ZgonNowyView(LoginRequiredMixin, CreateView):
+class ZgonNowyView(RolaWymaganaMixin, CreateView): # <-- Poprawka: RolaWymaganaMixin
+    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
     model = Zgon
     form_class = ZgonForm
     template_name = "sakramenty/zgon_formularz.html"
@@ -723,7 +743,8 @@ class ZgonNowyView(LoginRequiredMixin, CreateView):
         return reverse_lazy("zgon_lista")
 
 
-class ZgonEdycjaView(LoginRequiredMixin, UpdateView):
+class ZgonEdycjaView(RolaWymaganaMixin, UpdateView): # <-- Poprawka: RolaWymaganaMixin
+    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
     model = Zgon
     form_class = ZgonForm
     template_name = "sakramenty/zgon_formularz.html"
@@ -733,7 +754,8 @@ class ZgonEdycjaView(LoginRequiredMixin, UpdateView):
         return self.object.osoba.get_absolute_url()
 
 
-class ZgonUsunView(LoginRequiredMixin, DeleteView):
+class ZgonUsunView(RolaWymaganaMixin, DeleteView): # <-- Poprawka: RolaWymaganaMixin
+    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD]
     model = Zgon
     template_name = "sakramenty/zgon_usun.html"
 

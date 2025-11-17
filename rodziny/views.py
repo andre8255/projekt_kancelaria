@@ -1,4 +1,4 @@
-#rodziny/forms.py
+#rodziny/views.py
 from django.views import View
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -9,6 +9,10 @@ from django.urls import reverse_lazy
 from django.views.generic import (
     ListView, DetailView, CreateView, UpdateView, DeleteView, FormView
 )
+
+# Importy ról
+from konta.mixins import RolaWymaganaMixin
+from konta.models import Rola
 
 from .models import Rodzina, CzlonkostwoRodziny
 from .forms import RodzinaForm, DodajCzlonkaForm
@@ -41,10 +45,6 @@ class RodzinaListaView(LoginRequiredMixin, ListView):
                     Q(miejscowosc__icontains=slowo)
                 )
         return qs
-
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import DetailView
-from .models import Rodzina, CzlonkostwoRodziny
 
 class RodzinaSzczegolyView(LoginRequiredMixin, DetailView):
     model = Rodzina
@@ -109,21 +109,24 @@ class RodzinaSzczegolyView(LoginRequiredMixin, DetailView):
         return ctx
 
 
-class RodzinaNowaView(LoginRequiredMixin, CreateView):
+class RodzinaNowaView(RolaWymaganaMixin, CreateView):
+    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
     model = Rodzina
     form_class = RodzinaForm
     template_name = "rodziny/formularz.html"
     success_url = reverse_lazy("rodzina_lista")
 
 
-class RodzinaEdycjaView(LoginRequiredMixin, UpdateView):
+class RodzinaEdycjaView(RolaWymaganaMixin, UpdateView):
+    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
     model = Rodzina
     form_class = RodzinaForm
     template_name = "rodziny/formularz.html"
     success_url = reverse_lazy("rodzina_lista")
 
 
-class RodzinaUsunView(LoginRequiredMixin, DeleteView):
+class RodzinaUsunView(RolaWymaganaMixin, DeleteView):
+    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD]
     model = Rodzina
     template_name = "rodziny/potwierdz_usuniecie.html"
     success_url = reverse_lazy("rodzina_lista")
@@ -142,7 +145,8 @@ class RodzinaUsunView(LoginRequiredMixin, DeleteView):
         messages.success(request, "Rodzina została usunięta.")
         return super().delete(request, *args, **kwargs)
 
-class DodajCzlonkaView(LoginRequiredMixin, FormView):
+class DodajCzlonkaView(RolaWymaganaMixin, FormView):
+    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
     template_name = "rodziny/dodaj_czlonka.html"
     form_class = DodajCzlonkaForm
 
@@ -162,7 +166,8 @@ class DodajCzlonkaView(LoginRequiredMixin, FormView):
         ctx["rodzina"] = self.rodzina
         return ctx
     
-class UsunCzlonkaZRodzinyView(LoginRequiredMixin, View):
+class UsunCzlonkaZRodzinyView(RolaWymaganaMixin, View):
+    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD]
     template_name = "rodziny/usun_czlonka.html"
 
     def dispatch(self, request, *args, **kwargs):
@@ -191,7 +196,9 @@ class UsunCzlonkaZRodzinyView(LoginRequiredMixin, View):
             f"Osoba {osoba_txt} została usunięta z tej rodziny."
         )
         return redirect(self.rodzina.get_absolute_url())
-class CzlonkostwoUsunView(LoginRequiredMixin, DeleteView):
+
+class CzlonkostwoUsunView(RolaWymaganaMixin, DeleteView):
+    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD]
     model = CzlonkostwoRodziny
     template_name = "rodziny/czlonek_usun.html"
     context_object_name = "czlonkostwo"

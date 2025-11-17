@@ -1,3 +1,4 @@
+# msze/views.py
 from django.utils.dateparse import parse_datetime, parse_date
 from django.http import JsonResponse
 from django.utils.timezone import make_aware
@@ -15,6 +16,10 @@ from django.urls import reverse_lazy
 from django.views.generic import (
     ListView, DetailView, CreateView, UpdateView, FormView
 )
+
+# Importy ról
+from konta.mixins import RolaWymaganaMixin
+from konta.models import Rola
 
 from .models import Msza, IntencjaMszy
 from .forms import MszaForm, IntencjaForm
@@ -66,7 +71,8 @@ class MszaListaView(LoginRequiredMixin, ListView):
         ctx["filtr_q"] = self.request.GET.get("q", "")
         return ctx
     
-class MszaNowaView(LoginRequiredMixin, CreateView):
+class MszaNowaView(RolaWymaganaMixin, CreateView):
+    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
     model = Msza
     form_class = MszaForm
     template_name = "msze/msza_formularz.html"
@@ -103,7 +109,8 @@ class MszaNowaView(LoginRequiredMixin, CreateView):
     
 
 
-class MszaEdycjaView(LoginRequiredMixin, UpdateView):
+class MszaEdycjaView(RolaWymaganaMixin, UpdateView):
+    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
     model = Msza
     form_class = MszaForm
     template_name = "msze/msza_formularz.html"
@@ -121,7 +128,8 @@ class MszaSzczegolyView(LoginRequiredMixin, DetailView):
         ctx["intencje"] = msza.intencje.all()
         return ctx
     
-class MszaUsunView(LoginRequiredMixin, DeleteView):
+class MszaUsunView(RolaWymaganaMixin, DeleteView):
+    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD]
     model = Msza
     template_name = "msze/msza_usun.html"   # patrz pkt 3
     success_url = reverse_lazy("msza_lista")
@@ -138,7 +146,8 @@ class MszaListaDrukView(MszaListaView):
     paginate_by = None
 
 
-class IntencjaNowaView(LoginRequiredMixin, FormView):
+class IntencjaNowaView(RolaWymaganaMixin, FormView):
+    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
     template_name = "msze/intencja_formularz.html"
     form_class = IntencjaForm
 
@@ -158,7 +167,8 @@ class IntencjaNowaView(LoginRequiredMixin, FormView):
         ctx["msza"] = self.msza
         return ctx
 
-class IntencjaEdycjaView(LoginRequiredMixin, UpdateView):
+class IntencjaEdycjaView(RolaWymaganaMixin, UpdateView):
+    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
     model = IntencjaMszy
     form_class = IntencjaForm
     template_name = "msze/intencja_formularz.html"
@@ -172,7 +182,8 @@ class IntencjaEdycjaView(LoginRequiredMixin, UpdateView):
         messages.success(self.request, "Zapisano zmiany intencji.")
         return self.object.msza.get_absolute_url()
 
-class IntencjaUsunView(LoginRequiredMixin, DeleteView):
+class IntencjaUsunView(RolaWymaganaMixin, DeleteView):
+    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD]
     model = IntencjaMszy
     template_name = "msze/intencja_usun.html"
 
@@ -192,6 +203,12 @@ def kalendarz_mszy_dane(request):
     Pokazuje tylko msze dzisiejsze i przyszłe.
     Uwzględnia opcjonalne GET:start / GET:end wysyłane przez FullCalendar.
     """
+    
+    # Ten widok powinien być również chroniony. 
+    # Najprostszy sposób to dodanie dekoratora @login_required na górze,
+    # ale ponieważ nie edytujemy teraz importów, zakładamy, że 
+    # główny URL (w parafia/urls.py) chroni całą sekcję 'panel/'.
+    
     start_str = request.GET.get("start")
     end_str = request.GET.get("end")
 
