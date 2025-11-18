@@ -19,10 +19,7 @@
     {% endif %}
   </div>
 
-
-
-<div class="d-flex gap-2">
-
+  <div class="d-flex gap-2">
       {% if osoba %}
         <a href="{% url 'osoba_szczegoly' osoba.pk %}" 
         class="btn btn-outline-secondary btn-sm">
@@ -34,15 +31,11 @@
         Powrót
       </a>
       {% endif %}
-    
-
-
   </div>
+</div>
 
-
-
-
-<form method="post" class="card shadow-sm">
+{# --- WAŻNE: Dodano enctype="multipart/form-data" --- #}
+<form method="post" enctype="multipart/form-data" class="card shadow-sm">
   {% csrf_token %}
 
   <div class="card-body small">
@@ -51,69 +44,59 @@
       <div class="alert alert-danger small">{{ form.non_field_errors }}</div>
     {% endif %}
 
-    {# --- osoba --- #}
     {# --- OCHRZCZONY/A --- #}
+    <div class="row g-3 mb-3">
+     <div class="col-md-4">
+      <div class="d-flex justify-content-between align-items-start">
+        <label class="form-label small fw-semibold text-muted mb-0">
+          {{ form.ochrzczony.label }}
+        </label>
 
+        {% if not osoba %}
+          <a href="{% url 'osoba_nowa' %}" target="_blank"
+             class="btn btn-outline-primary btn-sm ms-2">
+            + Nowa osoba
+          </a>
+        {% endif %}
+      </div>
 
- <div class="row g-3 mb-3">
- <div class="col-md-4">
-  <div class="d-flex justify-content-between align-items-start">
-    <label class="form-label small fw-semibold text-muted mb-0">
-      {{ form.ochrzczony.label }}
-    </label>
+      {% if osoba %}
+        <input class="form-control" value="{{ osoba.nazwisko }} {{ osoba.imie_pierwsze }}" readonly>
+        <input type="hidden" name="{{ form.ochrzczony.html_name }}" value="{{ osoba.pk }}">
+      {% else %}
+        {{ form.ochrzczony }}
+      {% endif %}
 
-    {% if not osoba %}
-      <a href="{% url 'osoba_nowa' %}" target="_blank"
-         class="btn btn-outline-primary btn-sm ms-2">
-        + Nowa osoba
-      </a>
-    {% endif %}
-  </div>
-
-  {% if osoba %}
-    <input class="form-control" value="{{ osoba.nazwisko }} {{ osoba.imie_pierwsze }}" readonly>
-    <input type="hidden" name="{{ form.ochrzczony.html_name }}" value="{{ osoba.pk }}">
-  {% else %}
-    {{ form.ochrzczony }}
-  {% endif %}
-
-  {% if form.ochrzczony.errors %}
-    <div class="text-danger small">{{ form.ochrzczony.errors }}</div>
-  {% elif not osoba %}
-    <div class="form-text small">
-      Jeśli osoby nie ma na liście – kliknij „+ Nowa osoba”, dodaj i odśwież tę stronę.
+      {% if form.ochrzczony.errors %}
+        <div class="text-danger small">{{ form.ochrzczony.errors }}</div>
+      {% elif not osoba %}
+        <div class="form-text small">
+          Jeśli osoby nie ma na liście – kliknij „+ Nowa osoba”, dodaj i odśwież tę stronę.
+        </div>
+      {% endif %}
     </div>
-  {% endif %}
-</div>
 
- 
-
-    {# --- ROK + NR AKTU w jednym wierszu --- #}
-<div class="mb-4">
-<div class="row g-3 mb-3">
+    {# --- ROK + NR AKTU --- #}
     <div class="col-md-2">
         <label class="form-label small fw-semibold text-muted">{{ form.rok.label }}</label>
         {{ form.rok }}
         {% if form.rok.errors %}<div class="text-danger small">{{ form.rok.errors }}</div>{% endif %}
         {% if form.rok.help_text %}<div class="form-text small">{{ form.rok.help_text }}</div>{% endif %}
-      </div>
-      <div class="col-md-2">
+    </div>
+    <div class="col-md-2">
         <label class="form-label small fw-semibold text-muted">{{ form.akt_nr.label }}</label>
         {{ form.akt_nr }}
         {% if form.akt_nr.errors %}<div class="text-danger small">{{ form.akt_nr.errors }}</div>{% endif %}
         {% if form.akt_nr.help_text %}<div class="form-text small">{{ form.akt_nr.help_text }}</div>{% endif %}
-      </div>
     </div>
-</div>
-    <hr class="my-3">
-</div>
-    {# --- DANE O URODZENIU --- #}
+    </div>
 
-<div class="mb-4">
-<div class="row g-3 mb-3">
+    <hr class="my-3">
+
+    {# --- DANE O URODZENIU --- #}
+    <div class="row g-3 mb-3">
       <div class="col-md-4">
         <label class="form-label small fw-semibold text-muted">{{ form.data_urodzenia.label }}</label>
-
         {% if osoba and osoba.data_urodzenia %}
           <input class="form-control" value="{{ osoba.data_urodzenia }}" readonly>
           <input type="hidden" name="{{ form.data_urodzenia.html_name }}" value="{{ osoba.data_urodzenia|date:'Y-m-d' }}">
@@ -121,7 +104,6 @@
         {% else %}
           {{ form.data_urodzenia }}
         {% endif %}
-
         {% if form.data_urodzenia.errors %}
           <div class="text-danger small">{{ form.data_urodzenia.errors }}</div>
         {% endif %}
@@ -135,14 +117,10 @@
         {% endif %}
       </div>
     </div>
-</div> 
-    {# UWAGA: NIE renderujemy form.rok_urodzenia (pole „sam rok”) #}
 
     <hr class="my-3">
 
     {# --- DANE O CHRZCIE --- #}
-
-
     <div class="row g-3 mb-3">
       <div class="col-md-4">
         <label class="form-label small fw-semibold text-muted">{{ form.data_chrztu.label }}</label>
@@ -158,13 +136,10 @@
       </div>
 
       <div class="col-md-4">
-      
         <div class="d-flex justify-content-between align-items-center">
-          
           <label class="form-label small fw-semibold text-muted mb-0">
             {{ form.parafia.label }}
           </label>
-          
           <a href="{% url 'slownik_parafia_nowa' %}"
              target="_blank"
              class="btn btn-outline-primary btn-sm">
@@ -177,89 +152,73 @@
       </div>
     </div>
 
-    {# jeśli masz też pole rok_chrztu – zostawiamy jak było (opcjonalnie) #}
     {% if form.rok_chrztu %}
-      <div class="col-md-2">
-        <label class="form-label small fw-semibold text-muted">{{ form.rok_chrztu.label }}</label>
-        {{ form.rok_chrztu }}
-        {% if form.rok_chrztu.errors %}<div class="text-danger small">{{ form.rok_chrztu.errors }}</div>{% endif %}
-        {% if form.rok_chrztu.help_text %}<div class="form-text small">{{ form.rok_chrztu.help_text }}</div>{% endif %}
+      <div class="row g-3 mb-3">
+        <div class="col-md-2">
+          <label class="form-label small fw-semibold text-muted">{{ form.rok_chrztu.label }}</label>
+          {{ form.rok_chrztu }}
+          {% if form.rok_chrztu.errors %}<div class="text-danger small">{{ form.rok_chrztu.errors }}</div>{% endif %}
+        </div>
       </div>
     {% endif %}
 
     <hr class="my-3">
 
-    {# --- RODZICE, UWAGI itd. – resztę zostawiamy bez zmian #}
-    {% if form.ojciec %}
+    {# --- RODZICE --- #}
     <div class="row g-3 mb-3">
       <div class="col-md-4">
         <label class="form-label small fw-semibold text-muted">{{ form.ojciec.label }}</label>
         {{ form.ojciec }}
         {% if form.ojciec.errors %}<div class="text-danger small">{{ form.ojciec.errors }}</div>{% endif %}
       </div>
-    {% endif %}
-
-    {% if form.ojciec_wyznanie %}
       <div class="col-md-4">
         <label class="form-label small fw-semibold text-muted">{{ form.ojciec_wyznanie.label }}</label>
         {{ form.ojciec_wyznanie }}
       </div>
-      
-    {% endif %}
-   
+    </div>
 
-
-
-    {% if form.matka %}
-   <div class="row g-3 mb-3">
+    <div class="row g-3 mb-3">
       <div class="col-md-4">
         <label class="form-label small fw-semibold text-muted">{{ form.matka.label }}</label>
         {{ form.matka }}
       </div>
-    {% endif %}
-
-    {% if form.nazwisko_matki_rodowe %}
       <div class="col-md-4">
         <label class="form-label small fw-semibold text-muted">{{ form.nazwisko_matki_rodowe.label }}</label>
         {{ form.nazwisko_matki_rodowe }}
       </div>
-    {% endif %}
-
-    {% if form.matka_wyznanie %}
       <div class="col-md-4">
         <label class="form-label small fw-semibold text-muted">{{ form.matka_wyznanie.label }}</label>
         {{ form.matka_wyznanie }}
       </div>
-    {% endif %}
     </div>
 
+    {# --- UWAGI I SKAN --- #}
+    <div class="mb-3">
+      <label class="form-label small fw-semibold text-muted">{{ form.uwagi_wew.label }}</label>
+      {{ form.uwagi_wew }}
+    </div>
 
-    {% if form.uwagi_wew %}
-      <div class="mb-3">
-        <label class="form-label small fw-semibold text-muted">{{ form.uwagi_wew.label }}</label>
-        {{ form.uwagi_wew }}
-      </div>
-    {% endif %}
+    {# --- WAŻNE: Dodano pole skanu --- #}
+    <div class="mb-3">
+      <label class="form-label small fw-semibold text-muted">{{ form.skan_aktu.label }}</label>
+      {{ form.skan_aktu }}
+      {% if form.skan_aktu.errors %}
+        <div class="text-danger small">{{ form.skan_aktu.errors }}</div>
+      {% endif %}
+      {% if form.skan_aktu.help_text %}
+        <div class="form-text small">{{ form.skan_aktu.help_text }}</div>
+      {% endif %}
+    </div>
+
   </div>
 
   <div class="mt-4 d-flex gap-2">
-
-    <button class="btn btn-primary btn-sm">
-      Zapisz
-    </button>
-
-      {% if osoba %}
-        <a href="{% url 'osoba_szczegoly' osoba.pk %}" 
-        class="btn btn-outline-secondary btn-sm">
-        Anuluj
-      </a>
-      {% else %}
-        <a href="{% url 'chrzest_lista' %}" 
-        class="btn btn-outline-secondary btn-sm">
-        Anuluj
-      </a>
-      {% endif %}
-    
+    <button class="btn btn-primary btn-sm">Zapisz</button>
+    {% if osoba %}
+      <a href="{% url 'osoba_szczegoly' osoba.pk %}" class="btn btn-outline-secondary btn-sm">Anuluj</a>
+    {% else %}
+      <a href="{% url 'chrzest_lista' %}" class="btn btn-outline-secondary btn-sm">Anuluj</a>
+    {% endif %}
   </div>
 </form>
 

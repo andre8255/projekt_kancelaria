@@ -37,7 +37,7 @@
   </div>
 </div>
 
-<form method="post" class="card shadow-sm">
+<form method="post" enctype="multipart/form-data" class="card shadow-sm">
   {% csrf_token %}
 
   <div class="card-body small">
@@ -205,6 +205,16 @@
         <div class="text-danger small">{{ form.uwagi_wew.errors }}</div>
       {% endif %}
     </div>
+
+    {# --- NOWE POLE SKANU --- #}
+<div class="mb-3">
+  <label class="form-label small fw-semibold text-muted">{{ form.skan_aktu.label }}</label>
+  {{ form.skan_aktu }}
+  {% if form.skan_aktu.errors %}
+    <div class="text-danger small">{{ form.skan_aktu.errors }}</div>
+  {% endif %}
+</div>
+
 
   </div>
 

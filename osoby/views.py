@@ -26,7 +26,16 @@ import calendar
 from datetime import date, timedelta
 from msze.models import Msza
 from rodziny.models import Rodzina
-from sakramenty.models import Chrzest, Malzenstwo
+
+# Importy sakramentów (potrzebne do OsobaSzczegolyView)
+from sakramenty.models import (
+    Chrzest,
+    PierwszaKomunia,
+    Bierzmowanie,
+    Malzenstwo,
+    NamaszczenieChorych,
+    Zgon
+)
 
 from .models import Osoba
 from .forms import OsobaForm
@@ -48,8 +57,7 @@ class PanelStartView(LoginRequiredMixin, TemplateView):
             "osoby": Osoba.objects.count(),
             "rodziny": Rodzina.objects.count(),
             "chrzty": Chrzest.objects.count(),
-            # Dodaj resztę statystyk, jeśli chcesz
-            # "bierzmowania": Bierzmowanie.objects.count(),
+            "bierzmowania": Bierzmowanie.objects.count(),
             "sluby": Malzenstwo.objects.count(),
             # "zgony": Zgon.objects.count(),
         }
@@ -151,12 +159,46 @@ class OsobaSzczegolyView(LoginRequiredMixin, DetailView):
         ctx = super().get_context_data(**kwargs)
         osoba = self.object
 
-        # (Logika pobierania sakramentów została usunięta z tego widoku,
-        # ponieważ znajdowała się w starej, nadpisanej wersji.
-        # Jeśli była potrzebna, trzeba ją będzie przywrócić z sakramenty/views.py)
-        
-        # Poprawka: pobieranie rodzin, do których należy osoba
+        # --- PRZYWRÓCONA LOGIKA POBIERANIA SAKRAMENTÓW ---
+
+        # 1. Chrzty
+        ctx["chrzty_osoby"] = (
+            Chrzest.objects.filter(ochrzczony=osoba)
+            .order_by("rok", "akt_nr")
+        )
+
+        # 2. I Komunia
+        ctx["komunia_osoby"] = (
+            PierwszaKomunia.objects.filter(osoba=osoba)
+            .first()
+        )
+
+        # 3. Bierzmowanie
+        ctx["bierzmowanie_osoby"] = (
+            Bierzmowanie.objects.filter(osoba=osoba)
+            .order_by("rok", "akt_nr")
+            .first()
+        )
+
+        # 4. Małżeństwa (jako mąż lub żona)
+        ctx["malzenstwa_osoby"] = (
+            Malzenstwo.objects.filter(
+                Q(malzonek_a=osoba) | Q(malzonek_b=osoba)
+            ).order_by("rok", "akt_nr")
+        )
+
+        # 5. Namaszczenia
+        ctx["namaszczenia_osoby"] = (
+            NamaszczenieChorych.objects.filter(osoba=osoba)
+            .order_by("-data")
+        )
+
+        # 6. Zgon (OneToOne, więc dostęp przez atrybut, ale bezpiecznie sprawdzamy)
+        ctx["zgon_osoby"] = getattr(osoba, "zgon", None)
+
+        # 7. Rodziny
         ctx["rodziny"] = osoba.przynaleznosci_rodzinne.all() 
+        
         return ctx
 
 class OsobaNowaView(RolaWymaganaMixin, CreateView):
@@ -186,15 +228,12 @@ class OsobaUsunView(RolaWymaganaMixin, View):
     dozwolone_role = [Rola.ADMIN, Rola.KSIAZD]
 
     def get(self, request, *args, **kwargs):
-        # GET nie powinien usuwać danych, ale zostawiam logikę, którą miałeś
         osoba = get_object_or_404(Osoba, pk=self.kwargs.get("pk"))
-        
-        # Lepsza obsługa błędu ProtectedError
         try:
             osoba.delete()
             messages.success(request, f"Osoba {osoba} została usunięta.")
             return HttpResponseRedirect(reverse_lazy("osoba_lista"))
-        except: # (Powinno być models.ProtectedError, ale zostawiam ogólny)
+        except:
              messages.error(
                 request,
                 f"Nie można usunąć osoby '{osoba}', "
@@ -203,7 +242,6 @@ class OsobaUsunView(RolaWymaganaMixin, View):
              return redirect("osoba_szczegoly", pk=osoba.pk)
 
     def post(self, request, *args, **kwargs):
-        # Poprawna metoda POST do usuwania
         osoba = get_object_or_404(Osoba, pk=self.kwargs.get("pk"))
         try:
             osoba.delete()

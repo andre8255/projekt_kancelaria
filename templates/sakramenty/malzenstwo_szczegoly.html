@@ -63,6 +63,24 @@
 
     <p><strong>Uwagi wewnętrzne: </strong><br>{{ malzenstwo.uwagi_wew|default:"—" }}</p>
   </div>
+
+  {# --- SEKCJA ZAŁĄCZNIKA --- #}
+  <div class="col-md-12 mt-3">
+    <div class="card shadow-sm border-0">
+      <div class="card-header fw-semibold">
+        Załączniki
+      </div>
+      <div class="card-body small">
+        {% if malzenstwo.skan_aktu %}
+          <a href="{{ malzenstwo.skan_aktu.url }}" target="_blank" class="btn btn-outline-primary btn-sm">
+            📄 Zobacz skan aktu/protokołu
+          </a>
+        {% else %}
+          <span class="text-muted">Brak załączonego skanu.</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
 </div>
 
 {% endblock %}

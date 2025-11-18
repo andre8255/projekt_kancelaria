@@ -210,7 +210,27 @@
       </div>
     </div>
   </div>
-  </div> <script>
+  </div>
+  
+  <div class="col-md-12">
+  <div class="card shadow-sm border-0">
+    <div class="card-header fw-semibold">
+      Załączniki
+    </div>
+    <div class="card-body small">
+      {% if chrzest.skan_aktu %}
+        <a href="{{ chrzest.skan_aktu.url }}" target="_blank" class="btn btn-outline-primary btn-sm">
+          📄 Zobacz skan aktu
+        </a>
+      {% else %}
+        <span class="text-muted">Brak załączonego skanu.</span>
+      {% endif %}
+    </div>
+  </div>
+</div>
+  
+  
+  <script>
 document.getElementById('print_button').addEventListener('click', function() {
   // 1. Pobierz wybraną wartość z listy
   var cel = document.getElementById('print_purpose').value;

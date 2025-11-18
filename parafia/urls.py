@@ -2,6 +2,8 @@
 from django.contrib import admin
 from django.urls import path, include, reverse
 from django.http import HttpResponseRedirect
+from django.conf import settings
+from django.conf.urls.static import static
 
 def root_redirect(request):
     if request.user.is_authenticated:
@@ -18,3 +20,6 @@ urlpatterns = [
     path("panel/", include("sakramenty.urls")),
     path("panel/", include("slowniki.urls")),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

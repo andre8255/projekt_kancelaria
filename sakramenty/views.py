@@ -359,19 +359,40 @@ class BierzmowanieNoweView(RolaWymaganaMixin, CreateView):
         initial = super().get_initial()
         if self.osoba:
             initial["osoba"] = self.osoba
+            # 1. AUTOMATYCZNE POBIERANIE:
+            # Jeśli w profilu osoby jest już wpisane imię z bierzmowania,
+            # wstaw je do formularza jako wartość początkową.
+            if self.osoba.imie_bierzmowanie:
+                initial["imie_bierzmowania"] = self.osoba.imie_bierzmowanie
         return initial
 
     def form_valid(self, form):
         obj = form.save(commit=False)
+        
+        # Jeśli dodajemy z profilu konkretnej osoby
         if self.osoba:
             obj.osoba = self.osoba
 
+        # Sprawdzenie duplikatów
         if Bierzmowanie.objects.filter(osoba=obj.osoba).exists():
             form.add_error("osoba", "Dla tej osoby wpis bierzmowania już istnieje.")
             return self.form_invalid(form)
 
         obj.save()
-        messages.success(self.request, "Dodano wpis bierzmowania.")
+
+        # 2. AKTUALIZACJA OSOBY:
+        # Pobieramy imię wpisane w formularzu bierzmowania
+        nowe_imie = form.cleaned_data.get("imie_bierzmowania")
+        
+        # Jeśli imię zostało podane, aktualizujemy profil osoby
+        if nowe_imie:
+            osoba_do_edycji = obj.osoba
+            # Zapisujemy tylko jeśli jest inne (lub było puste), żeby nie robić zbędnych zapytań
+            if osoba_do_edycji.imie_bierzmowanie != nowe_imie:
+                osoba_do_edycji.imie_bierzmowanie = nowe_imie
+                osoba_do_edycji.save()
+
+        messages.success(self.request, "Dodano wpis bierzmowania i zaktualizowano dane osoby.")
         return redirect(self.get_success_url())
 
     def get_context_data(self, **kwargs):

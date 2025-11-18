@@ -1,37 +1,25 @@
 # osoby/forms.py
+import re
+from django.utils import timezone
 from django import forms
 from .models import Osoba
-from slowniki.models import Wyznanie
-
-class DateInput(forms.DateInput):
-    input_type = "date"
-
+from slowniki.models import Wyznanie 
 
 class BootstrapFormMixin:
     """
-    Prosty mixin: automatycznie dodaje klasę 'form-control'
-    do wszystkich pól <input>, <select>, <textarea>.
-    Dzięki temu formularz wygląda jak Bootstrap.
+    Automatycznie dodaje klasę 'form-control' do pól formularza.
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
         for name, field in self.fields.items():
             widget = field.widget
-
-            # checkboxy/radiobuttony mają inny styl, nie ruszamy ich
             if widget.__class__.__name__ in ["CheckboxInput", "RadioSelect", "CheckboxSelectMultiple"]:
                 widget.attrs.setdefault("class", "form-check-input")
             else:
-                # zwykłe pola tekstowe, selecty, textarea
                 existing = widget.attrs.get("class", "")
                 widget.attrs["class"] = (existing + " form-control").strip()
-
-            # drobne upiększenie: placeholder domyślnie = label
-            if not widget.attrs.get("placeholder") and hasattr(field, "label") and field.label:
+            if not widget.attrs.get("placeholder") and field.label:
                 widget.attrs["placeholder"] = field.label
-
-
 
 class OsobaForm(BootstrapFormMixin, forms.ModelForm):
     class Meta:
@@ -50,6 +38,7 @@ class OsobaForm(BootstrapFormMixin, forms.ModelForm):
             "data_urodzenia",
             "miejsce_urodzenia",
             "wyznanie",
+            "data_zgonu",
 
             "ulica",
             "nr_domu",
@@ -60,23 +49,63 @@ class OsobaForm(BootstrapFormMixin, forms.ModelForm):
 
             "telefon",
             "email",
+            "uwagi",
         ]
         widgets = {
-           "data_urodzenia": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
+           "data_urodzenia": forms.DateInput(attrs={"type": "date"}),
+           "data_zgonu": forms.DateInput(attrs={"type": "date"}),
+           "uwagi": forms.Textarea(attrs={"rows": 3}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.fields["data_urodzenia"].input_formats = ["%Y-%m-%d"]
-        # ładna etykieta
         self.fields["wyznanie"].label = "Wyznanie"
-
-        # pobierz tylko aktywne wyznania, alfabetycznie
-        self.fields["wyznanie"].queryset = Wyznanie.objects.filter(
-            aktywne=True
-        ).order_by("nazwa")
-
-        # pole może być puste
+        self.fields["wyznanie"].queryset = Wyznanie.objects.all().order_by("nazwa")
         self.fields["wyznanie"].required = False
         self.fields["wyznanie"].empty_label = "— wybierz —"
+
+    def clean(self):
+        """
+        Wspólna walidacja dla całego formularza.
+        """
+        cleaned_data = super().clean()
+        today = timezone.localdate()
+
+        # --- 1. Walidacja Daty Urodzenia i Zgonu ---
+        data_ur = cleaned_data.get("data_urodzenia")
+        data_zg = cleaned_data.get("data_zgonu")
+
+        if data_ur and data_ur > today:
+            self.add_error("data_urodzenia", "Data urodzenia nie może być z przyszłości.")
+        
+        if data_zg:
+            if data_zg > today:
+                 self.add_error("data_zgonu", "Data zgonu nie może być z przyszłości.")
+            if data_ur and data_zg < data_ur:
+                 self.add_error("data_zgonu", "Data zgonu nie może być wcześniejsza niż data urodzenia.")
+
+        # --- 2. Walidacja Kodu Pocztowego ---
+        kod = cleaned_data.get("kod_pocztowy")
+        if kod:
+            # Wzorzec: 2 cyfry, myślnik, 3 cyfry
+            if not re.match(r'^\d{2}-\d{3}$', kod):
+                self.add_error("kod_pocztowy", "Kod pocztowy musi mieć format XX-XXX (np. 00-001).")
+
+        # --- 3. Walidacja Nr Domu ---
+        # Reguła: Musi zaczynać się od cyfry 1-9 (nie może być 0).
+        nr_domu = cleaned_data.get("nr_domu")
+        if nr_domu:
+            wzorzec_dom = r'^[1-9][0-9a-zA-Z/]*$'
+            if not re.match(wzorzec_dom, nr_domu):
+                self.add_error("nr_domu", "Musi zaczynać się od cyfry (nie 0). Dozwolone tylko litery, cyfry i znak '/'.")
+
+        # --- 4. Walidacja Nr Mieszkania ---
+        # Reguła: Musi zaczynać się od cyfry 0-9 (MOŻE być 0).
+        nr_mieszkania = cleaned_data.get("nr_mieszkania")
+        if nr_mieszkania:
+            wzorzec_mieszkanie = r'^[0-9][0-9a-zA-Z/]*$' # <--- ZMIANA: [0-9] zamiast [1-9]
+            if not re.match(wzorzec_mieszkanie, nr_mieszkania):
+                self.add_error("nr_mieszkania", "Musi zaczynać się od cyfry (może być 0). Dozwolone tylko litery, cyfry i znak '/'.")
+
+        return cleaned_data

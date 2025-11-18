@@ -88,6 +88,15 @@ class Chrzest(models.Model):
     # Uwagi
     uwagi_wew = models.TextField("Uwagi kancelaryjne (wewnętrzne)", blank=True)
 
+    skan_aktu = models.FileField(
+        "Skan aktu",
+        upload_to="skany/chrzty/",
+        null=True,
+        blank=True,
+        help_text="Opcjonalnie: załącz skan aktu (PDF, JPG)"
+    )
+
+
     class Meta:
         constraints = [
             models.UniqueConstraint(
@@ -238,6 +247,13 @@ class Bierzmowanie(models.Model):
     )
     uwagi_wew = models.TextField("Uwagi kancelaryjne (wewnętrzne)", blank=True)
 
+    skan_aktu = models.FileField(
+        "Skan świadectwa/aktu",
+        upload_to="skany/bierzmowania/",
+        null=True,
+        blank=True
+    )
+
     class Meta:
         constraints = [
             models.UniqueConstraint(
@@ -322,6 +338,13 @@ class Malzenstwo(models.Model):
 
     # Uwagi
     uwagi_wew = models.TextField("Uwagi (wewnętrzne)", blank=True)
+
+    skan_aktu = models.FileField(
+        "Skan aktu/protokołu",
+        upload_to="skany/malzenstwa/",
+        null=True,
+        blank=True
+    )
 
     class Meta:
         constraints = [
