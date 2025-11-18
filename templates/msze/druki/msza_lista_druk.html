@@ -38,6 +38,20 @@
   tbody tr:nth-child(even) {
     background: #fdfdfd;
   }
+  /* Styl dla listy intencji wewnątrz komórki tabeli */
+  ul.intencje-list {
+    margin: 0;
+    padding-left: 15px;
+    list-style-type: disc;
+  }
+  ul.intencje-list li {
+    margin-bottom: 2px;
+  }
+  .zamawiajacy {
+    font-style: italic;
+    color: #444;
+    font-size: 0.9em;
+  }
 </style>
 
 <div class="doc">
@@ -56,12 +70,11 @@
     <table>
       <thead>
         <tr>
-          <th>Lp.</th>
-          <th>Data</th>
-          <th>Godzina</th>
-          <th>Miejsce</th>
-          <th>Celebrans</th>
-          <th>Status (Intencje)</th>
+          <th style="width: 30px;">Lp.</th>
+          <th style="width: 80px;">Data</th>
+          <th style="width: 50px;">Godz.</th>     
+          <th>Intencje</th>
+          <th>Miejsce / Celebrans</th>
         </tr>
       </thead>
       <tbody>
@@ -70,15 +83,36 @@
           <td>{{ forloop.counter }}</td>
           <td>{{ msza.data|date:"d.m.Y" }}</td>
           <td>{{ msza.godzina|time:"H:i" }}</td>
-          <td>{{ msza.miejsce|default:"—" }}</td>
-          <td>{{ msza.celebrans|default:"—" }}</td>
+          
           <td>
-            {% if msza.ile_intencji > 0 %}
-              {{ msza.ile_intencji }} int. (Zajęta)
-            {% else %}
-              <span style="color: #006400;">Wolna</span>
+            {% with intencje=msza.intencje.all %}
+              {% if intencje %}
+                <ul class="intencje-list">
+                  {% for i in intencje %}
+                    <li>
+                      {{ i.tresc }}
+                      {% if i.zamawiajacy %}
+                        <span class="zamawiajacy">({{ i.zamawiajacy }})</span>
+                      {% endif %}
+                    </li>
+                  {% endfor %}
+                </ul>
+              {% else %}
+                <span style="color: #006400; font-style: italic;">Wolna</span>
+              {% endif %}
+            {% endwith %}
+          </td>
+
+
+
+          <td>
+            {{ msza.miejsce|default:"—" }}
+            {% if msza.celebrans %}
+              <br><span style="font-size: 0.9em; color: #555;"> {{ msza.celebrans }}</span>
             {% endif %}
           </td>
+
+          
         </tr>
         {% endfor %}
       </tbody>

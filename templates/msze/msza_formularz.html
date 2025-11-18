@@ -1,51 +1,114 @@
 {% extends "base_panel.html" %}
 {% block content %}
+
 <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
-  <h1 class="h5 mb-0">{% if form.instance.pk %}Edytuj mszę{% else %}Nowa msza{% endif %}</h1>
+  <h1 class="h5 mb-0">
+    <span class="badge bg-primary-subtle text-primary border border-primary rounded-pill fw-normal px-2 py-1">
+      {% if object %}Edycja{% else %}Nowa{% endif %}
+    </span>
+    <span class="fw-semibold">Msza Święta</span>
+  </h1>
   <div class="d-flex gap-2">
-    <a href="{% url 'msza_lista' %}" class="btn btn-outline-secondary btn-sm">Powrót</a>
+    <a href="{% url 'msza_lista' %}" class="btn btn-outline-secondary btn-sm">
+      Powrót
+    </a>
   </div>
 </div>
 
-<form method="post" class="card shadow-sm">
+<form method="post" enctype="multipart/form-data" class="card shadow-sm">
   {% csrf_token %}
+  
   <div class="card-body small">
-    {% if form.non_field_errors %}<div class="alert alert-danger small">{{ form.non_field_errors }}</div>{% endif %}
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger small">{{ form.non_field_errors }}</div>
+    {% endif %}
 
+    {# --- WIERSZ 1: Data, Godzina, Miejsce --- #}
     <div class="row g-3">
-      <div class="col-sm-4">
-        {% for field in form %}
-          {% if field.name == "data" %}
-            <label class="form-label small fw-semibold text-muted">{{ field.label }}</label>
-            {{ field }}
-            {% if field.errors %}<div class="text-danger small">{{ field.errors }}</div>{% endif %}
-            {% if field.help_text %}<div class="form-text small">{{ field.help_text }}</div>{% endif %}
-          {% endif %}
-        {% endfor %}
+      
+      {# 1. DATA Z RÓŻDŻKĄ #}
+      <div class="col-md-4">
+        <label class="form-label small fw-semibold text-muted">{{ form.data.label }}</label>
+        <div class="input-group">
+          {{ form.data }}
+          <button class="btn btn-outline-secondary" type="button" 
+                  onclick="ustawDzis('{{ form.data.id_for_label }}')"
+                  title="Wstaw dzisiejszą datę">
+            🪄
+          </button>
+        </div>
+        {% if form.data.errors %}
+          <div class="text-danger small">{{ form.data.errors }}</div>
+        {% endif %}
       </div>
-      <div class="col-sm-4">
-        <label class="form-label small text-muted fw-semibold">{{ form.godzina.label }}</label>
+
+      {# 2. GODZINA #}
+      <div class="col-md-2">
+        <label class="form-label small fw-semibold text-muted">{{ form.godzina.label }}</label>
         {{ form.godzina }}
-        {% if form.godzina.errors %}<div class="text-danger small">{{ form.godzina.errors }}</div>{% endif %}
+        {% if form.godzina.errors %}
+          <div class="text-danger small">{{ form.godzina.errors }}</div>
+        {% endif %}
       </div>
-      <div class="col-sm-4">
-        <label class="form-label small text-muted fw-semibold">{{ form.miejsce.label }}</label>
+
+      {# 3. MIEJSCE #}
+      <div class="col-md-6">
+        <label class="form-label small fw-semibold text-muted">{{ form.miejsce.label }}</label>
         {{ form.miejsce }}
-        {% if form.miejsce.errors %}<div class="text-danger small">{{ form.miejsce.errors }}</div>{% endif %}
+        {% if form.miejsce.errors %}
+          <div class="text-danger small">{{ form.miejsce.errors }}</div>
+        {% endif %}
+        {% if form.miejsce.help_text %}
+          <div class="form-text small">{{ form.miejsce.help_text }}</div>
+        {% endif %}
       </div>
     </div>
 
-    <div class="mt-3">
-      <label class="form-label small text-muted fw-semibold">{{ form.celebrans.label }}</label>
-      {{ form.celebrans }}
-      {% if form.celebrans.errors %}<div class="text-danger small">{{ form.celebrans.errors }}</div>{% endif %}
+    <hr class="my-3">
+
+    {# --- WIERSZ 2: Celebrans (Lista vs Ręczny) --- #}
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label small fw-semibold text-muted">{{ form.celebrans.label }}</label>
+        {{ form.celebrans }}
+        {% if form.celebrans.errors %}
+          <div class="text-danger small">{{ form.celebrans.errors }}</div>
+        {% endif %}
+        <div class="form-text small">
+          Wybierz z listy duchownych (tytuł np. "ks." doda się sam).
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label small fw-semibold text-muted">{{ form.celebrans_opis.label }}</label>
+        {{ form.celebrans_opis }}
+        {% if form.celebrans_opis.errors %}
+          <div class="text-danger small">{{ form.celebrans_opis.errors }}</div>
+        {% endif %}
+        <div class="form-text small">
+          Wypełnij TYLKO jeśli księdza nie ma na liście obok (np. gość).
+        </div>
+      </div>
     </div>
+
+    <hr class="my-3">
+
+    {# --- WIERSZ 3: Uwagi --- #}
+    <div class="mb-3">
+      <label class="form-label small fw-semibold text-muted">{{ form.uwagi.label }}</label>
+      {{ form.uwagi }}
+      {% if form.uwagi.errors %}
+        <div class="text-danger small">{{ form.uwagi.errors }}</div>
+      {% endif %}
+    </div>
+
   </div>
 
- <div class="mt-4 d-flex gap-2">
-    <button class="btn btn-primary ">Zapisz</button>
-    <a href="{% url 'msza_lista' %}" class="btn btn-outline-secondary">Anuluj</a>
-    
+  <div class="card-footer bg-white border-top-0 pt-0 pb-3">
+    <div class="d-flex gap-2">
+      <button class="btn btn-primary btn-sm">Zapisz</button>
+      <a href="{% url 'msza_lista' %}" class="btn btn-outline-secondary btn-sm">Anuluj</a>
+    </div>
   </div>
 </form>
 {% endblock %}

@@ -1,4 +1,5 @@
 {% extends "base_panel.html" %}
+{% load static %}
 
 {% block content %}
 <div class="card shadow-sm border-0">
@@ -7,9 +8,14 @@
   </div>
 </div>
 
-<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+{# --- ZMIANA NA WERSJĘ LOKALNĄ (OFFLINE) --- #}
+{# FullCalendar v6 w wersji 'global' zazwyczaj wstrzykuje CSS automatycznie przez JS, #}
+{# ale zostawiamy link do CSS (jeśli go pobrałeś), lub możesz go usunąć. #}
+{# Jeśli nie pobrałeś pliku .css, usuń poniższą linijkę: #}
+{# <link href="{% static 'vendor/fullcalendar/index.global.min.css' %}" rel="stylesheet"> #}
 
-<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+{# Główny plik JS FullCalendar #}
+<script src="{% static 'vendor/fullcalendar/index.global.min.js' %}"></script>
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {

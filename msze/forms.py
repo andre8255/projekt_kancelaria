@@ -1,5 +1,8 @@
+# msze/forms.py
 from django import forms
+from django.utils import timezone
 from .models import Msza, IntencjaMszy
+from slowniki.models import Duchowny # <--- Import
 
 class BootstrapFormMixin:
     def __init__(self, *args, **kwargs):
@@ -15,13 +18,22 @@ class BootstrapFormMixin:
                 widget.attrs["placeholder"] = field.label
 
 class MszaForm(BootstrapFormMixin, forms.ModelForm):
+    # Opcjonalnie: Sortowanie listy duchownych
+    celebrans = forms.ModelChoiceField(
+        queryset=Duchowny.objects.filter(aktywny=True).order_by("imie_nazwisko"),
+        required=False,
+        label="Celebrans (z listy)",
+        empty_label="--- wybierz ---"
+    )
+
     class Meta:
         model = Msza
         fields = [
             "data",
             "godzina",
             "miejsce",
-            "celebrans",
+            "celebrans",       # <--- Wybór z listy
+            "celebrans_opis",  # <--- Opis ręczny
             "uwagi",
         ]
         widgets = {
@@ -32,9 +44,31 @@ class MszaForm(BootstrapFormMixin, forms.ModelForm):
         
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # zaakceptuj też polskie formaty przy edycji
         self.fields["data"].input_formats = ["%Y-%m-%d", "%d.%m.%Y", "%d-%m-%Y"]
         self.fields["godzina"].input_formats = ["%H:%M"]
+
+        today_str = timezone.localdate().strftime('%Y-%m-%d')
+        self.fields['data'].widget.attrs['min'] = today_str
+
+    def clean(self):
+        cleaned_data = super().clean()
+        # Logika czyszczenia pól:
+        celebrans = cleaned_data.get("celebrans")
+        opis = cleaned_data.get("celebrans_opis")
+
+        # Jeśli wybrano księdza z listy, usuwamy wpis ręczny (żeby nie było dubli)
+        if celebrans and opis:
+            cleaned_data["celebrans_opis"] = ""
+        
+        return cleaned_data
+
+    def clean_data(self):
+        data = self.cleaned_data.get('data')
+        if data:
+            today = timezone.localdate()
+            if data < today:
+                raise forms.ValidationError("Data mszy nie może być wcześniejsza niż dzisiejsza.")
+        return data
 
 class IntencjaForm(BootstrapFormMixin, forms.ModelForm):
     class Meta:

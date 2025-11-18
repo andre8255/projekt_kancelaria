@@ -51,9 +51,10 @@ class OsobaForm(BootstrapFormMixin, forms.ModelForm):
             "email",
             "uwagi",
         ]
+        # --- TUTAJ BYŁ BŁĄD - DODANO format='%Y-%m-%d' ---
         widgets = {
-           "data_urodzenia": forms.DateInput(attrs={"type": "date"}),
-           "data_zgonu": forms.DateInput(attrs={"type": "date"}),
+           "data_urodzenia": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
+           "data_zgonu": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
            "uwagi": forms.Textarea(attrs={"rows": 3}),
         }
 
@@ -104,7 +105,7 @@ class OsobaForm(BootstrapFormMixin, forms.ModelForm):
         # Reguła: Musi zaczynać się od cyfry 0-9 (MOŻE być 0).
         nr_mieszkania = cleaned_data.get("nr_mieszkania")
         if nr_mieszkania:
-            wzorzec_mieszkanie = r'^[0-9][0-9a-zA-Z/]*$' # <--- ZMIANA: [0-9] zamiast [1-9]
+            wzorzec_mieszkanie = r'^[0-9][0-9a-zA-Z/]*$'
             if not re.match(wzorzec_mieszkanie, nr_mieszkania):
                 self.add_error("nr_mieszkania", "Musi zaczynać się od cyfry (może być 0). Dozwolone tylko litery, cyfry i znak '/'.")
 

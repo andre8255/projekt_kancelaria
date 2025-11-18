@@ -1,5 +1,7 @@
+# msze/models.py
 from django.db import models
 from django.urls import reverse
+from slowniki.models import Duchowny  # <--- Dodano import
 
 class Msza(models.Model):
     data = models.DateField("Data mszy")
@@ -11,11 +13,24 @@ class Msza(models.Model):
         help_text="Np. Kościół parafialny / Kaplica / Kościół filialny"
     )
 
-    celebrans = models.CharField(
-        "Celebrans",
+    # --- ZMIANA: Rozdzielamy na wybór z listy i opis ręczny ---
+    
+    # 1. Wybór ze słownika (tutaj system sam pobierze tytuł)
+    celebrans = models.ForeignKey(
+        Duchowny,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Celebrans (z listy)",
+        related_name="msze_odprawiane"
+    )
+
+    # 2. Pole tekstowe (dla gości lub księży spoza listy)
+    celebrans_opis = models.CharField(
+        "Celebrans (opis ręczny)",
         max_length=120,
         blank=True,
-        help_text="Kto odprawia (opcjonalnie)"
+        help_text="Wypełnij tylko jeśli celebransa nie ma na liście powyżej."
     )
 
     uwagi = models.TextField(
@@ -33,13 +48,13 @@ class Msza(models.Model):
         ]
 
     def __str__(self):
+        # Wyświetlanie: Data Godzina (Miejsce)
         return f"{self.data} {self.godzina} ({self.miejsce})"
 
     def get_absolute_url(self):
         return reverse("msza_szczegoly", args=[self.pk])
 
     def czy_zajeta(self):
-        # jeśli jest przynajmniej jedna intencja → zajęta
         return self.intencje.exists()
 
     def ile_intencji(self):
@@ -85,5 +100,4 @@ class IntencjaMszy(models.Model):
         ordering = ["msza", "pk"]
 
     def __str__(self):
-        # krótki podgląd
         return f"Intencja na {self.msza.data} {self.msza.godzina}: {self.tresc[:50]}..."

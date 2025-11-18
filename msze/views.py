@@ -139,11 +139,15 @@ class MszaUsunView(RolaWymaganaMixin, DeleteView):
         return super().delete(request, *args, **kwargs)
 
 class MszaListaDrukView(MszaListaView):
-    # 1. Podmieniamy szablon na wersję do druku
     template_name = "msze/druki/msza_lista_druk.html"
-
-    # 2. Wyłączamy paginację (drukujemy wszystkie wyniki)
     paginate_by = None
+
+    def get_queryset(self):
+        # Pobieramy queryset z logiką filtrowania z klasy nadrzędnej (MszaListaView)
+        qs = super().get_queryset()
+        # WAŻNE: Dodajemy prefetch_related("intencje"), 
+        # aby pobrać treści intencji w jednym zapytaniu SQL (optymalizacja)
+        return qs.prefetch_related("intencje")
 
 
 class IntencjaNowaView(RolaWymaganaMixin, FormView):

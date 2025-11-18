@@ -24,6 +24,9 @@ class BootstrapFormMixin:
 class DateInput(forms.DateInput):
     input_type = "date"
 
+# =============================================================================
+# === CHRZEST
+# =============================================================================
 class ChrzestForm(BootstrapFormMixin, forms.ModelForm):
     class Meta:
         model = Chrzest
@@ -45,29 +48,22 @@ class ChrzestForm(BootstrapFormMixin, forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # jeśli przyszliśmy z profilu osoby (initial zawiera ochrzczony) – schowaj to pole
         if self.initial.get("ochrzczony") and not self.instance.pk:
             self.fields["ochrzczony"].widget = forms.HiddenInput()
 
         self.fields["data_urodzenia"].input_formats = ["%Y-%m-%d", "%d.%m.%Y", "%d-%m-%Y"]
         self.fields["data_chrztu"].input_formats    = ["%Y-%m-%d", "%d.%m.%Y", "%d-%m-%Y"]
-        self.fields["ojciec"].widget.attrs.setdefault("placeholder", "wpisz imię i nazwisko")
-        self.fields["matka"].widget.attrs.setdefault("placeholder", "wpisz imię i nazwisko")
-        self.fields["nazwisko_matki_rodowe"].widget.attrs.setdefault("placeholder", "np. Kowalska")
         
-        # Pola nieobowiązkowe w HTML (walidacja logiczna jest w clean)
         self.fields["rok"].required = False
         self.fields["rok"].widget.attrs.pop("required", None)
-
         if "rok_chrztu" in self.fields:
             self.fields["rok_chrztu"].required = False
             self.fields["rok_chrztu"].widget.attrs.pop("required", None)
 
     def clean(self):
         cleaned = super().clean()
-        today = timezone.localdate() # Dzisiejsza data do porównań
+        today = timezone.localdate()
 
-        # 1. Sprawdzenie duplikatów
         osoba = cleaned.get("ochrzczony")
         if osoba:
             qs = Chrzest.objects.filter(ochrzczony=osoba)
@@ -76,99 +72,63 @@ class ChrzestForm(BootstrapFormMixin, forms.ModelForm):
             if qs.exists():
                 raise forms.ValidationError("Ta osoba ma już wpis chrztu.")
 
-        # Pobranie danych z formularza
+        akt_nr = cleaned.get("akt_nr")
+        if akt_nr:
+            if not str(akt_nr).isdigit():
+                self.add_error("akt_nr", "Numer aktu może składać się tylko z cyfr.")
+
         data_chrztu = cleaned.get("data_chrztu")
         data_urodzenia = cleaned.get("data_urodzenia")
         rok_ksiegi = cleaned.get("rok")
         rok_chrztu = cleaned.get("rok_chrztu")
 
-        # 2. AUTO-UZUPEŁNIANIE ROKU
-        # Jeśli wpisano datę chrztu, a nie wpisano roku księgi/chrztu -> pobierz z daty
         if data_chrztu:
             if not rok_ksiegi:
                 cleaned["rok"] = data_chrztu.year
-                # Aktualizujemy też zmienną lokalną do dalszych sprawdzeń
                 rok_ksiegi = data_chrztu.year 
             
             if "rok_chrztu" in self.fields and not rok_chrztu:
                 cleaned["rok_chrztu"] = data_chrztu.year
                 rok_chrztu = data_chrztu.year
 
-        # 3. WALIDACJA: DATA Z PRZYSZŁOŚCI
         if data_chrztu and data_chrztu > today:
             self.add_error("data_chrztu", "Data chrztu nie może być z przyszłości.")
 
-        # 4. WALIDACJA: ROK Z PRZYSZŁOŚCI
-        # Sprawdzamy Rok Księgi
-        if rok_ksiegi:
-            try:
-                if int(rok_ksiegi) > today.year:
-                    self.add_error("rok", "Rok księgi nie może być z przyszłości.")
-            except (ValueError, TypeError):
-                pass 
-
-        # Sprawdzamy Rok Chrztu (jeśli wpisany ręcznie bez pełnej daty)
-        if rok_chrztu:
-            try:
-                if int(rok_chrztu) > today.year:
-                    self.add_error("rok_chrztu", "Rok chrztu nie może być z przyszłości.")
-            except (ValueError, TypeError):
-                pass
-
-        # 5. WALIDACJA: CHRONOLOGIA (Chrzest < Urodzenie)
         if data_chrztu and data_urodzenia:
             if data_chrztu < data_urodzenia:
                 self.add_error("data_chrztu", "Data chrztu nie może być wcześniejsza niż data urodzenia.")
         
-        # Dodatkowe: Jeśli mamy tylko lata, też sprawdźmy chronologię
-        if rok_chrztu and cleaned.get("rok_urodzenia"):
-            try:
-                if int(rok_chrztu) < int(cleaned["rok_urodzenia"]):
-                     self.add_error("rok_chrztu", "Rok chrztu nie może być wcześniejszy niż rok urodzenia.")
-            except (ValueError, TypeError):
-                pass
-
         return cleaned
 
 
+# =============================================================================
+# === I KOMUNIA ŚWIĘTA
+# =============================================================================
 class PierwszaKomuniaForm(BootstrapFormMixin, forms.ModelForm):
-    
     class Meta:
         model = PierwszaKomunia
         fields = ["osoba", "rok", "parafia", "uwagi_wew"]
-        
         widgets = {
             "uwagi_wew": forms.Textarea(attrs={"rows": 3}),
         }
-        
         labels = {
             "rok": "Rok I Komunii",
             "parafia": "Parafia (miejsce Komunii)",
             "uwagi_wew": "Uwagi (tylko do kancelarii)",
         }
-        
-        help_texts = {
-            "rok": "Np. 1998. Możesz wpisać tylko rok.",
-            "parafia": "Np. Parafia św. Leonarda Opata w Mykanowie",
-        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
         biezacy_rok = timezone.now().year
         ZAKRES_LAT = range(biezacy_rok - 100, biezacy_rok + 6)
-
         wybory_lat = [('', '---------')] + [(r, r) for r in reversed(ZAKRES_LAT)]
-
         self.fields['rok'].widget = forms.Select(
             choices=wybory_lat,
             attrs={'class': 'form-select form-select-sm'} 
         )
-
         if not self.instance.pk:
             self.fields['rok'].initial = biezacy_rok
             
-
     def clean(self):
         cleaned = super().clean()
         osoba = cleaned.get("osoba")
@@ -181,6 +141,9 @@ class PierwszaKomuniaForm(BootstrapFormMixin, forms.ModelForm):
         return cleaned
 
 
+# =============================================================================
+# === BIERZMOWANIE
+# =============================================================================
 class BierzmowanieForm(BootstrapFormMixin, forms.ModelForm):
     parafia_nowa = forms.CharField(
         required=False,
@@ -235,22 +198,14 @@ class BierzmowanieForm(BootstrapFormMixin, forms.ModelForm):
         ZAKRES_LAT = range(biezacy_rok - 100, biezacy_rok + 6)
         wybory_lat = [('', '---------')] + [(r, r) for r in reversed(ZAKRES_LAT)]
         
-        # Pole rok jest selectem (lista rozwijana)
         self.fields['rok'].widget = forms.Select(
             choices=wybory_lat,
             attrs={'class': 'form-select form-select-sm'}
         )
 
-        # ZMIANA: Usunięto ustawianie domyślnego roku
-        # if not self.instance.pk:
-        #     self.fields['rok'].initial = biezacy_rok
-
-        # ROK nie jest wymagany (bo możemy go pobrać z daty), AKT_NR jest wymagany
         self.fields["rok"].required = False
         self.fields["rok"].widget.attrs.pop("required", None)
-        
-        self.fields["akt_nr"].required = True # Wymagamy numeru aktu
-        
+        self.fields["akt_nr"].required = True
         self.fields["parafia"].required = False
         self.fields["szafarz"].required = False
 
@@ -265,21 +220,27 @@ class BierzmowanieForm(BootstrapFormMixin, forms.ModelForm):
             if qs.exists():
                 raise forms.ValidationError("Ta osoba ma już wpis bierzmowania.")
 
+        akt_nr = cleaned.get("akt_nr")
+        if akt_nr:
+            if not str(akt_nr).isdigit():
+                self.add_error("akt_nr", "Numer aktu może składać się tylko z cyfr.")
+
         data_bierzmowania = cleaned.get("data_bierzmowania")
         rok = cleaned.get("rok")
-
-        # 1. AUTO-UZUPEŁNIANIE ROKU: Jeśli brak roku, a jest data -> pobierz rok z daty
+        
+        # Auto-rok
         if (rok is None or str(rok).strip() == "") and data_bierzmowania:
             cleaned["rok"] = data_bierzmowania.year 
         
-        # 2. WALIDACJA DATY: Nie może być wcześniejsza niż urodzenie
-        # (osoba może przyjść z formularza lub z instancji, jeśli edytujemy)
-        if not osoba and self.instance.pk:
-            osoba = self.instance.osoba
+        today = timezone.localdate()
+        if data_bierzmowania:
+            if data_bierzmowania > today:
+                self.add_error("data_bierzmowania", "Data bierzmowania nie może być z przyszłości.")
             
-        if osoba and data_bierzmowania:
-            # Sprawdzamy, czy model osoby ma pole data_urodzenia i czy jest wypełnione
-            if getattr(osoba, 'data_urodzenia', None):
+            if not osoba and self.instance.pk:
+                osoba = self.instance.osoba
+            
+            if osoba and getattr(osoba, 'data_urodzenia', None):
                 if data_bierzmowania < osoba.data_urodzenia:
                     self.add_error(
                         'data_bierzmowania', 
@@ -321,7 +282,10 @@ class BierzmowanieForm(BootstrapFormMixin, forms.ModelForm):
             instance.save()
         return instance
 
-#-------------Małżeństwo------------
+
+# =============================================================================
+# === MAŁŻEŃSTWO
+# =============================================================================
 class MalzenstwoForm(BootstrapFormMixin, forms.ModelForm):
     malzonek_b = forms.ModelChoiceField(
         queryset=Osoba.objects.all().order_by("nazwisko", "imie_pierwsze"),
@@ -388,8 +352,18 @@ class MalzenstwoForm(BootstrapFormMixin, forms.ModelForm):
         self.fixed_malzonek_a = kwargs.pop("malzonek_a_obj", None)
         super().__init__(*args, **kwargs)
         
+        biezacy_rok = timezone.now().year
+        ZAKRES_LAT = range(biezacy_rok - 100, biezacy_rok + 6)
+        wybory_lat = [('', '---------')] + [(r, r) for r in reversed(ZAKRES_LAT)]
+        self.fields['rok'].widget = forms.Select(
+            choices=wybory_lat,
+            attrs={'class': 'form-select form-select-sm'}
+        )
+
         self.fields["rok"].required = False
         self.fields["rok"].widget.attrs.pop("required", None)
+        self.fields["akt_nr"].required = True
+
         self.fields["malzonek_a"].queryset = Osoba.objects.order_by("nazwisko","imie_pierwsze")
         self.fields["malzonek_b"].queryset = Osoba.objects.order_by("nazwisko","imie_pierwsze")
     
@@ -399,8 +373,14 @@ class MalzenstwoForm(BootstrapFormMixin, forms.ModelForm):
     def clean(self):
         cleaned = super().clean()
 
+        akt_nr = cleaned.get("akt_nr")
+        if akt_nr:
+            if not str(akt_nr).isdigit():
+                self.add_error("akt_nr", "Numer aktu może składać się tylko z cyfr.")
+
         data_slubu = cleaned.get("data_slubu")
         rok = cleaned.get("rok")
+        
         if (rok is None or str(rok).strip() == "") and data_slubu:
             cleaned["rok"] = data_slubu.year
 
@@ -417,7 +397,10 @@ class MalzenstwoForm(BootstrapFormMixin, forms.ModelForm):
 
         return cleaned
 
-#----------Namaszczenie chorych------------
+
+# =============================================================================
+# === NAMASZCZENIE CHORYCH
+# =============================================================================
 class NamaszczenieChorychForm(BootstrapFormMixin, forms.ModelForm):
     class Meta:
         model = NamaszczenieChorych
@@ -451,11 +434,30 @@ class NamaszczenieChorychForm(BootstrapFormMixin, forms.ModelForm):
 
     def clean(self):
         cleaned = super().clean()
+        today = timezone.localdate()
+
         if not self.initial.get("osoba") and not cleaned.get("osoba"):
             self.add_error("osoba", "Wybierz osobę.")
+        
+        data = cleaned.get("data")
+        if data:
+            if data > today:
+                self.add_error("data", "Data posługi nie może być z przyszłości.")
+            
+            osoba = cleaned.get("osoba")
+            if not osoba and self.instance.pk:
+                osoba = self.instance.osoba
+            
+            if osoba and getattr(osoba, 'data_urodzenia', None):
+                if data < osoba.data_urodzenia:
+                    self.add_error("data", f"Data posługi nie może być wcześniejsza niż data urodzenia ({osoba.data_urodzenia}).")
+
         return cleaned
     
-#------------Zgon----------------------
+
+# =============================================================================
+# === ZGON
+# =============================================================================
 class ZgonForm(BootstrapFormMixin, forms.ModelForm):
     class Meta:
         model = Zgon
@@ -477,23 +479,30 @@ class ZgonForm(BootstrapFormMixin, forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
         self.fields["osoba"].queryset = Osoba.objects.order_by("nazwisko", "imie_pierwsze")
         self.fields["osoba"].label = "Osoba zmarła"
-
-        self.fields["rok"].label = "Rok"
-        self.fields["akt_nr"].label = "Nr aktu"
-        self.fields["data_zgonu"].label = "Data zgonu"
-        self.fields["miejsce_zgonu"].label = "Miejsce zgonu"
-        self.fields["data_pogrzebu"].label = "Data pogrzebu"
-        self.fields["cmentarz"].label = "Cmentarz"
-        self.fields["uwagi_wew"].label = "Uwagi (wewnętrzne)"
+        
+        # ZMIANA: Rok opcjonalny (auto-fill), akt_nr wymagany
+        self.fields["rok"].required = False
+        self.fields["akt_nr"].required = True
 
     def clean(self):
         cleaned_data = super().clean()
         
+        # 1. Walidacja Nr Aktu
+        akt_nr = cleaned_data.get("akt_nr")
+        if akt_nr:
+            if not str(akt_nr).isdigit():
+                self.add_error("akt_nr", "Numer aktu może składać się tylko z cyfr.")
+
         data_zgonu = cleaned_data.get("data_zgonu")
+        data_pogrzebu = cleaned_data.get("data_pogrzebu")
         osoba = cleaned_data.get("osoba") 
+        rok = cleaned_data.get("rok")
+
+        # 2. Auto-rok
+        if (rok is None or str(rok).strip() == "") and data_zgonu:
+            cleaned_data["rok"] = data_zgonu.year
 
         if not osoba and self.instance.pk:
             osoba = self.instance.osoba
@@ -501,13 +510,21 @@ class ZgonForm(BootstrapFormMixin, forms.ModelForm):
         if not osoba:
             return cleaned_data
 
+        # 3. Walidacja zgon < urodzenie
         data_urodzenia = getattr(osoba, 'data_urodzenia', None)
-
         if data_zgonu and data_urodzenia:
             if data_zgonu < data_urodzenia:
                 self.add_error(
                     'data_zgonu', 
                     'Data zgonu nie może być wcześniejsza niż data urodzenia tej osoby.'
+                )
+        
+        # 4. Walidacja pogrzeb < zgon
+        if data_zgonu and data_pogrzebu:
+            if data_pogrzebu < data_zgonu:
+                self.add_error(
+                    'data_pogrzebu', 
+                    'Data pogrzebu nie może być wcześniejsza niż data zgonu.'
                 )
 
         return cleaned_data
