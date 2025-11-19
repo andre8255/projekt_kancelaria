@@ -1,4 +1,5 @@
 #rodziny/views.py
+from django.utils import timezone
 from django.views import View
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -144,6 +145,56 @@ class RodzinaUsunView(RolaWymaganaMixin, DeleteView):
     def delete(self, request, *args, **kwargs):
         messages.success(request, "Rodzina została usunięta.")
         return super().delete(request, *args, **kwargs)
+
+class RodzinaDrukView(LoginRequiredMixin, DetailView):
+    model = Rodzina
+    template_name = "rodziny/druki/rodzina_druk.html"
+    context_object_name = "rodzina"
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        rodzina = self.object
+
+        # --- Ta sama logika co w szczegółach, aby pobrać statusy sakramentów ---
+        czlonkowie = (
+            CzlonkostwoRodziny.objects
+            .select_related("osoba")
+            .filter(rodzina=rodzina)
+        )
+
+        PRIORYTET_ROLI = {
+            "MAZ": 1, "ZONA": 2, "DZIECKO": 3, "INNA": 4,
+        }
+        def kolejnosc(cz): return PRIORYTET_ROLI.get(cz.rola, 99)
+        posortowani = sorted(czlonkowie, key=kolejnosc)
+
+        wynik = []
+        for wpis in posortowani:
+            osoba = wpis.osoba
+            
+            # Sprawdzamy sakramenty (True/False)
+            ma_chrzest = Chrzest.objects.filter(ochrzczony=osoba).exists()
+            ma_komunia = PierwszaKomunia.objects.filter(osoba=osoba).exists()
+            ma_bierzmowanie = Bierzmowanie.objects.filter(osoba=osoba).exists()
+            ma_malzenstwo = Malzenstwo.objects.filter(Q(malzonek_a=osoba) | Q(malzonek_b=osoba)).exists()
+            # ma_zgon = Zgon.objects.filter(osoba=osoba).exists() # Opcjonalnie jeśli chcesz oznaczać zmarłych
+
+            wynik.append({
+                "relacja": wpis,
+                "osoba": osoba,
+                "sakramenty": {
+                    "chrzest": ma_chrzest,
+                    "komunia": ma_komunia,
+                    "bierzmowanie": ma_bierzmowanie,
+                    "malzenstwo": ma_malzenstwo,
+                }
+            })
+
+        ctx["czlonkowie_posortowani"] = wynik
+        ctx["today"] = timezone.localdate()
+        return ctx
+
+
 
 class DodajCzlonkaView(RolaWymaganaMixin, FormView):
     dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]

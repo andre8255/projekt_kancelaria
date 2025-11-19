@@ -1,0 +1,123 @@
+{% extends "base_print.html" %}
+{% block title %}Zaświadczenie I Komunii Św.{% endblock %}
+
+{% block content %}
+<style>
+    .header {
+        text-align: center;
+        margin-top: 1cm;
+        margin-bottom: 1.5cm;
+    }
+    .header h1 {
+        font-size: 18pt;
+        font-weight: bold;
+        text-transform: uppercase;
+        margin: 0;
+        color: #000;
+    }
+    .header h2 {
+        font-size: 14pt;
+        font-weight: normal;
+        margin-top: 5px;
+        font-style: italic;
+    }
+
+    .content {
+        margin: 0 1.5cm;
+        font-size: 12pt;
+        line-height: 1.6;
+    }
+
+    .data-row {
+        margin-bottom: 15px;
+        border-bottom: 1px dotted #000;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+    }
+
+    .label {
+        font-weight: bold;
+        padding-right: 10px;
+        background: #fff;
+        white-space: nowrap;
+    }
+
+    .value {
+        font-weight: bold;
+        flex-grow: 1;
+        text-align: center;
+        padding-bottom: 2px;
+    }
+
+    .footer {
+        margin-top: 3cm;
+        text-align: right;
+        font-size: 11pt;
+    }
+</style>
+
+<div class="header">
+    <h1>Zaświadczenie</h1>
+    <h2>o przyjęciu Pierwszej Komunii Świętej</h2>
+</div>
+
+<div class="content">
+    <p style="text-align: center; margin-bottom: 1cm;">Niniejszym zaświadcza się, że:</p>
+
+    <div class="data-row">
+        <span class="label">Imię i Nazwisko:</span>
+        <span class="value">{{ komunia.osoba.imie_pierwsze }} {{ komunia.osoba.nazwisko }}</span>
+    </div>
+
+    <div class="data-row">
+        <span class="label">Data urodzenia:</span>
+        <span class="value">{{ komunia.osoba.data_urodzenia|default:"—" }}</span>
+    </div>
+
+    <div class="data-row">
+        <span class="label">Imiona rodziców:</span>
+        <span class="value">
+            {{ komunia.osoba.imie_ojca|default:"..." }} i {{ komunia.osoba.imie_matki|default:"..." }}
+        </span>
+    </div>
+
+    <p style="text-align: center; margin: 1cm 0;">przyjął(a) Pierwszą Komunię Świętą:</p>
+
+    <div class="data-row">
+        <span class="label">Rok:</span>
+        <span class="value">{{ komunia.rok }}</span>
+    </div>
+
+    <div class="data-row">
+        <span class="label">W parafii:</span>
+        <span class="value">
+            {% if komunia.parafia %}
+                {{ komunia.parafia.nazwa }} 
+                {% if komunia.parafia.miejscowosc %}
+                    w {{ komunia.parafia.miejscowosc }}
+                {% endif %}
+            {% else %}
+                (Parafia tutejsza / brak danych)
+            {% endif %}
+        </span>
+    </div>
+
+</div>
+
+<div class="footer">
+    {# Tu poprawiliśmy wyświetlanie miejscowości i daty #}
+    <p>
+        {% if komunia.parafia.miejscowosc %}
+            {{ komunia.parafia.miejscowosc }}
+        {% else %}
+            ....................
+        {% endif %}
+        , dnia: {{ today|date:"d.m.Y" }}
+    </p>
+    <br><br><br>
+    <p>.....................................................................<br>
+    <small>(podpis i pieczęć)</small></p>
+</div>
+
+{% endblock %}

@@ -163,6 +163,24 @@
   }
 </script>
 
+<script>
+  function ustawDzis(idPola) {
+    // ... (bez zmian)
+  }
+
+  // NOWA FUNKCJA: Wstawia tylko bieżący ROK
+  function ustawRok(idPola) {
+    const dzis = new Date();
+    const rok = dzis.getFullYear();
+    
+    const pole = document.getElementById(idPola);
+    if (pole) {
+      pole.value = rok;
+    }
+  }
+</script>
+
+
 <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
 </body>
 </html>

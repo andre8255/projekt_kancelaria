@@ -60,9 +60,16 @@ class ParafiaForm(BootstrapFormMixin, forms.ModelForm):
         # Reguła: Pierwszy znak to cyfra (0-9), potem cyfry, litery lub '/'
         nr_mieszkania = cleaned_data.get("nr_mieszkania")
         if nr_mieszkania:
-            wzorzec_mieszkanie = r'^[0-9][0-9a-zA-Z/]*$' # <--- ZMIANA: Pozwalamy na 0 na początku
+            wzorzec_mieszkanie = r'^[0-9][0-9a-zA-Z/]*$'
             if not re.match(wzorzec_mieszkanie, nr_mieszkania):
                 self.add_error("nr_mieszkania", "Musi zaczynać się od cyfry (może być 0). Dozwolone tylko litery, cyfry i znak '/'.")
+
+        # --- 4. Walidacja Telefonu ---
+        telefon = cleaned_data.get("telefon")
+        if telefon:
+            # Sprawdzamy czy ciąg znaków składa się tylko z cyfr
+            if not telefon.isdigit():
+                self.add_error("telefon", "Numer telefonu może składać się wyłącznie z cyfr (bez spacji, myślników i +).")
 
         return cleaned_data
 

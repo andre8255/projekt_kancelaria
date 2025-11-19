@@ -20,12 +20,28 @@
   </div>
 </div>
 
-<form method="get" class="mb-3">
+{# --- ZMIANA: Formularz z polem ROK --- #}
+<form method="get" class="mb-3 d-flex gap-2 align-items-center flex-wrap">
+  
+  {# Pole Rok #}
+  <div style="width: 100px;">
+    <input type="number" name="rok" class="form-control form-control-sm" 
+           value="{{ request.GET.rok }}" placeholder="Rok">
+  </div>
+
+  {# Główne pole wyszukiwania #}
   <div class="input-group input-group-sm" style="max-width:400px;">
     <input class="form-control" type="search" name="q" value="{{ request.GET.q }}"
-           placeholder="Nazwisko, parafia, rok…">
+           placeholder="Nazwisko, parafia…">
     <button class="btn btn-outline-secondary">Szukaj</button>
   </div>
+
+  {# Przycisk czyszczenia #}
+  {% if request.GET.q or request.GET.rok %}
+    <a href="{% url 'komunia_lista' %}" class="btn btn-sm btn-link text-decoration-none text-secondary">
+      ✕ Wyczyść
+    </a>
+  {% endif %}
 </form>
 
 <div class="card shadow-sm">
@@ -55,7 +71,6 @@
                 <div class="btn-group btn-group-sm" role="group">
                   <a href="{% url 'komunia_szczegoly' k.pk %}" class="btn btn-outline-secondary">Szczegóły</a>
                   <a href="{% url 'komunia_usun' k.pk %}" class="btn btn-outline-danger">Usuń</a>
-                  
                 </div>
               </td>
             </tr>
@@ -64,7 +79,7 @@
         </table>
       </div>
     {% else %}
-      <div class="p-3 text-muted small">Brak wpisów.</div>
+      <div class="p-3 text-muted small">Brak wpisów pasujących do kryteriów.</div>
     {% endif %}
   </div>
 </div>

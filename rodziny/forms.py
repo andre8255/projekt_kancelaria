@@ -49,7 +49,7 @@ class RodzinaForm(BootstrapFormMixin, forms.ModelForm):
                 self.add_error("kod_pocztowy", "Kod pocztowy musi mieć format XX-XXX (np. 00-001).")
 
         # --- 2. Walidacja Nr Domu ---
-        # Musi zaczynać się od 1-9 (nie zero)
+        # Reguła: Musi zaczynać się od cyfry 1-9 (nie 0).
         nr_domu = cleaned_data.get("nr_domu")
         if nr_domu:
             wzorzec_dom = r'^[1-9][0-9a-zA-Z/]*$'
@@ -57,12 +57,19 @@ class RodzinaForm(BootstrapFormMixin, forms.ModelForm):
                 self.add_error("nr_domu", "Musi zaczynać się od cyfry (nie 0). Dozwolone tylko litery, cyfry i znak '/'.")
 
         # --- 3. Walidacja Nr Mieszkania ---
-        # Może zaczynać się od 0-9 (zero dozwolone)
+        # Reguła: Musi zaczynać się od cyfry 0-9 (MOŻE być 0).
         nr_mieszkania = cleaned_data.get("nr_mieszkania")
         if nr_mieszkania:
-            wzorzec_mieszkanie = r'^[0-9][0-9a-zA-Z/]*$' # <--- ZMIANA
+            wzorzec_mieszkanie = r'^[0-9][0-9a-zA-Z/]*$'
             if not re.match(wzorzec_mieszkanie, nr_mieszkania):
                 self.add_error("nr_mieszkania", "Musi zaczynać się od cyfry (może być 0). Dozwolone tylko litery, cyfry i znak '/'.")
+
+        # --- 4. Walidacja Telefonu ---
+        telefon = cleaned_data.get("telefon_kontaktowy")
+        if telefon:
+            # Sprawdzamy czy ciąg znaków składa się tylko z cyfr
+            if not telefon.isdigit():
+                self.add_error("telefon_kontaktowy", "Numer telefonu może składać się wyłącznie z cyfr (bez spacji, myślników i +).")
 
         return cleaned_data
 

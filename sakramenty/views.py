@@ -54,25 +54,26 @@ class ChrzestListaView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         qs = Chrzest.objects.select_related("ochrzczony").order_by("-rok", "akt_nr")
 
-        # filtrowanie po roku i wyszukiwanie
+        # 1. Filtrowanie po frazie (nazwisko, imię, nr aktu)
         szukaj = (self.request.GET.get("q") or "").strip()
-        rok = (self.request.GET.get("rok") or "").strip()
-
-        if rok:
-            qs = qs.filter(rok=rok)
-
         if szukaj:
-            # szukaj po nazwisku, imieniu albo nr aktu
             qs = qs.filter(
                 Q(ochrzczony__nazwisko__icontains=szukaj)
                 | Q(ochrzczony__imie_pierwsze__icontains=szukaj)
                 | Q(akt_nr__icontains=szukaj)
             )
 
+        # 2. Filtrowanie po ROKU (Nowe)
+        # W modelu Chrzest pole nazywa się 'rok' (CharField lub IntegerField)
+        rok = (self.request.GET.get("rok") or "").strip()
+        if rok:
+            qs = qs.filter(rok=rok)
+
         return qs
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
+        # Przekazujemy parametry do szablonu, aby je wyświetlić w polach formularza
         ctx["filtr_q"] = self.request.GET.get("q", "")
         ctx["filtr_rok"] = self.request.GET.get("rok", "")
         return ctx
@@ -197,7 +198,9 @@ class ChrzestDrukView(LoginRequiredMixin, DetailView):
 # === I KOMUNIA ŚW.
 # =============================================================================
 
-class KomuniaListaView(LoginRequiredMixin, ListView): # <-- Poprawka: ListView i LoginRequiredMixin
+# sakramenty/views.py
+
+class KomuniaListaView(LoginRequiredMixin, ListView):
     model = PierwszaKomunia
     template_name = "sakramenty/komunia_lista.html"
     context_object_name = "komunie"
@@ -206,15 +209,23 @@ class KomuniaListaView(LoginRequiredMixin, ListView): # <-- Poprawka: ListView i
 
     def get_queryset(self):
         qs = super().get_queryset().select_related("osoba")
+        
+        # 1. Filtrowanie po frazie (nazwisko, imię, parafia)
         q = (self.request.GET.get("q") or "").strip()
         if q:
             for slowo in q.split():
                 qs = qs.filter(
                     Q(osoba__nazwisko__icontains=slowo)
                     | Q(osoba__imie_pierwsze__icontains=slowo)
-                    | Q(parafia__nazwa__icontains=slowo) # Poprawka: Model Komunii ma pole parafia (nie tekst)
-                    | Q(rok__icontains=slowo)
+                    | Q(parafia__nazwa__icontains=slowo)
                 )
+        
+        # 2. Filtrowanie po ROKU (Nowe)
+        rok = (self.request.GET.get("rok") or "").strip()
+        if rok and rok.isdigit():
+            # W modelu PierwszaKomunia pole nazywa się 'rok' (CharField lub IntegerField)
+            qs = qs.filter(rok=rok)
+
         return qs
 
 
@@ -300,7 +311,12 @@ class KomuniaDrukView(LoginRequiredMixin, DetailView):
     model = PierwszaKomunia
     template_name = "sakramenty/druki/komunia_druk.html"
     context_object_name = "komunia"
-
+    
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        # To naprawia brakującą datę:
+        ctx["today"] = timezone.localdate() 
+        return ctx
 
 # =============================================================================
 # === BIERZMOWANIE
@@ -583,16 +599,25 @@ class NamaszczenieListaView(LoginRequiredMixin, ListView):
         qs = (
             NamaszczenieChorych.objects.all()
             .select_related("osoba", "szafarz")
-            .order_by("-data", "osoba__nazwisko", "osoba__imie_pierwsze") # Poprawka: Dodane sortowanie
+            .order_by("-data", "osoba__nazwisko", "osoba__imie_pierwsze")
         )
+        
+        # 1. Filtrowanie po frazie (istniejące)
         q = (self.request.GET.get("q") or "").strip()
         if q:
             qs = qs.filter(
                 Q(osoba__nazwisko__icontains=q)
                 | Q(osoba__imie_pierwsze__icontains=q)
                 | Q(miejsce__icontains=q)
-                | Q(szafarz__imie_nazwisko__icontains=q) # Zakładam pole imie_nazwisko
+                | Q(szafarz__imie_nazwisko__icontains=q)
             )
+
+        # 2. Filtrowanie po ROKU (Nowe)
+        rok = (self.request.GET.get("rok") or "").strip()
+        if rok and rok.isdigit():
+            # Filtrujemy po roku z pola daty (data__year)
+            qs = qs.filter(data__year=rok)
+
         return qs
 
 

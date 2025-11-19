@@ -5,7 +5,7 @@ from django.db import transaction
 from .models import Chrzest, PierwszaKomunia, Bierzmowanie, Malzenstwo, NamaszczenieChorych, Zgon
 from osoby.models import Osoba
 from slowniki.models import Parafia, Duchowny 
-from django.db.models import Q
+from django.db.models import Q, Max
 
 
 class BootstrapFormMixin:
@@ -25,20 +25,53 @@ class DateInput(forms.DateInput):
     input_type = "date"
 
 # =============================================================================
+# === POMOCNICZA FUNKCJA WALIDACJI NUMERACJI ===
+# =============================================================================
+def ustal_numer_aktu(model_class, rok, podany_nr, instance_pk=None):
+    """
+    Zwraca: (czy_sukces, wynik_lub_blad)
+    """
+    if not rok:
+        return False, "Brak roku - nie można zweryfikować numeru aktu."
+
+    if podany_nr:
+        # A) RĘCZNY
+        if not str(podany_nr).isdigit():
+             return False, "Numer aktu może składać się tylko z cyfr."
+        
+        qs = model_class.objects.filter(rok=rok, akt_nr=podany_nr)
+        if instance_pk:
+            qs = qs.exclude(pk=instance_pk)
+        
+        if qs.exists():
+            return False, f"Numer aktu {podany_nr} w roku {rok} już istnieje! Wybierz inny."
+        
+        return True, podany_nr
+    else:
+        # B) AUTOMAT
+        istniejace = model_class.objects.filter(rok=rok).values_list('akt_nr', flat=True)
+        max_nr = 0
+        for numer_str in istniejace:
+            if numer_str and numer_str.isdigit():
+                n = int(numer_str)
+                if n > max_nr:
+                    max_nr = n
+        return True, str(max_nr + 1)
+
+
+# =============================================================================
 # === CHRZEST
 # =============================================================================
 class ChrzestForm(BootstrapFormMixin, forms.ModelForm):
     class Meta:
         model = Chrzest
         fields = [
-            "rok", "akt_nr",
-            "ochrzczony",
+            "rok", "akt_nr", "ochrzczony",
             "data_urodzenia", "rok_urodzenia", "miejsce_urodzenia",
             "data_chrztu", "rok_chrztu", "miejsce_chrztu","parafia",
             "ojciec", "ojciec_wyznanie",
             "matka", "nazwisko_matki_rodowe", "matka_wyznanie",
-            "uwagi_wew",
-            "skan_aktu",
+            "uwagi_wew", "skan_aktu",
         ]
         widgets = {
             "data_urodzenia": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
@@ -56,6 +89,11 @@ class ChrzestForm(BootstrapFormMixin, forms.ModelForm):
         
         self.fields["rok"].required = False
         self.fields["rok"].widget.attrs.pop("required", None)
+        
+        self.fields["akt_nr"].required = False
+        self.fields["akt_nr"].widget.attrs.pop("required", None)
+        self.fields["akt_nr"].widget.attrs["placeholder"] = "Puste = automat"
+
         if "rok_chrztu" in self.fields:
             self.fields["rok_chrztu"].required = False
             self.fields["rok_chrztu"].widget.attrs.pop("required", None)
@@ -72,37 +110,37 @@ class ChrzestForm(BootstrapFormMixin, forms.ModelForm):
             if qs.exists():
                 raise forms.ValidationError("Ta osoba ma już wpis chrztu.")
 
-        akt_nr = cleaned.get("akt_nr")
-        if akt_nr:
-            if not str(akt_nr).isdigit():
-                self.add_error("akt_nr", "Numer aktu może składać się tylko z cyfr.")
-
         data_chrztu = cleaned.get("data_chrztu")
-        data_urodzenia = cleaned.get("data_urodzenia")
         rok_ksiegi = cleaned.get("rok")
-        rok_chrztu = cleaned.get("rok_chrztu")
+        akt_nr = cleaned.get("akt_nr")
 
+        finalny_rok = rok_ksiegi
+        if not finalny_rok and data_chrztu:
+            finalny_rok = data_chrztu.year
+            cleaned["rok"] = finalny_rok
+
+        if finalny_rok:
+            sukces, wynik = ustal_numer_aktu(Chrzest, finalny_rok, akt_nr, self.instance.pk)
+            if sukces:
+                cleaned["akt_nr"] = wynik
+            else:
+                self.add_error("akt_nr", wynik)
+        else:
+            if not akt_nr:
+                 self.add_error("rok", "Podaj datę chrztu lub rok, aby nadać numer.")
+
+        data_urodzenia = cleaned.get("data_urodzenia")
         if data_chrztu:
-            if not rok_ksiegi:
-                cleaned["rok"] = data_chrztu.year
-                rok_ksiegi = data_chrztu.year 
-            
-            if "rok_chrztu" in self.fields and not rok_chrztu:
-                cleaned["rok_chrztu"] = data_chrztu.year
-                rok_chrztu = data_chrztu.year
-
-        if data_chrztu and data_chrztu > today:
-            self.add_error("data_chrztu", "Data chrztu nie może być z przyszłości.")
-
-        if data_chrztu and data_urodzenia:
-            if data_chrztu < data_urodzenia:
+            if data_chrztu > today:
+                self.add_error("data_chrztu", "Data chrztu nie może być z przyszłości.")
+            if data_urodzenia and data_chrztu < data_urodzenia:
                 self.add_error("data_chrztu", "Data chrztu nie może być wcześniejsza niż data urodzenia.")
         
         return cleaned
 
 
 # =============================================================================
-# === I KOMUNIA ŚWIĘTA
+# === I KOMUNIA ŚWIĘTA (ZMODYFIKOWANA)
 # =============================================================================
 class PierwszaKomuniaForm(BootstrapFormMixin, forms.ModelForm):
     class Meta:
@@ -110,25 +148,33 @@ class PierwszaKomuniaForm(BootstrapFormMixin, forms.ModelForm):
         fields = ["osoba", "rok", "parafia", "uwagi_wew"]
         widgets = {
             "uwagi_wew": forms.Textarea(attrs={"rows": 3}),
+            # ZMIANA: TextInput z blokadą wpisywania
+            "rok": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "RRRR",
+                "maxlength": "4",  # Blokuje wpisanie więcej niż 4 znaków
+                # Skrypt JS blokujący wpisywanie liter (pozwala tylko na cyfry)
+                "oninput": "this.value = this.value.replace(/[^0-9]/g, '');"
+            }),
         }
         labels = {
             "rok": "Rok I Komunii",
             "parafia": "Parafia (miejsce Komunii)",
             "uwagi_wew": "Uwagi (tylko do kancelarii)",
         }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        biezacy_rok = timezone.now().year
-        ZAKRES_LAT = range(biezacy_rok - 100, biezacy_rok + 6)
-        wybory_lat = [('', '---------')] + [(r, r) for r in reversed(ZAKRES_LAT)]
-        self.fields['rok'].widget = forms.Select(
-            choices=wybory_lat,
-            attrs={'class': 'form-select form-select-sm'} 
-        )
-        if not self.instance.pk:
-            self.fields['rok'].initial = biezacy_rok
             
+    def clean_rok(self):
+        rok = self.cleaned_data.get("rok")
+        if rok:
+            # Dodatkowa weryfikacja po stronie serwera
+            if not str(rok).isdigit() or len(str(rok)) != 4:
+                raise forms.ValidationError("Rok musi składać się dokładnie z 4 cyfr.")
+            
+            current_year = timezone.now().year
+            if int(rok) > current_year + 1:
+                 raise forms.ValidationError("Rok nie może być z dalekiej przyszłości.")
+        return rok
+
     def clean(self):
         cleaned = super().clean()
         osoba = cleaned.get("osoba")
@@ -145,141 +191,84 @@ class PierwszaKomuniaForm(BootstrapFormMixin, forms.ModelForm):
 # === BIERZMOWANIE
 # =============================================================================
 class BierzmowanieForm(BootstrapFormMixin, forms.ModelForm):
-    parafia_nowa = forms.CharField(
-        required=False,
-        label="Albo wpisz nową parafię",
-        widget=forms.TextInput(attrs={"class": "form-control"}),
-        help_text="Jeśli nie ma na liście powyżej, wpisz ręcznie."
-    )
-    szafarz_nowy = forms.CharField(
-        required=False,
-        label="Albo wpisz nowego szafarza",
-        widget=forms.TextInput(attrs={
-            "class": "form-control",
-            "placeholder": "Np. «bp Jan Kowalski» albo «ks. Piotr Nowak»"
-        }),
-        help_text="Jeśli brak na liście powyżej, wpisz ręcznie."
-    )
+    parafia_nowa = forms.CharField(required=False, label="Albo wpisz nową parafię", widget=forms.TextInput(attrs={"class": "form-control"}))
+    szafarz_nowy = forms.CharField(required=False, label="Albo wpisz nowego szafarza", widget=forms.TextInput(attrs={"class": "form-control"}))
 
     class Meta:
         model = Bierzmowanie
-        fields = [
-            "osoba",
-            "rok",
-            "akt_nr",
-            "data_bierzmowania",
-            "miejsce_bierzmowania",
-            "imie_bierzmowania",
-            "parafia",
-            "szafarz",
-            "swiadek",
-            "uwagi_wew",
-            "skan_aktu",
-        ]
+        fields = ["osoba", "rok", "akt_nr", "data_bierzmowania", "miejsce_bierzmowania", "imie_bierzmowania", "parafia", "szafarz", "swiadek", "uwagi_wew", "skan_aktu"]
         widgets = {
             "osoba": forms.Select(attrs={"class": "form-control"}),
-            "rok": forms.TextInput(attrs={"class": "form-control", "placeholder": "Rok bierzmowania"}),
-            "akt_nr": forms.TextInput(attrs={"class": "form-control", "placeholder": "Nr aktu bierzmowania"}),
-            "data_bierzmowania": forms.DateInput(
-                attrs={"class": "form-control", "type": "date"},
-                format="%Y-%m-%d",
-            ),
-            "imie_bierzmowania": forms.TextInput(attrs={"class": "form-control"}),
-            "miejsce_bierzmowania": forms.TextInput(attrs={"class": "form-control"}),
-            "parafia": forms.Select(attrs={"class": "form-control"}),
-            "szafarz": forms.Select(attrs={"class": "form-control"}),
-            "swiadek": forms.TextInput(attrs={"class": "form-control"}),
+            "rok": forms.TextInput(attrs={"class": "form-control", "placeholder": "Rok"}),
+            "akt_nr": forms.TextInput(attrs={"class": "form-control", "placeholder": "Puste = automat"}),
+            "data_bierzmowania": forms.DateInput(attrs={"class": "form-control", "type": "date"}, format="%Y-%m-%d"),
             "uwagi_wew": forms.Textarea(attrs={"class": "form-control", "rows": 2}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        
+        # Rok jako Select
         biezacy_rok = timezone.now().year
         ZAKRES_LAT = range(biezacy_rok - 100, biezacy_rok + 6)
         wybory_lat = [('', '---------')] + [(r, r) for r in reversed(ZAKRES_LAT)]
-        
-        self.fields['rok'].widget = forms.Select(
-            choices=wybory_lat,
-            attrs={'class': 'form-select form-select-sm'}
-        )
+        self.fields['rok'].widget = forms.Select(choices=wybory_lat, attrs={'class': 'form-select form-select-sm'})
 
         self.fields["rok"].required = False
-        self.fields["rok"].widget.attrs.pop("required", None)
-        self.fields["akt_nr"].required = True
+        self.fields["akt_nr"].required = False
         self.fields["parafia"].required = False
         self.fields["szafarz"].required = False
 
     def clean(self):
         cleaned = super().clean()
-
+        today = timezone.localdate()
         osoba = cleaned.get("osoba")
         if osoba:
             qs = Bierzmowanie.objects.filter(osoba=osoba)
-            if self.instance.pk:
-                qs = qs.exclude(pk=self.instance.pk)
-            if qs.exists():
-                raise forms.ValidationError("Ta osoba ma już wpis bierzmowania.")
-
-        akt_nr = cleaned.get("akt_nr")
-        if akt_nr:
-            if not str(akt_nr).isdigit():
-                self.add_error("akt_nr", "Numer aktu może składać się tylko z cyfr.")
+            if self.instance.pk: qs = qs.exclude(pk=self.instance.pk)
+            if qs.exists(): raise forms.ValidationError("Ta osoba ma już wpis bierzmowania.")
 
         data_bierzmowania = cleaned.get("data_bierzmowania")
         rok = cleaned.get("rok")
-        
-        # Auto-rok
-        if (rok is None or str(rok).strip() == "") and data_bierzmowania:
-            cleaned["rok"] = data_bierzmowania.year 
-        
-        today = timezone.localdate()
+        if not rok and data_bierzmowania:
+            rok = data_bierzmowania.year
+            cleaned["rok"] = rok
+
+        akt_nr = cleaned.get("akt_nr")
+        if rok:
+            sukces, wynik = ustal_numer_aktu(Bierzmowanie, rok, akt_nr, self.instance.pk)
+            if sukces: cleaned["akt_nr"] = wynik
+            else: self.add_error("akt_nr", wynik)
+        else:
+            if not akt_nr: self.add_error("rok", "Podaj datę bierzmowania lub rok.")
+
         if data_bierzmowania:
-            if data_bierzmowania > today:
-                self.add_error("data_bierzmowania", "Data bierzmowania nie może być z przyszłości.")
-            
-            if not osoba and self.instance.pk:
-                osoba = self.instance.osoba
-            
+            if data_bierzmowania > today: self.add_error("data_bierzmowania", "Data z przyszłości.")
+            if not osoba and self.instance.pk: osoba = self.instance.osoba
             if osoba and getattr(osoba, 'data_urodzenia', None):
                 if data_bierzmowania < osoba.data_urodzenia:
-                    self.add_error(
-                        'data_bierzmowania', 
-                        f'Data bierzmowania nie może być wcześniejsza niż data urodzenia osoby ({osoba.data_urodzenia}).'
-                    )
-
+                    self.add_error('data_bierzmowania', 'Data bierzmowania wcześniejsza niż urodzenie.')
         return cleaned
 
     def save(self, commit=True):
         instance = super().save(commit=False)
         c = self.cleaned_data
-
-        if c.get("rok") is not None:
-            instance.rok = c["rok"]
-
-        wybrana_parafia = c.get("parafia")
-        nowa_parafia_txt = (c.get("parafia_nowa") or "").strip()
-        if wybrana_parafia:
-            instance.parafia = wybrana_parafia
-            if hasattr(instance, "parafia_nazwa_reczna"):
-                instance.parafia_nazwa_reczna = ""
+        if c.get("rok") is not None: instance.rok = c["rok"]
+        
+        if c.get("parafia"):
+             instance.parafia = c["parafia"]
+             if hasattr(instance, "parafia_nazwa_reczna"): instance.parafia_nazwa_reczna = ""
         else:
-            instance.parafia = None
-            if hasattr(instance, "parafia_nazwa_reczna"):
-                instance.parafia_nazwa_reczna = nowa_parafia_txt
-
-        wybrany_szafarz = c.get("szafarz")
-        nowy_szafarz_txt = (c.get("szafarz_nowy") or "").strip()
-        if wybrany_szafarz:
-            instance.szafarz = wybrany_szafarz
-            if hasattr(instance, "szafarz_opis_reczny"):
-                instance.szafarz_opis_reczny = ""
+             instance.parafia = None
+             if hasattr(instance, "parafia_nazwa_reczna"): instance.parafia_nazwa_reczna = (c.get("parafia_nowa") or "").strip()
+        
+        if c.get("szafarz"):
+             instance.szafarz = c["szafarz"]
+             if hasattr(instance, "szafarz_opis_reczny"): instance.szafarz_opis_reczny = ""
         else:
-            instance.szafarz = None
-            if hasattr(instance, "szafarz_opis_reczny"):
-                instance.szafarz_opis_reczny = nowy_szafarz_txt
-
-        if commit:
-            instance.save()
+             instance.szafarz = None
+             if hasattr(instance, "szafarz_opis_reczny"): instance.szafarz_opis_reczny = (c.get("szafarz_nowy") or "").strip()
+        if commit: instance.save()
         return instance
 
 
@@ -287,114 +276,57 @@ class BierzmowanieForm(BootstrapFormMixin, forms.ModelForm):
 # === MAŁŻEŃSTWO
 # =============================================================================
 class MalzenstwoForm(BootstrapFormMixin, forms.ModelForm):
-    malzonek_b = forms.ModelChoiceField(
-        queryset=Osoba.objects.all().order_by("nazwisko", "imie_pierwsze"),
-        label="Współmałżonek",
-        help_text="Wybierz osobę, z którą zawarto małżeństwo."
-    )
-
-    parafia = forms.ModelChoiceField(
-        queryset=Parafia.objects.all().order_by("nazwa"),
-        required=False,
-        label="Parafia ślubu",
-        help_text="Wybierz z listy, albo wpisz nową parafię poniżej (ręcznie)."
-    )
-
-    parafia_opis_reczny = forms.CharField(
-        required=False,
-        label="Albo wpisz nową parafię",
-        help_text="Jeśli nie ma na liście powyżej.",
-        widget=forms.TextInput()
-    )
-
-    swiadek_urzedowy = forms.ModelChoiceField(
-        queryset=Duchowny.objects.all().order_by("tytul", "imie_nazwisko"),
-        required=False,
-        label="Świadek urzędowy / asystujący",
-        help_text="Kapłan / diakon, który asystował przy zawarciu małżeństwa."
-    )
-
-    swiadek_urzedowy_opis_reczny = forms.CharField(
-        required=False,
-        label="Albo wpisz nowego świadka/asystującego",
-        help_text="Np. «ks. Jan Kowalski», jeśli nie ma go na liście powyżej.",
-        widget=forms.TextInput()
-    )
+    malzonek_b = forms.ModelChoiceField(queryset=Osoba.objects.all().order_by("nazwisko", "imie_pierwsze"), label="Współmałżonek")
+    parafia = forms.ModelChoiceField(queryset=Parafia.objects.all().order_by("nazwa"), required=False)
+    parafia_opis_reczny = forms.CharField(required=False, widget=forms.TextInput())
+    swiadek_urzedowy = forms.ModelChoiceField(queryset=Duchowny.objects.all().order_by("tytul", "imie_nazwisko"), required=False)
+    swiadek_urzedowy_opis_reczny = forms.CharField(required=False, widget=forms.TextInput())
 
     class Meta:
         model = Malzenstwo
-        fields = [
-            "malzonek_a",
-            "malzonek_b",
-            "rok",
-            "akt_nr",
-            "data_slubu",
-            "parafia",
-            "parafia_opis_reczny",
-            "swiadek_urzedowy",
-            "swiadek_urzedowy_opis_reczny",
-            "swiadek_a",
-            "swiadek_b",
-            "uwagi_wew",
-            "skan_aktu",
-        ]
+        fields = ["malzonek_a", "malzonek_b", "rok", "akt_nr", "data_slubu", "parafia", "parafia_opis_reczny", "swiadek_urzedowy", "swiadek_urzedowy_opis_reczny", "swiadek_a", "swiadek_b", "uwagi_wew", "skan_aktu"]
         widgets = {
-            "rok": forms.TextInput(attrs={"placeholder": "Rok ślubu"}),
-            "akt_nr": forms.TextInput(attrs={"placeholder": "Nr aktu małżeństwa"}),
-            "data_slubu": forms.DateInput(
-                attrs={"type": "date"},
-                format="%Y-%m-%d"
-            ),
+            "rok": forms.TextInput(attrs={"placeholder": "Rok"}),
+            "akt_nr": forms.TextInput(attrs={"placeholder": "Puste = automat"}),
+            "data_slubu": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
             "uwagi_wew": forms.Textarea(attrs={"rows": 3}),
         }
 
     def __init__(self, *args, **kwargs):
         self.fixed_malzonek_a = kwargs.pop("malzonek_a_obj", None)
         super().__init__(*args, **kwargs)
-        
         biezacy_rok = timezone.now().year
         ZAKRES_LAT = range(biezacy_rok - 100, biezacy_rok + 6)
         wybory_lat = [('', '---------')] + [(r, r) for r in reversed(ZAKRES_LAT)]
-        self.fields['rok'].widget = forms.Select(
-            choices=wybory_lat,
-            attrs={'class': 'form-select form-select-sm'}
-        )
-
+        self.fields['rok'].widget = forms.Select(choices=wybory_lat, attrs={'class': 'form-select form-select-sm'})
         self.fields["rok"].required = False
-        self.fields["rok"].widget.attrs.pop("required", None)
-        self.fields["akt_nr"].required = True
-
+        self.fields["akt_nr"].required = False
         self.fields["malzonek_a"].queryset = Osoba.objects.order_by("nazwisko","imie_pierwsze")
         self.fields["malzonek_b"].queryset = Osoba.objects.order_by("nazwisko","imie_pierwsze")
-    
-        if self.fixed_malzonek_a:
-            self.fields["malzonek_a"].required = False
+        if self.fixed_malzonek_a: self.fields["malzonek_a"].required = False
 
     def clean(self):
         cleaned = super().clean()
-
-        akt_nr = cleaned.get("akt_nr")
-        if akt_nr:
-            if not str(akt_nr).isdigit():
-                self.add_error("akt_nr", "Numer aktu może składać się tylko z cyfr.")
-
         data_slubu = cleaned.get("data_slubu")
         rok = cleaned.get("rok")
-        
-        if (rok is None or str(rok).strip() == "") and data_slubu:
-            cleaned["rok"] = data_slubu.year
+        if not rok and data_slubu:
+            rok = data_slubu.year
+            cleaned["rok"] = rok
+
+        akt_nr = cleaned.get("akt_nr")
+        if rok:
+            sukces, wynik = ustal_numer_aktu(Malzenstwo, rok, akt_nr, self.instance.pk)
+            if sukces: cleaned["akt_nr"] = wynik
+            else: self.add_error("akt_nr", wynik)
+        else:
+            if not akt_nr: self.add_error("rok", "Podaj datę ślubu lub rok.")
 
         a = cleaned.get("malzonek_a") or self.fixed_malzonek_a or self.initial.get("malzonek_a") or self.instance.malzonek_a
         b = cleaned.get("malzonek_b")
-        if a and not hasattr(a, "pk"):
-            a = Osoba.objects.filter(pk=a).first()
-        if not a:
-            self.add_error("malzonek_a", "Wskaż małżonka A.")
-        if not b:
-            self.add_error("malzonek_b", "Wskaż małżonka B.")
-        if a and b and a == b:
-            self.add_error("malzonek_b", "Małżonkowie muszą być różni.")
-
+        if a and not hasattr(a, "pk"): a = Osoba.objects.filter(pk=a).first()
+        if not a: self.add_error("malzonek_a", "Wskaż małżonka A.")
+        if not b: self.add_error("malzonek_b", "Wskaż małżonka B.")
+        if a and b and a == b: self.add_error("malzonek_b", "Małżonkowie muszą być różni.")
         return cleaned
 
 
@@ -404,56 +336,24 @@ class MalzenstwoForm(BootstrapFormMixin, forms.ModelForm):
 class NamaszczenieChorychForm(BootstrapFormMixin, forms.ModelForm):
     class Meta:
         model = NamaszczenieChorych
-        fields = [
-            "osoba",
-            "data",
-            "miejsce",
-            "szafarz",
-            "spowiedz",
-            "komunia",
-            "namaszczenie",
-            "uwagi_wew",
-        ]
+        fields = ["osoba", "data", "miejsce", "szafarz", "spowiedz", "komunia", "namaszczenie", "uwagi_wew"]
         widgets = {
             "data": forms.DateInput(attrs={"type": "date"}),
             "uwagi_wew": forms.Textarea(attrs={"rows": 3}),
         }
-        labels = {
-            "data": "Data posługi",
-            "miejsce": "Miejsce",
-            "szafarz": "Szafarz",
-            "spowiedz": "Spowiedź",
-            "komunia": "Komunia Święta",
-            "namaszczenie": "Namaszczenie chorych",
-            "uwagi_wew": "Uwagi duszpasterskie",
-        }
-        help_texts = {
-            "miejsce": "Np. dom chorego, szpital",
-            "szafarz": "Kto udzielił posługi (np. ks. Jan Nowak)",
-        }
-
     def clean(self):
         cleaned = super().clean()
         today = timezone.localdate()
-
-        if not self.initial.get("osoba") and not cleaned.get("osoba"):
-            self.add_error("osoba", "Wybierz osobę.")
-        
+        if not self.initial.get("osoba") and not cleaned.get("osoba"): self.add_error("osoba", "Wybierz osobę.")
         data = cleaned.get("data")
         if data:
-            if data > today:
-                self.add_error("data", "Data posługi nie może być z przyszłości.")
-            
+            if data > today: self.add_error("data", "Data z przyszłości.")
             osoba = cleaned.get("osoba")
-            if not osoba and self.instance.pk:
-                osoba = self.instance.osoba
-            
+            if not osoba and self.instance.pk: osoba = self.instance.osoba
             if osoba and getattr(osoba, 'data_urodzenia', None):
-                if data < osoba.data_urodzenia:
-                    self.add_error("data", f"Data posługi nie może być wcześniejsza niż data urodzenia ({osoba.data_urodzenia}).")
-
+                if data < osoba.data_urodzenia: self.add_error("data", "Data wcześniejsza niż urodzenie.")
         return cleaned
-    
+
 
 # =============================================================================
 # === ZGON
@@ -461,70 +361,47 @@ class NamaszczenieChorychForm(BootstrapFormMixin, forms.ModelForm):
 class ZgonForm(BootstrapFormMixin, forms.ModelForm):
     class Meta:
         model = Zgon
-        fields = [
-            "osoba",
-            "rok",
-            "akt_nr",
-            "data_zgonu",
-            "miejsce_zgonu",
-            "data_pogrzebu",
-            "cmentarz",
-            "uwagi_wew",
-        ]
+        fields = ["osoba", "rok", "akt_nr", "data_zgonu", "miejsce_zgonu", "data_pogrzebu", "cmentarz", "uwagi_wew"]
         widgets = {
             "data_zgonu": forms.DateInput(attrs={"type": "date"}),
             "data_pogrzebu": forms.DateInput(attrs={"type": "date"}),
             "uwagi_wew": forms.Textarea(attrs={"rows":3}),
+            "akt_nr": forms.TextInput(attrs={"placeholder": "Puste = automat"}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["osoba"].queryset = Osoba.objects.order_by("nazwisko", "imie_pierwsze")
-        self.fields["osoba"].label = "Osoba zmarła"
-        
-        # ZMIANA: Rok opcjonalny (auto-fill), akt_nr wymagany
         self.fields["rok"].required = False
-        self.fields["akt_nr"].required = True
+        self.fields["akt_nr"].required = False
 
     def clean(self):
-        cleaned_data = super().clean()
+        cleaned = super().clean()
+        data_zgonu = cleaned.get("data_zgonu")
+        rok = cleaned.get("rok")
+        if not rok and data_zgonu:
+            rok = data_zgonu.year
+            cleaned["rok"] = rok
+
+        akt_nr = cleaned.get("akt_nr")
+        if rok:
+            sukces, wynik = ustal_numer_aktu(Zgon, rok, akt_nr, self.instance.pk)
+            if sukces: cleaned["akt_nr"] = wynik
+            else: self.add_error("akt_nr", wynik)
+        else:
+            if not akt_nr: self.add_error("rok", "Podaj datę zgonu lub rok.")
+
+        data_pogrzebu = cleaned.get("data_pogrzebu")
+        osoba = cleaned.get("osoba") 
+        if not osoba and self.instance.pk: osoba = self.instance.osoba
+        if not osoba: return cleaned
         
-        # 1. Walidacja Nr Aktu
-        akt_nr = cleaned_data.get("akt_nr")
-        if akt_nr:
-            if not str(akt_nr).isdigit():
-                self.add_error("akt_nr", "Numer aktu może składać się tylko z cyfr.")
+        today = timezone.localdate()
+        if data_zgonu:
+            if data_zgonu > today: self.add_error('data_zgonu', 'Data z przyszłości.')
+            if getattr(osoba, 'data_urodzenia', None) and data_zgonu < osoba.data_urodzenia:
+                self.add_error('data_zgonu', 'Data zgonu wcześniejsza niż urodzenie.')
 
-        data_zgonu = cleaned_data.get("data_zgonu")
-        data_pogrzebu = cleaned_data.get("data_pogrzebu")
-        osoba = cleaned_data.get("osoba") 
-        rok = cleaned_data.get("rok")
-
-        # 2. Auto-rok
-        if (rok is None or str(rok).strip() == "") and data_zgonu:
-            cleaned_data["rok"] = data_zgonu.year
-
-        if not osoba and self.instance.pk:
-            osoba = self.instance.osoba
-        
-        if not osoba:
-            return cleaned_data
-
-        # 3. Walidacja zgon < urodzenie
-        data_urodzenia = getattr(osoba, 'data_urodzenia', None)
-        if data_zgonu and data_urodzenia:
-            if data_zgonu < data_urodzenia:
-                self.add_error(
-                    'data_zgonu', 
-                    'Data zgonu nie może być wcześniejsza niż data urodzenia tej osoby.'
-                )
-        
-        # 4. Walidacja pogrzeb < zgon
         if data_zgonu and data_pogrzebu:
-            if data_pogrzebu < data_zgonu:
-                self.add_error(
-                    'data_pogrzebu', 
-                    'Data pogrzebu nie może być wcześniejsza niż data zgonu.'
-                )
-
-        return cleaned_data
+            if data_pogrzebu < data_zgonu: self.add_error('data_pogrzebu', 'Data pogrzebu wcześniejsza niż zgon.')
+        return cleaned

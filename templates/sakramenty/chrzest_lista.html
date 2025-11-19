@@ -20,15 +20,28 @@
   </div>
 </div>
 
-<form method="get" class="mb-3">
+{# --- ZMIANA: Formularz teraz zawiera pole ROK --- #}
+<form method="get" class="mb-3 d-flex gap-2 align-items-center flex-wrap">
+  
+  {# Pole Rok (księgi) #}
+  <div style="width: 100px;">
+    <input type="number" name="rok" class="form-control form-control-sm" 
+           value="{{ request.GET.rok }}" placeholder="Rok">
+  </div>
+
+  {# Główne pole wyszukiwania #}
   <div class="input-group input-group-sm" style="max-width:400px;">
-    <input class="form-control"
-           type="search"
-           name="q"
-           value="{{ request.GET.q }}"
-           placeholder="Nazwisko, rok, nr aktu…">
+    <input class="form-control" type="search" name="q" value="{{ request.GET.q }}"
+           placeholder="Nazwisko, nr aktu…">
     <button class="btn btn-outline-secondary">Szukaj</button>
   </div>
+
+  {# Przycisk czyszczenia filtrów #}
+  {% if request.GET.q or request.GET.rok %}
+    <a href="{% url 'chrzest_lista' %}" class="btn btn-sm btn-link text-decoration-none text-secondary">
+      ✕ Wyczyść
+    </a>
+  {% endif %}
 </form>
 
 <div class="card shadow-sm">
@@ -48,39 +61,30 @@
           <tbody>
             {% for wpis in chrzty %}
             <tr>
-
-             
-                 <!-- Rok / akt -->
               <td>
                 {{ wpis.rok }}/{{ wpis.akt_nr }}
               </td>
-              <!-- Osoba -->
               <td>
                 {{ wpis.ochrzczony.nazwisko }} {{ wpis.ochrzczony.imie_pierwsze }}
               </td>
 
-            <!-- Data chrztu -->
-              <td>
+            <td>
                 {% if wpis.data_chrztu %}
                   {{ wpis.data_chrztu }}
-                {% elif wpis.rok_chrztu %}
-                  {{ wpis.rok_chrztu }}
                 {% else %}
                   —
                 {% endif %}
               </td>
-              <!-- Data urodzenia -->
               <td>
                 {% if wpis.miejsce_chrztu %}
                   {{ wpis.miejsce_chrztu }}
-                {% elif wpis.miejsce_chrztu %}
-                  {{ wpis.miejsce_chrztu }}
+                {% elif wpis.parafia %}
+                  {{ wpis.parafia }}
                 {% else %}
-                  —
+                  — 
                 {% endif %}
               </td>
 
-              <!-- Akcje -->
               <td class="text-end">
                 <div class="btn-group btn-group-sm" role="group">
                   <a href="{% url 'chrzest_szczegoly' wpis.pk %}" class="btn btn-outline-secondary">
@@ -98,7 +102,7 @@
       </div>
     {% else %}
       <div class="p-3 text-muted small">
-        Brak wpisów chrztu.
+        Brak wpisów chrztu pasujących do kryteriów.
       </div>
     {% endif %}
   </div>

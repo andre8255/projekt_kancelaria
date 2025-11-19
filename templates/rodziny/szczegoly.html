@@ -4,7 +4,15 @@
 <div class="d-flex justify-content-between align-items-start mb-3">
   <h1 class="h5 mb-0">{{ rodzina.nazwa }}</h1>
 
+  
+
   <div class="ms-3 d-flex flex-wrap gap-2">
+
+    <a href="{% url 'rodzina_druk' rodzina.pk %}" target="_blank" class="btn btn-outline-secondary btn-sm">
+      🖨️ Drukuj kartotekę
+    </a>
+
+
     <a href="{% url 'rodzina_edytuj' rodzina.pk %}" class="btn btn-outline-secondary btn-sm">
       Edytuj
     </a>

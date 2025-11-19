@@ -51,8 +51,8 @@ class OsobaForm(BootstrapFormMixin, forms.ModelForm):
             "email",
             "uwagi",
         ]
-        # --- TUTAJ BYŁ BŁĄD - DODANO format='%Y-%m-%d' ---
         widgets = {
+           # Wymuszamy format Y-m-d, żeby data nie znikała przy edycji
            "data_urodzenia": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
            "data_zgonu": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
            "uwagi": forms.Textarea(attrs={"rows": 3}),
@@ -108,5 +108,12 @@ class OsobaForm(BootstrapFormMixin, forms.ModelForm):
             wzorzec_mieszkanie = r'^[0-9][0-9a-zA-Z/]*$'
             if not re.match(wzorzec_mieszkanie, nr_mieszkania):
                 self.add_error("nr_mieszkania", "Musi zaczynać się od cyfry (może być 0). Dozwolone tylko litery, cyfry i znak '/'.")
+
+        # --- 5. Walidacja Telefonu ---
+        telefon = cleaned_data.get("telefon")
+        if telefon:
+            # Sprawdzamy czy ciąg znaków składa się tylko z cyfr
+            if not telefon.isdigit():
+                self.add_error("telefon", "Numer telefonu może składać się wyłącznie z cyfr (bez spacji, myślników i +).")
 
         return cleaned_data

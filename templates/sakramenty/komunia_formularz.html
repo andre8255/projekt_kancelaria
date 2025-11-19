@@ -71,20 +71,27 @@
       </div>
     </div>
 </div>
-    {# --- ROK --- #}
-
-
-
+    {# --- ROK (Z RÓŻDŻKĄ) --- #}
     <div class="row g-3 mb-3">
-    <div class="col-md-4">
-      <label class="form-label small fw-semibold text-muted">
-        {{ form.rok.label }}
-      </label>
-      {{ form.rok }}
-      {% if form.rok.errors %}
-        <div class="text-danger small">{{ form.rok.errors }}</div>
-      {% endif %}
-    </div>
+      <div class="col-md-4">
+        <label class="form-label small fw-semibold text-muted">
+          {{ form.rok.label }}
+        </label>
+        
+        <div class="input-group">
+          {{ form.rok }}
+          {# Przycisk wywołujący funkcję ustawRok #}
+          <button class="btn btn-outline-secondary" type="button" 
+                  onclick="ustawRok('{{ form.rok.id_for_label }}')"
+                  title="Wstaw bieżący rok">
+            🪄
+          </button>
+        </div>
+
+        {% if form.rok.errors %}
+          <div class="text-danger small">{{ form.rok.errors }}</div>
+        {% endif %}
+      </div>
 
     {# ================== PARAFIA ================== #}
     <div class="col-md-4">
