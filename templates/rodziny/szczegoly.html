@@ -69,6 +69,14 @@
           </p>
         {% endif %}
 
+
+
+
+
+
+
+
+
         {% if not rodzina.telefon_kontaktowy and not rodzina.email_kontaktowy and not rodzina.uwagi %}
           <p class="mb-0 text-muted small">Brak danych kontaktowych.</p>
         {% endif %}
@@ -236,6 +244,75 @@
       </div>
     </div>
   </div>
+
+<hr class="my-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <h2 class="h6 fw-bold mb-0">Historia wizyt duszpasterskich (Kolęda)</h2>
+      <a href="{% url 'wizyta_nowa' rodzina.pk %}" class="btn btn-sm btn-outline-primary">
+        + Dodaj wizytę
+      </a>
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="card-body p-0">
+        {% if rodzina.wizyty.exists %}
+          <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Rok</th>
+                  <th>Data</th>
+                  <th>Status</th>
+                  <th>Ksiądz</th>
+                  <th>Notatka</th>
+                  <th class="text-end">Akcje</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for w in rodzina.wizyty.all %}
+                <tr class="{% if w.status == 'ODMOWA' %}table-danger{% elif w.status == 'NIEOBECNI' %}table-warning{% endif %}">
+                  <td class="fw-bold">{{ w.rok }}</td>
+                  <td>{{ w.data_wizyty|default:"—" }}</td>
+                  <td>
+                    {% if w.status == 'PRZYJETA' %}
+                      <span class="badge text-bg-success">Przyjęta</span>
+                    {% elif w.status == 'NIEOBECNI' %}
+                      <span class="badge text-bg-warning">Nieobecni</span>
+                    {% elif w.status == 'ODMOWA' %}
+                      <span class="badge text-bg-danger">Odmowa</span>
+                    {% else %}
+                      {{ w.get_status_display }}
+                    {% endif %}
+                  </td>
+                  <td>{{ w.ksiadz|default:"—" }}</td>
+                  <td class="text-muted fst-italic text-truncate" style="max-width: 200px;">
+                    {{ w.notatka }}
+                  </td>
+                  <td class="text-end">
+                    <a href="{% url 'wizyta_edytuj' w.pk %}" class="btn btn-link btn-sm p-0 text-secondary" title="Edytuj">
+                      ✏️
+                    </a>
+                    <a href="{% url 'wizyta_usun' w.pk %}" class="btn btn-link btn-sm p-0 text-danger ms-2" title="Usuń">
+                      🗑️
+                    </a>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div class="p-3 text-muted small text-center">
+            Brak odnotowanych wizyt. Kliknij "Dodaj wizytę", aby rozpocząć historię.
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+
+
+
 
 </div>
 

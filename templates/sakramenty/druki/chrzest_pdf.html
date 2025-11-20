@@ -1,0 +1,76 @@
+{% extends "base_pdf.html" %}
+
+{% block title %}Świadectwo Chrztu - {{ chrzest.ochrzczony.nazwisko }}{% endblock %}
+
+{% block content %}
+
+    <div class="text-center" style="margin-bottom: 1cm; font-size: 14pt; font-weight: bold;">
+        RZYMSKOKATOLICKA PARAFIA PW. <br>
+        {{chrzest.parafia.nazwa}} - {{chrzest.parafia.miejscowosc}}
+    </div>
+
+    <h1>Świadectwo Chrztu</h1>
+    <h2>Nr aktu: {{ chrzest.rok }}/{{ chrzest.akt_nr }}</h2>
+
+    <div style="margin: 1cm 0;">
+        Niniejszym zaświadcza się, że:
+    </div>
+
+    <table class="dane-table">
+        <tr>
+            <td class="label">Nazwisko i Imię:</td>
+            <td class="value bold">{{ chrzest.ochrzczony.nazwisko }} {{ chrzest.ochrzczony.imie_pierwsze }}</td>
+        </tr>
+        <tr>
+            <td class="label">Data urodzenia:</td>
+            <td class="value">{{ chrzest.ochrzczony.data_urodzenia|date:"d.m.Y" }}</td>
+        </tr>
+        <tr>
+            <td class="label">Miejsce urodzenia:</td>
+            <td class="value">{{ chrzest.ochrzczony.miejsce_urodzenia|default:"—" }}</td>
+        </tr>
+        <tr>
+            <td class="label">Ojciec:</td>
+            <td class="value">{{ chrzest.ojciec|default:"—" }}</td>
+        </tr>
+        <tr>
+            <td class="label">Matka (z domu):</td>
+            <td class="value">
+                {{ chrzest.matka|default:"—" }} 
+                {% if chrzest.nazwisko_matki_rodowe %} z domu {{ chrzest.nazwisko_matki_rodowe }}{% endif %}
+            </td>
+        </tr>
+    </table>
+
+    <div style="margin: 1cm 0; text-align: center;">
+        przyjął(a) Sakrament Chrztu Świętego
+    </div>
+
+    <table class="dane-table">
+        <tr>
+            <td class="label">Data chrztu:</td>
+            <td class="value bold">
+                {% if chrzest.data_chrztu %}
+                    {{ chrzest.data_chrztu|date:"d.m.Y" }} r.
+                {% else %}
+                    {{ chrzest.rok }} r.
+                {% endif %}
+            </td>
+        </tr>
+    </table>
+
+    <div style="margin-top: 1cm; border: 1px solid #ccc; padding: 10px; min-height: 3cm;">
+        <strong>Adnotacje o innych sakramentach:</strong><br>
+        {% if bierzmowanie %}
+            Bierzmowanie: {{ bierzmowanie.data_bierzmowania|date:"d.m.Y" }}, {{ bierzmowanie.parafia|default:"tutejsza" }}<br>
+        {% endif %}
+        </div>
+
+    <div class="footer">
+        <p>Miejscowość, dnia: {{ today|date:"d.m.Y" }}</p>
+        <br>
+        <p>.....................................................................<br>
+        <small>(podpis i pieczęć proboszcza)</small></p>
+    </div>
+
+{% endblock %}

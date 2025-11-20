@@ -1,0 +1,77 @@
+{% extends "base_pdf.html" %}
+{% block title %}Zaświadczenie - Namaszczenie Chorych{% endblock %}
+{% block content %}
+
+
+    <h1>Zaświadczenie</h1>
+    <h2>o udzieleniu posługi sakramentalnej chorym</h2>
+
+    <div style="margin: 1cm 0;">
+        Niniejszym zaświadcza się, że:
+    </div>
+
+    <table class="dane-table">
+        <tr>
+            <td class="label">Imię i Nazwisko:</td>
+            <td class="value bold">{{ namaszczenie.osoba.imie_pierwsze }} {{ namaszczenie.osoba.nazwisko }}</td>
+        </tr>
+        <tr>
+            <td class="label">Data urodzenia:</td>
+            <td class="value">{{ namaszczenie.osoba.data_urodzenia|date:"d.m.Y" }}</td>
+        </tr>
+        <tr>
+            <td class="label">Adres:</td>
+            <td class="value">
+                {{ namaszczenie.osoba.miejscowosc|default:"" }} {{ namaszczenie.osoba.ulica|default:"" }} {{ namaszczenie.osoba.nr_domu|default:"" }}
+            </td>
+        </tr>
+    </table>
+
+    <div style="margin: 0.5cm 0; text-align: center; font-weight: bold;">
+        PRZYJĄŁ(ĘŁA) SAKRAMENTY ŚWIĘTE
+    </div>
+
+    <table class="dane-table">
+        <tr>
+            <td class="label">Data:</td>
+            <td class="value bold">{{ namaszczenie.data|date:"d.m.Y" }}</td>
+        </tr>
+        <tr>
+            <td class="label">Miejsce:</td>
+            <td class="value">{{ namaszczenie.miejsce|default:"Dom chorego" }}</td>
+        </tr>
+        <tr>
+            <td class="label">Szafarz:</td>
+            <td class="value">
+                {% if namaszczenie.szafarz %}
+                    {{ namaszczenie.szafarz }}
+                {% else %}
+                    —
+                {% endif %}
+            </td>
+        </tr>
+    </table>
+
+    <div style="margin-top: 1cm; padding: 10px; border: 1px solid #000;">
+        <strong>Udzielono następujących sakramentów:</strong><br><br>
+        
+        <div style="margin-bottom: 5px;">
+            [{% if namaszczenie.spowiedz %} <strong>X</strong> {% else %} &nbsp;&nbsp; {% endif %}] Spowiedź Święta
+        </div>
+        
+        <div style="margin-bottom: 5px;">
+            [{% if namaszczenie.komunia %} <strong>X</strong> {% else %} &nbsp;&nbsp; {% endif %}] Komunia Święta (Wiatyk)
+        </div>
+        
+        <div>
+            [{% if namaszczenie.namaszczenie %} <strong>X</strong> {% else %} &nbsp;&nbsp; {% endif %}] Namaszczenie Olejem Chorych
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Miejscowość, dnia: {{ today|date:"d.m.Y" }}</p>
+        <br>
+        <p>........................................................<br><small>(Podpis kapłana)</small></p>
+    </div>
+
+{% endblock %}

@@ -1,6 +1,8 @@
 # sakramenty/views.py
 
 # === IMPORTY ===
+from django.views.generic import View
+from parafia.utils_pdf import render_to_pdf
 from django import forms
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -17,6 +19,7 @@ from django.views.generic import (
     UpdateView,
     DeleteView,
 )
+
 
 # Importy ról
 from konta.mixins import RolaWymaganaMixin
@@ -193,7 +196,27 @@ class ChrzestDrukView(LoginRequiredMixin, DetailView):
         ctx["http_request"] = self.request
         return ctx
 
-
+class ChrzestPDFView(LoginRequiredMixin, View): # Używamy View, nie DetailView
+    def get(self, request, *args, **kwargs):
+        # Pobieramy chrzest
+        chrzest = get_object_or_404(Chrzest, pk=kwargs['pk'])
+        
+        # Pobieramy bierzmowanie tej samej osoby (do adnotacji)
+        bierzmowanie = Bierzmowanie.objects.filter(osoba=chrzest.ochrzczony).first()
+        
+        # Kontekst danych dla szablonu
+        context = {
+            'chrzest': chrzest,
+            'bierzmowanie': bierzmowanie,
+            'today': timezone.localdate(),
+        }
+        
+        # Generujemy PDF
+        # Nazwa pliku np. "Swiadectwo_Chrztu_Kowalski.pdf"
+        filename = f"Swiadectwo_Chrztu_{chrzest.ochrzczony.nazwisko}.pdf"
+        
+        return render_to_pdf('sakramenty/druki/chrzest_pdf.html', context, filename)
+    
 # =============================================================================
 # === I KOMUNIA ŚW.
 # =============================================================================
@@ -311,7 +334,7 @@ class KomuniaDrukView(LoginRequiredMixin, DetailView):
     model = PierwszaKomunia
     template_name = "sakramenty/druki/komunia_druk.html"
     context_object_name = "komunia"
-    
+
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         # To naprawia brakującą datę:
@@ -828,3 +851,76 @@ class ZgonDrukView(LoginRequiredMixin, DetailView):
         ctx["today"] = timezone.localdate()
         ctx["http_request"] = self.request
         return ctx
+    
+
+# --- I KOMUNIA PDF ---
+class KomuniaPDFView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        komunia = get_object_or_404(PierwszaKomunia, pk=kwargs['pk'])
+        # Pobieramy chrzest dla adnotacji (opcjonalnie)
+        chrzest = Chrzest.objects.filter(ochrzczony=komunia.osoba).first()
+        
+        context = {
+            'komunia': komunia,
+            'chrzest': chrzest,
+            'today': timezone.localdate(),
+        }
+        filename = f"Komunia_{komunia.osoba.nazwisko}.pdf"
+        return render_to_pdf('sakramenty/druki/komunia_pdf.html', context, filename)
+
+# --- BIERZMOWANIE PDF ---
+class BierzmowaniePDFView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        bierzmowanie = get_object_or_404(Bierzmowanie, pk=kwargs['pk'])
+        # Pobieramy chrzest (do świadectwa bierzmowania często się wpisuje datę chrztu)
+        chrzest = Chrzest.objects.filter(ochrzczony=bierzmowanie.osoba).first()
+        
+        context = {
+            'bierzmowanie': bierzmowanie,
+            'chrzest': chrzest,
+            'today': timezone.localdate(),
+        }
+        filename = f"Bierzmowanie_{bierzmowanie.osoba.nazwisko}.pdf"
+        return render_to_pdf('sakramenty/druki/bierzmowanie_pdf.html', context, filename)
+
+# --- MAŁŻEŃSTWO PDF ---
+class MalzenstwoPDFView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        malzenstwo = get_object_or_404(Malzenstwo, pk=kwargs['pk'])
+        
+        context = {
+            'malzenstwo': malzenstwo,
+            'today': timezone.localdate(),
+        }
+        filename = f"Slub_{malzenstwo.malzonek_a.nazwisko}_{malzenstwo.malzonek_b.nazwisko}.pdf"
+        return render_to_pdf('sakramenty/druki/malzenstwo_pdf.html', context, filename)
+
+#--- NAMASZCZENIE PDF ---
+class NamaszczeniePDFView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        namaszczenie = get_object_or_404(NamaszczenieChorych, pk=kwargs['pk'])
+        
+        context = {
+            'namaszczenie': namaszczenie,
+            'today': timezone.localdate(),
+        }
+        filename = f"Namaszczenie_{namaszczenie.osoba.nazwisko}.pdf"
+        return render_to_pdf('sakramenty/druki/namaszczenie_pdf.html', context, filename)
+
+
+
+# --- ZGON PDF ---
+class ZgonPDFView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        zgon = get_object_or_404(Zgon, pk=kwargs['pk'])
+        
+        # Pobieramy sakramenty (czy był namaszczony przed śmiercią?)
+        ostatnie_namaszczenie = NamaszczenieChorych.objects.filter(osoba=zgon.osoba).order_by('-data').first()
+        
+        context = {
+            'zgon': zgon,
+            'namaszczenie': ostatnie_namaszczenie,
+            'today': timezone.localdate(),
+        }
+        filename = f"Zgon_{zgon.osoba.nazwisko}.pdf"
+        return render_to_pdf('sakramenty/druki/zgon_pdf.html', context, filename)

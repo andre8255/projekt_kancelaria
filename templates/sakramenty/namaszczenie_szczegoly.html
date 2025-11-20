@@ -5,6 +5,9 @@
   <h1 class="h5 mb-0">Namaszczenie chorych / posługa</h1>
 
   <div class="d-flex flex-wrap gap-2 ms-auto">
+    <a href="{% url 'namaszczenie_pdf' namaszczenie.pk %}" target="_blank" class="btn btn-outline-secondary btn-sm">
+    📄 Pobierz PDF (Zaświadczenie)
+  </a>
     <a href="{% url 'namaszczenie_druk' namaszczenie.pk %}" target="_blank" class="btn btn-outline-primary btn-sm">Drukuj</a>
     <a href="{% url 'namaszczenie_edytuj' namaszczenie.pk %}" class="btn btn-outline-secondary btn-sm">Edytuj</a>
     <a href="{% url 'namaszczenie_usun' namaszczenie.pk %}" class="btn btn-outline-danger btn-sm">Usuń</a>

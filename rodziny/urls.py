@@ -19,4 +19,10 @@ urlpatterns = [
     
     path("<int:rodzina_pk>/dodaj-czlonka/", views.DodajCzlonkaView.as_view(), name="rodzina_dodaj_czlonka"),
     path("<int:rodzina_pk>/czlonek/<int:czlonek_pk>/usun/", views.UsunCzlonkaZRodzinyView.as_view(), name="rodzina_usun_czlonka"),
+
+    # WIZYTY DUSZPASTERSKIE
+    path("<int:rodzina_pk>/wizyty/nowa/", views.WizytaNowaView.as_view(), name="wizyta_nowa"),
+    path("wizyty/<int:pk>/edycja/", views.WizytaEdycjaView.as_view(), name="wizyta_edytuj"),
+    path("wizyty/<int:pk>/usun/", views.WizytaUsunView.as_view(), name="wizyta_usun"),
+
 ]

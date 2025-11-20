@@ -1,0 +1,67 @@
+{% extends "base_pdf.html" %}
+{% block title %}Świadectwo Bierzmowania{% endblock %}
+{% block content %}
+
+    <div class="text-center" style="margin-bottom: 1cm; font-weight: bold;">
+        RZYMSKOKATOLICKA PARAFIA PW. <br> {{bierzmowanie.parafia.nazwa}} - {{bierzmowanie.parafia.miejscowosc}}
+    </div>
+
+    <h1>Świadectwo Bierzmowania</h1>
+    <h2>Nr aktu: {{ bierzmowanie.rok }}/{{ bierzmowanie.akt_nr }}</h2>
+
+    <table class="dane-table">
+        <tr>
+            <td class="label">Nazwisko i Imię:</td>
+            <td class="value bold">{{ bierzmowanie.osoba.nazwisko }} {{ bierzmowanie.osoba.imie_pierwsze }}</td>
+        </tr>
+        <tr>
+            <td class="label">Data i miejsce ur.:</td>
+            <td class="value">
+                {{ bierzmowanie.osoba.data_urodzenia|date:"d.m.Y" }}, {{ bierzmowanie.osoba.miejsce_urodzenia|default:"—" }}
+            </td>
+        </tr>
+        <tr>
+            <td class="label">Rodzice:</td>
+            <td class="value">{{ bierzmowanie.osoba.imie_ojca }} i {{ bierzmowanie.osoba.imie_matki }}</td>
+        </tr>
+    </table>
+
+    <div style="margin: 0.5cm 0; text-align: center; font-weight: bold;">
+        PRZYJĄŁ(ĘŁA) SAKRAMENT BIERZMOWANIA
+    </div>
+
+    <table class="dane-table">
+        <tr>
+            <td class="label">Data:</td>
+            <td class="value bold">{{ bierzmowanie.data_bierzmowania|date:"d.m.Y" }}</td>
+        </tr>
+        <tr>
+            <td class="label">Miejsce:</td>
+            <td class="value">{{ bierzmowanie.miejsce_bierzmowania|default:"Kościół Parafialny" }}</td>
+        </tr>
+        <tr>
+            <td class="label">Imię z bierzmowania:</td>
+            <td class="value bold">{{ bierzmowanie.imie_bierzmowania|default:"—" }}</td>
+        </tr>
+        <tr>
+            <td class="label">Szafarz:</td>
+            <td class="value">
+                {% if bierzmowanie.szafarz %}
+                    {{ bierzmowanie.szafarz }}
+                {% else %}
+                    {{ bierzmowanie.szafarz_opis_reczny|default:"—" }}
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td class="label">Świadek:</td>
+            <td class="value">{{ bierzmowanie.swiadek|default:"—" }}</td>
+        </tr>
+    </table>
+
+    <div class="footer">
+        <p>Miejscowość, dnia: {{ today|date:"d.m.Y" }}</p>
+        <br><br>
+        <p>........................................................<br><small>(Proboszcz)</small></p>
+    </div>
+{% endblock %}

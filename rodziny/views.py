@@ -15,8 +15,8 @@ from django.views.generic import (
 from konta.mixins import RolaWymaganaMixin
 from konta.models import Rola
 
-from .models import Rodzina, CzlonkostwoRodziny
-from .forms import RodzinaForm, DodajCzlonkaForm
+from .models import Rodzina, CzlonkostwoRodziny,WizytaDuszpasterska
+from .forms import RodzinaForm, DodajCzlonkaForm,WizytaForm
 from sakramenty.models import (
     Chrzest,
     PierwszaKomunia,
@@ -145,6 +145,51 @@ class RodzinaUsunView(RolaWymaganaMixin, DeleteView):
     def delete(self, request, *args, **kwargs):
         messages.success(request, "Rodzina została usunięta.")
         return super().delete(request, *args, **kwargs)
+
+# === WIZYTY DUSZPASTERSKIE ===
+
+class WizytaNowaView(RolaWymaganaMixin, CreateView):
+    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
+    model = WizytaDuszpasterska
+    form_class = WizytaForm
+    template_name = "rodziny/wizyta_formularz.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        self.rodzina = get_object_or_404(Rodzina, pk=kwargs["rodzina_pk"])
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        wizyta = form.save(commit=False)
+        wizyta.rodzina = self.rodzina
+        wizyta.save()
+        messages.success(self.request, f"Dodano wizytę duszpasterską ({wizyta.rok}).")
+        return redirect(self.rodzina.get_absolute_url())
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["rodzina"] = self.rodzina
+        return ctx
+
+class WizytaEdycjaView(RolaWymaganaMixin, UpdateView):
+    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
+    model = WizytaDuszpasterska
+    form_class = WizytaForm
+    template_name = "rodziny/wizyta_formularz.html"
+
+    def get_success_url(self):
+        messages.success(self.request, "Zaktualizowano wizytę.")
+        return self.object.rodzina.get_absolute_url()
+
+class WizytaUsunView(RolaWymaganaMixin, DeleteView):
+    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD]
+    model = WizytaDuszpasterska
+    template_name = "rodziny/wizyta_usun.html"
+
+    def get_success_url(self):
+        messages.success(self.request, "Usunięto wizytę.")
+        return self.object.rodzina.get_absolute_url()
+
+
 
 class RodzinaDrukView(LoginRequiredMixin, DetailView):
     model = Rodzina

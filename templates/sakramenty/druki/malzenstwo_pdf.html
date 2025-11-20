@@ -1,0 +1,77 @@
+{% extends "base_pdf.html" %}
+{% block title %}Świadectwo Ślubu{% endblock %}
+{% block content %}
+
+    <div class="text-center" style="margin-bottom: 1cm; font-weight: bold;">
+        RZYMSKOKATOLICKA PARAFIA PW.<br> {{malzenstwo.parafia.nazwa}} - {{malzenstwo.parafia.miejscowosc}}
+    </div>
+
+    <h1>Świadectwo Ślubu</h1>
+    <h2>Nr aktu: {{ malzenstwo.rok }}/{{ malzenstwo.akt_nr }}</h2>
+
+    <div class="text-center"  style="margin-bottom: 1cm;">
+        Na podstawie ksiąg małżeńskich parafii tutejszej zaświadcza się, <br>że dnia:
+        <strong>{{ malzenstwo.data_slubu|date:"d E Y" }} roku</strong>
+        zawarli sakramentalny związek małżeński:
+    </div>
+
+    <h3>MĄŻ</h3>
+    <table class="dane-table">
+        <tr>
+            <td class="label">Nazwisko i Imię:</td>
+            <td class="value bold">{{ malzenstwo.malzonek_a.nazwisko }} {{ malzenstwo.malzonek_a.imie_pierwsze }}</td>
+        </tr>
+        <tr>
+            <td class="label">Urodzony:</td>
+            <td class="value">{{ malzenstwo.malzonek_a.data_urodzenia|date:"d.m.Y" }} r.</td>
+        </tr>
+        <tr>
+            <td class="label">Rodzice:</td>
+            <td class="value">{% if chrzest_a %}
+            {{ chrzest_a.ojciec|default:"—" }} i {{ chrzest_a.matka|default:"—" }}
+          {% else %}
+            {{ malzenstwo.malzonek_a.imie_ojca|default:"—" }} i {{ malzenstwo.malzonek_a.imie_matki|default:"—" }}
+          {% endif %}</td>
+        </tr>
+
+    </table>
+
+    <h3>ŻONA</h3>
+    <table class="dane-table">
+        <tr>
+            <td class="label">Nazwisko i Imię:</td>
+            <td class="value bold">{{ malzenstwo.malzonek_b.nazwisko_rodowe }} {{ malzenstwo.malzonek_b.imie_pierwsze }}</td>
+        </tr>
+        <tr>
+            <td class="label">Urodzona:</td>
+            <td class="value">{{ malzenstwo.malzonek_b.data_urodzenia|date:"d.m.Y" }} r.</td>
+        </tr>
+        <tr>
+            <td class="label">Rodzice:</td>
+            <td class="value">{% if chrzest_a %}
+            {{ chrzest_b.ojciec|default:"—" }} i {{ chrzest_b.matka|default:"—" }}
+          {% else %}
+            {{ malzenstwo.malzonek_b.imie_ojca|default:"—" }} i {{ malzenstwo.malzonek_b.imie_matki|default:"—" }}
+          {% endif %}</td>
+        </tr>
+    </table>
+
+    <div style="margin-top: 1 cm;">
+        <p><strong>Świadkowie:</strong> 
+            {{ malzenstwo.swiadek_a|default:"..." }} i {{ malzenstwo.swiadek_b|default:"..." }}
+        </p>
+        <p><strong>Świadek urzędowy/asystujący:</strong> 
+            {% if malzenstwo.swiadek_urzedowy %}
+                {{ malzenstwo.swiadek_urzedowy }}
+            {% else %}
+                {{ malzenstwo.swiadek_urzedowy_opis_reczny }}
+            {% endif %}
+        </p>
+    </div>
+
+    <div class="footer">
+        <p>Miejscowość, dnia: {{ today|date:"d.m.Y" }}</p>
+        <br>
+        <p>........................................................<br><small>(Proboszcz)</small></p>
+    </div>
+{% endblock %}

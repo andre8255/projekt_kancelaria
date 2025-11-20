@@ -2,6 +2,10 @@
 from django.db import models
 from django.urls import reverse
 from osoby.models import Osoba
+from django.utils import timezone
+from slowniki.models import Duchowny
+
+
 
 class Rodzina(models.Model):
     nazwa = models.CharField(
@@ -88,3 +92,43 @@ class CzlonkostwoRodziny(models.Model):
 
     def __str__(self):
         return f"{self.osoba} jako {self.get_rola_display()} ({self.get_status_display()})"
+
+
+class WizytaDuszpasterska(models.Model):
+    STATUSY = [
+        ("PRZYJETA", "Wizyta przyjęta"),
+        ("NIEOBECNI", "Nieobecni / Zamknięte"),
+        ("ODMOWA", "Odmowa przyjęcia"),
+        ("INNE", "Inne"),
+    ]
+
+    rodzina = models.ForeignKey(
+        Rodzina,
+        on_delete=models.CASCADE,
+        related_name="wizyty",
+        verbose_name="Rodzina"
+    )
+    
+    rok = models.IntegerField("Rok wizyty")
+    data_wizyty = models.DateField("Data wizyty", null=True, blank=True)
+    
+    ksiadz = models.ForeignKey(
+        Duchowny,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Ksiądz odwiedzający"
+    )
+    
+    status = models.CharField("Status", max_length=20, choices=STATUSY, default="PRZYJETA")
+    
+    ofiara = models.CharField("Ofiara", max_length=100, blank=True, help_text="Opcjonalnie")
+    notatka = models.TextField("Notatki duszpasterskie", blank=True)
+
+    class Meta:
+        verbose_name = "Wizyta duszpasterska"
+        verbose_name_plural = "Wizyty duszpasterskie"
+        ordering = ["-rok", "-data_wizyty"]
+
+    def __str__(self):
+        return f"Kolęda {self.rok} - {self.rodzina}"

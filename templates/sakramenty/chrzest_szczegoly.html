@@ -6,6 +6,10 @@
   <h1 class="h5 mb-0">Chrzest</h1>
 
   <div class="d-flex flex-wrap gap-2">
+    <a href="{% url 'chrzest_pdf' chrzest.pk %}" target="_blank" class="btn btn-outline-secondary btn-sm">
+    📄 Pobierz PDF (Zaświadczenie)
+  </a>
+
     <a href="{% url 'chrzest_edytuj' chrzest.pk %}" class="btn btn-outline-secondary btn-sm">
       Edytuj
     </a>
@@ -217,10 +221,6 @@
     <div class="card-header fw-semibold">
       Załączniki
     </div>
-    <div class="card-body small">
-      {% if chrzest.skan_aktu %}
-        <a href="{{ chrzest.skan_aktu.url }}" target="_blank" class="btn btn-outline-primary btn-sm">
-          📄 Zobacz skan aktu
         </a>
       {% else %}
         <span class="text-muted">Brak załączonego skanu.</span>

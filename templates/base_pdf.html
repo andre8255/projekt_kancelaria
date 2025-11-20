@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Dokument{% endblock %}</title>
+    <style>
+        /* Ustawienia strony A4 */
+        @page {
+            size: A4;
+            margin: 2cm; /* Marginesy dokumentu */
+            @bottom-right {
+                content: "Strona " counter(page) " z " counter(pages);
+                font-size: 9pt;
+            }
+        }
+
+        body {
+            font-family: "Times New Roman", serif; /* Czcionka szeryfowa wygląda bardziej oficjalnie */
+            font-size: 12pt;
+            line-height: 1.5;
+            color: #000;
+        }
+
+        h1, h2, h3 {
+            text-align: center;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+        
+        h1 { font-size: 18pt; margin-bottom: 5px; }
+        h2 { font-size: 14pt; margin-top: 0; margin-bottom: 1cm; font-weight: normal; }
+
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .bold { font-weight: bold; }
+
+        /* Tabela do ładnego układania danych (podpis: wartość) */
+        .dane-table {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .dane-table td {
+            padding: 5px 0;
+            vertical-align: bottom;
+        }
+        .label {
+            width: 30%;
+            font-weight: bold;
+        }
+        .value {
+            width: 70%;
+            border-bottom: 1px dotted #000; /* Kropki jak w formularzu */
+            padding-left: 10px;
+        }
+
+        .footer {
+            margin-top: 0.5cm;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    {% block content %}{% endblock %}
+</body>
+</html>

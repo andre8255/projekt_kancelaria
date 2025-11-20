@@ -1,0 +1,59 @@
+{% extends "base_pdf.html" %}
+{% block title %}Zaświadczenie I Komunii Św.{% endblock %}
+{% block content %}
+
+    <div class="text-center" style="margin-bottom: 1.5cm; font-weight: bold;">
+        RZYMSKOKATOLICKA PARAFIA PW. <br> {{komunia.parafia.nazwa}} - {{komunia.parafia.miejscowosc}}
+    </div>
+
+    <h1>Zaświadczenie</h1>
+    <h2>o przyjęciu Pierwszej Komunii Świętej</h2>
+
+    <div style="margin: 1cm 0;">Niniejszym zaświadcza się, że:</div>
+
+    <table class="dane-table">
+        <tr>
+            <td class="label">Imię i Nazwisko:</td>
+            <td class="value bold">{{ komunia.osoba.imie_pierwsze }} {{ komunia.osoba.nazwisko }}</td>
+        </tr>
+        <tr>
+            <td class="label">Data urodzenia:</td>
+            <td class="value">{{ komunia.osoba.data_urodzenia|date:"d.m.Y" }}</td>
+        </tr>
+        <tr>
+            <td class="label">Rodzice:</td>
+            <td class="value">
+                {{ komunia.osoba.imie_ojca|default:"..." }} i {{ komunia.osoba.imie_matki|default:"..." }}
+            </td>
+        </tr>
+    </table>
+
+    <div style="margin: 1cm 0; text-align: center;">
+        przyjął(a) Pierwszą Komunię Świętą
+    </div>
+
+    <table class="dane-table">
+        <tr>
+            <td class="label">Rok:</td>
+            <td class="value bold">{{ komunia.rok }}</td>
+        </tr>
+        <tr>
+            <td class="label">W parafii:</td>
+            <td class="value">
+                {% if komunia.parafia %}{{ komunia.parafia }}{% else %}Tutejszej{% endif %}
+            </td>
+        </tr>
+    </table>
+
+    {% if chrzest %}
+    <div style="margin-top: 1cm; font-size: 10pt;">
+      <!--  <em>Chrzest św.: rok {{ chrzest.rok }}, nr aktu {{ chrzest.akt_nr }}, parafia: {{ chrzest.parafia|default:"Tutejsza" }}</em>-->
+    </div>
+    {% endif %}
+
+    <div class="footer">
+        <p>Miejscowość, dnia: {{ today|date:"d.m.Y" }}</p>
+        <br>
+        <p>........................................................</p>
+    </div>
+{% endblock %}

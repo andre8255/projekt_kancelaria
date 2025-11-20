@@ -65,5 +65,13 @@ urlpatterns = [
     path("namaszczenia/lista/druk/", views.NamaszczenieListaDrukView.as_view(), name="namaszczenie_lista_druk"),
     path("panel/zgony/<int:pk>/druk/", views.ZgonDrukView.as_view(), name="zgon_druk"),
     path("zgony/lista/druk/", views.ZgonListaDrukView.as_view(), name="zgon_lista_druk"),
+
+    # --- PDFy ---
+    path("chrzest/<int:pk>/pdf/", views.ChrzestPDFView.as_view(), name="chrzest_pdf"),
+    path("komunia/<int:pk>/pdf/", views.KomuniaPDFView.as_view(), name="komunia_pdf"),
+    path("bierzmowanie/<int:pk>/pdf/", views.BierzmowaniePDFView.as_view(), name="bierzmowanie_pdf"),
+    path("malzenstwo/<int:pk>/pdf/", views.MalzenstwoPDFView.as_view(), name="malzenstwo_pdf"),
+    path("namaszczenie/<int:pk>/pdf/", views.NamaszczeniePDFView.as_view(), name="namaszczenie_pdf"),
+    path("zgon/<int:pk>/pdf/", views.ZgonPDFView.as_view(), name="zgon_pdf"),
 ]
 

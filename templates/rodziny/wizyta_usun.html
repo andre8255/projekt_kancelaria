@@ -1,0 +1,13 @@
+{% extends "base_panel.html" %}
+{% block content %}
+<div class="alert alert-danger">
+  <h4 class="alert-heading">Potwierdź usunięcie</h4>
+  <p>Czy na pewno chcesz usunąć wpis wizyty duszpasterskiej z roku <strong>{{ object.rok }}</strong>?</p>
+  <hr>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Tak, usuń</button>
+    <a href="{% url 'rodzina_szczegoly' object.rodzina.pk %}" class="btn btn-secondary">Anuluj</a>
+  </form>
+</div>
+{% endblock %}
