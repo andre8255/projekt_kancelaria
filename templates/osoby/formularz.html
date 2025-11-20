@@ -116,16 +116,29 @@
           {% endif %}
         </div>
 
-         <div class="col-md-4">
+         <div class="col-md-4" id="container_data_zgonu">
           <label class="form-label small text-muted fw-semibold">
             {{ form.data_zgonu.label }}
           </label>
-          {{ form.data_zgonu }}
+          
+          <div class="input-group">
+            {{ form.data_zgonu }}
+            <button class="btn btn-outline-secondary" type="button" 
+                    onclick="ustawDzis('{{ form.data_zgonu.id_for_label }}')"
+                    title="Wstaw dzisiejszą datę">
+              🪄
+            </button>
+          </div>
+
           {% if form.data_zgonu.errors %}
             <div class="text-danger small">{{ form.data_zgonu.errors }}</div>
           {% endif %}
+          
+          {# Informacja dla użytkownika #}
+          <div class="form-text small fst-italic text-danger" id="info_zgonu">
+            Osoba oznaczona jako zmarła.
+          </div>
         </div>
-      </div>
   </div>
             <!--Rodzice-->
       <div class="mb-4">
@@ -331,4 +344,23 @@
     <a href="{% url 'osoba_lista' %}" class="btn btn-outline-secondary">Anuluj</a>
   </div>
 </form>
+
+<script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const container = document.getElementById('container_data_zgonu');
+                // Django nadaje ID polu formularza jako id_nazwapola
+                const input = document.getElementById('id_data_zgonu'); 
+
+                if (input && container) {
+                    // Jeśli pole jest puste (osoba żyje), ukrywamy cały kontener
+                    if (!input.value) {
+                        container.style.display = 'none';
+                    } 
+                    // Jeśli pole ma wartość (osoba zmarła), zostawiamy widoczne
+                    else {
+                        container.style.display = 'block';
+                    }
+                }
+            });
+        </script>
 {% endblock %}

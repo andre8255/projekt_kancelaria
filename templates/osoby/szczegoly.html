@@ -81,6 +81,14 @@
   {% endif %}
 </p>
 
+{# --- ZMIANA: Pokaż TYLKO jeśli data zgonu jest wpisana lub istnieje akt --- #}
+        {% if osoba.data_zgonu or zgon_osoby %}
+          <div class="mt-3 p-2 bg-danger-subtle border border-danger rounded">
+            <p class="mb-0 fw-bold text-danger">
+              ✝ Data zgonu: {{ osoba.data_zgonu|default:zgon_osoby.data_zgonu }}
+            </p>
+          </div>
+        {% endif %}
         
 
       </div>
