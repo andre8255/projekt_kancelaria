@@ -1,5 +1,6 @@
 #rodziny/views.py
 from django.utils import timezone
+from django.conf import settings
 from django.views import View
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -7,6 +8,7 @@ from django.db.models import Q
 from django.db.models.deletion import ProtectedError
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse_lazy
+from parafia.utils_pdf import render_to_pdf
 from django.views.generic import (
     ListView, DetailView, CreateView, UpdateView, DeleteView, FormView
 )
@@ -145,6 +147,49 @@ class RodzinaUsunView(RolaWymaganaMixin, DeleteView):
     def delete(self, request, *args, **kwargs):
         messages.success(request, "Rodzina została usunięta.")
         return super().delete(request, *args, **kwargs)
+
+class RodzinaPDFView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        rodzina = get_object_or_404(Rodzina, pk=kwargs['pk'])
+        
+        # --- LOGIKA POBIERANIA CZŁONKÓW I SAKRAMENTÓW ---
+        # (Kopiujemy logikę, aby PDF miał te same dane co widok WWW)
+        czlonkowie = CzlonkostwoRodziny.objects.select_related("osoba").filter(rodzina=rodzina)
+        
+        PRIORYTET_ROLI = {"MAZ": 1, "ZONA": 2, "DZIECKO": 3, "INNA": 4}
+        posortowani = sorted(czlonkowie, key=lambda cz: PRIORYTET_ROLI.get(cz.rola, 99))
+        
+        wynik = []
+        for wpis in posortowani:
+            osoba = wpis.osoba
+            ma_chrzest = Chrzest.objects.filter(ochrzczony=osoba).exists()
+            ma_komunia = PierwszaKomunia.objects.filter(osoba=osoba).exists()
+            ma_bierzmowanie = Bierzmowanie.objects.filter(osoba=osoba).exists()
+            ma_malzenstwo = Malzenstwo.objects.filter(Q(malzonek_a=osoba) | Q(malzonek_b=osoba)).exists()
+            
+            wynik.append({
+                "relacja": wpis,
+                "osoba": osoba,
+                "sakramenty": {
+                    "chrzest": ma_chrzest,
+                    "komunia": ma_komunia,
+                    "bierzmowanie": ma_bierzmowanie,
+                    "malzenstwo": ma_malzenstwo,
+                }
+            })
+        
+        context = {
+            'rodzina': rodzina,
+            'czlonkowie_posortowani': wynik,
+            'today': timezone.localdate(),
+            'parafia_nazwa': settings.PARAFIA_NAZWA,
+            'parafia_miejscowosc': settings.PARAFIA_MIEJSCOWOSC,
+        }
+        
+        filename = f"Kartoteka_{rodzina.nazwa}.pdf"
+        return render_to_pdf('rodziny/druki/rodzina_pdf.html', context, filename)
+
+
 
 # === WIZYTY DUSZPASTERSKIE ===
 

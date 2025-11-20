@@ -2,8 +2,9 @@
 {% block title %}Świadectwo Bierzmowania{% endblock %}
 {% block content %}
 
-    <div class="text-center" style="margin-bottom: 1cm; font-weight: bold;">
-        RZYMSKOKATOLICKA PARAFIA PW. <br> {{bierzmowanie.parafia.nazwa}} - {{bierzmowanie.parafia.miejscowosc}}
+    <div class="text-center" style="margin-bottom: 0.5cm; font-size: 10pt;">
+     {{ parafia_nazwa }} -
+     {{ parafia_miejscowosc }}
     </div>
 
     <h1>Świadectwo Bierzmowania</h1>
@@ -59,9 +60,9 @@
         </tr>
     </table>
 
-    <div class="footer">
+    <div class="footer"><br>
         <p>Miejscowość, dnia: {{ today|date:"d.m.Y" }}</p>
-        <br><br>
-        <p>........................................................<br><small>(Proboszcz)</small></p>
+        <br>
+        <p>........................................................<small>(Proboszcz)</small></p>
     </div>
 {% endblock %}

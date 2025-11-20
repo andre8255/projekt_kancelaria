@@ -16,6 +16,7 @@ urlpatterns = [
     
     # --- NOWA ŚCIEŻKA WYDRUKU ---
     path("<int:pk>/druk/", views.RodzinaDrukView.as_view(), name="rodzina_druk"), 
+    path("<int:pk>/pdf/", views.RodzinaPDFView.as_view(), name="rodzina_pdf"),
     
     path("<int:rodzina_pk>/dodaj-czlonka/", views.DodajCzlonkaView.as_view(), name="rodzina_dodaj_czlonka"),
     path("<int:rodzina_pk>/czlonek/<int:czlonek_pk>/usun/", views.UsunCzlonkaZRodzinyView.as_view(), name="rodzina_usun_czlonka"),

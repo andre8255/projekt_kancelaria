@@ -4,9 +4,9 @@
 
 {% block content %}
 
-    <div class="text-center" style="margin-bottom: 1cm; font-size: 14pt; font-weight: bold;">
-        RZYMSKOKATOLICKA PARAFIA PW. <br>
-        {{chrzest.parafia.nazwa}} - {{chrzest.parafia.miejscowosc}}
+    <div class="text-center" style="margin-bottom: 0.5cm; font-size: 10pt;">
+     {{ parafia_nazwa }} -
+     {{ parafia_miejscowosc }}
     </div>
 
     <h1>Świadectwo Chrztu</h1>
@@ -59,12 +59,19 @@
         </tr>
     </table>
 
-    <div style="margin-top: 1cm; border: 1px solid #ccc; padding: 10px; min-height: 3cm;">
-        <strong>Adnotacje o innych sakramentach:</strong><br>
-        {% if bierzmowanie %}
-            Bierzmowanie: {{ bierzmowanie.data_bierzmowania|date:"d.m.Y" }}, {{ bierzmowanie.parafia|default:"tutejsza" }}<br>
+   <div style="margin-top: 1cm; border-top: 1px solid #000; padding-top: 10px;">
+        <strong>Cel wydania / Uwagi:</strong><br>
+        
+        {% if cel_wydania == "uwagi_wew" %}
+             {{ chrzest.uwagi_wew|default:"(brak uwag w księdze)" }}
+        
+        {% elif cel_wydania %}
+             {{ cel_wydania }}
+        
+        {% else %}
+             Do celów kościelnych.
         {% endif %}
-        </div>
+    </div>
 
     <div class="footer">
         <p>Miejscowość, dnia: {{ today|date:"d.m.Y" }}</p>

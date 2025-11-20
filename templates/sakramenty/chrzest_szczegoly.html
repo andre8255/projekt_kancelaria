@@ -6,9 +6,10 @@
   <h1 class="h5 mb-0">Chrzest</h1>
 
   <div class="d-flex flex-wrap gap-2">
+    {# Przycisk bezpośredni (opcjonalnie, bo mamy panel niżej) #}
     <a href="{% url 'chrzest_pdf' chrzest.pk %}" target="_blank" class="btn btn-outline-secondary btn-sm">
-    📄 Pobierz PDF (Zaświadczenie)
-  </a>
+      📄 PDF (Domyślny)
+    </a>
 
     <a href="{% url 'chrzest_edytuj' chrzest.pk %}" class="btn btn-outline-secondary btn-sm">
       Edytuj
@@ -22,20 +23,16 @@
   </div>
 </div>
 
-
 <div class="row g-4">
 
   <div class="col-md-6">
     <div class="card shadow-sm border-0 h-100">
-      <div class="card-header fw-semibold">
-        Dane aktu chrztu
-      </div>
+      <div class="card-header fw-semibold">Dane aktu chrztu</div>
       <div class="card-body small">
         <p class="mb-2">
           <span class="text-muted d-block">Rok / nr aktu</span>
           <strong>{{ chrzest.rok }}/{{ chrzest.akt_nr }}</strong>
         </p>
-
         <p class="mb-2">
           <span class="text-muted d-block">Data chrztu</span>
           {% if chrzest.data_chrztu %}
@@ -46,7 +43,6 @@
             <span class="text-muted">—</span>
           {% endif %}
         </p>
-
         <p class="mb-2">
           <span class="text-muted d-block">Miejsce chrztu</span>
           {% if chrzest.miejsce_chrztu %}
@@ -61,18 +57,12 @@
 
   <div class="col-md-6">
     <div class="card shadow-sm border-0 h-100">
-      <div class="card-header fw-semibold">
-        Ochrzczony / ochrzczona
-      </div>
+      <div class="card-header fw-semibold">Ochrzczony / ochrzczona</div>
       <div class="card-body small">
-
         <p class="mb-2">
           <span class="text-muted d-block">Imię i nazwisko</span>
-          <strong>
-            {{ chrzest.ochrzczony.nazwisko }} {{ chrzest.ochrzczony.imie_pierwsze }}
-          </strong>
+          <strong>{{ chrzest.ochrzczony.nazwisko }} {{ chrzest.ochrzczony.imie_pierwsze }}</strong>
         </p>
-
         <p class="mb-2">
           <span class="text-muted d-block">Data urodzenia</span>
           {% if chrzest.data_urodzenia %}
@@ -83,7 +73,6 @@
             <span class="text-muted">—</span>
           {% endif %}
         </p>
-
         <p class="mb-2">
           <span class="text-muted d-block">Miejsce urodzenia</span>
           {% if chrzest.miejsce_urodzenia %}
@@ -92,90 +81,51 @@
             <span class="text-muted">—</span>
           {% endif %}
         </p>
-
       </div>
     </div>
   </div>
 
-
   <div class="col-md-12">
     <div class="card shadow-sm border-0">
-      <div class="card-header fw-semibold">
-        Rodzice
-      </div>
+      <div class="card-header fw-semibold">Rodzice</div>
       <div class="card-body small row g-4">
-
         <div class="col-md-6">
           <div class="border rounded p-3 h-100">
-            <div class="text-muted small fw-semibold text-uppercase mb-2">
-              Ojciec
-            </div>
-
+            <div class="text-muted small fw-semibold text-uppercase mb-2">Ojciec</div>
             <p class="mb-2">
               <span class="text-muted d-block">Imię i nazwisko</span>
-              {% if chrzest.ojciec %}
-                <strong>{{ chrzest.ojciec }}</strong>
-              {% else %}
-                <span class="text-muted">—</span>
-              {% endif %}
+              <strong>{{ chrzest.ojciec|default:"—" }}</strong>
             </p>
-
             <p class="mb-0">
               <span class="text-muted d-block">Wyznanie</span>
-              {% if chrzest.ojciec_wyznanie %}
-                <strong>{{ chrzest.ojciec_wyznanie }}</strong>
-              {% else %}
-                <span class="text-muted">—</span>
-              {% endif %}
+              <strong>{{ chrzest.ojciec_wyznanie|default:"—" }}</strong>
             </p>
           </div>
         </div>
-
         <div class="col-md-6">
           <div class="border rounded p-3 h-100">
-            <div class="text-muted small fw-semibold text-uppercase mb-2">
-              Matka
-            </div>
-
+            <div class="text-muted small fw-semibold text-uppercase mb-2">Matka</div>
             <p class="mb-2">
               <span class="text-muted d-block">Imię i nazwisko</span>
-              {% if chrzest.matka %}
-                <strong>{{ chrzest.matka }}</strong>
-              {% else %}
-                <span class="text-muted">—</span>
-              {% endif %}
+              <strong>{{ chrzest.matka|default:"—" }}</strong>
             </p>
-
             <p class="mb-2">
               <span class="text-muted d-block">Nazwisko rodowe</span>
-              {% if chrzest.nazwisko_matki_rodowe %}
-                <strong>{{ chrzest.nazwisko_matki_rodowe }}</strong>
-              {% else %}
-                <span class="text-muted">—</span>
-              {% endif %}
+              <strong>{{ chrzest.nazwisko_matki_rodowe|default:"—" }}</strong>
             </p>
-
             <p class="mb-0">
               <span class="text-muted d-block">Wyznanie</span>
-              {% if chrzest.matka_wyznanie %}
-                <strong>{{ chrzest.matka_wyznanie }}</strong>
-              {% else %}
-                <span class="text-muted">—</span>
-              {% endif %}
+              <strong>{{ chrzest.matka_wyznanie|default:"—" }}</strong>
             </p>
           </div>
         </div>
-
       </div>
     </div>
   </div>
 
-
   <div class="col-md-12">
     <div class="card shadow-sm border-0">
-      <div class="card-header fw-semibold">
-        Uwagi kancelaryjne
-      </div>
+      <div class="card-header fw-semibold">Uwagi kancelaryjne</div>
       <div class="card-body small">
         {% if chrzest.uwagi_wew %}
           <p class="mb-0" style="white-space:pre-line;">{{ chrzest.uwagi_wew }}</p>
@@ -188,68 +138,71 @@
 
   <div class="col-md-12">
     <div class="card shadow-sm border-0">
+      <div class="card-header fw-semibold">Załączniki</div>
+      <div class="card-body small">
+        {% if chrzest.skan_aktu %}
+          <a href="{{ chrzest.skan_aktu.url }}" target="_blank" class="btn btn-outline-primary btn-sm">
+            📄 Zobacz skan aktu
+          </a>
+        {% else %}
+          <span class="text-muted">Brak załączonego skanu.</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-12">
+    <div class="card shadow-sm border-0 bg-light">
       <div class="card-header fw-semibold">
-        Drukuj świadectwo
+        🖨️ Drukuj świadectwo
       </div>
       <div class="card-body">
         <p class="card-text small text-muted">
-          Wybierz adnotację, która ma się pojawić w punkcie 7. (Uwagi) na wydruku.
+          Wybierz adnotację, która ma się pojawić na wydruku w polu "Cel wydania / Uwagi".
         </p>
 
-        <div class="mb-3">
-          <label for="print_purpose" class="form-label small">Cel wydruku:</label>
-          <select id="print_purpose" class="form-select form-select-sm" style="max-width: 350px;">
-            <option value="" selected>(Brak adnotacji)</option>
-            <option value="Do ślubu">Do ślubu</option>
-            <option value="Do bierzmowania">Do bierzmowania</option>
-            <option value="Święcenia kapłańskie">Święcenia kapłańskie</option>
-            <option value="Wystąpienie z kościoła">Wystąpienie z kościoła</option>
-            <option value="uwagi_wew">(Pokaż uwagi wewnętrzne z księgi)</option>
-          </select>
-        </div>
+        <div class="d-flex gap-2 align-items-center flex-wrap">
+          <div style="flex-grow: 1; max-width: 350px;">
+            <label for="print_purpose" class="form-label small visually-hidden">Cel wydruku:</label>
+            <select id="print_purpose" class="form-select form-select-sm">
+              <option value="" selected>(Brak adnotacji - cel ogólny)</option>
+              <option value="Do ślubu kościelnego">Do ślubu kościelnego</option>
+              <option value="Do bierzmowania">Do bierzmowania</option>
+              <option value="Święcenia kapłańskie">Święcenia kapłańskie</option>
+              <option value="Wystąpienie z kościoła">Wystąpienie z kościoła</option>
+              <option value="uwagi_wew">(Pokaż uwagi wewnętrzne z księgi)</option>
+            </select>
+          </div>
 
-        <button id="print_button" class="btn btn-primary btn-sm">
-          Generuj wydruk
-        </button>
+          <button id="print_button" class="btn btn-primary btn-sm">
+            Generuj PDF
+          </button>
+        </div>
       </div>
     </div>
   </div>
-  </div>
-  
-  <div class="col-md-12">
-  <div class="card shadow-sm border-0">
-    <div class="card-header fw-semibold">
-      Załączniki
-    </div>
-        </a>
-      {% else %}
-        <span class="text-muted">Brak załączonego skanu.</span>
-      {% endif %}
-    </div>
-  </div>
+
 </div>
-  
-  
-  <script>
-document.getElementById('print_button').addEventListener('click', function() {
-  // 1. Pobierz wybraną wartość z listy
-  var cel = document.getElementById('print_purpose').value;
 
-  // 2. Ustal bazowy adres URL (taki sam jak w starym przycisku "Drukuj")
-  var baseUrl = "{% url 'chrzest_druk' chrzest.pk %}";
-  var finalUrl = baseUrl;
+<script>
+  document.getElementById('print_button').addEventListener('click', function() {
+    // 1. Pobierz wybraną wartość z listy
+    var cel = document.getElementById('print_purpose').value;
 
-  // 3. Dodaj wartość jako parametr URL
-  if (cel === 'uwagi_wew') {
-    finalUrl += '?cel=uwagi_wew';
-  } else if (cel) {
-    finalUrl += '?cel=' + encodeURIComponent(cel);
-  }
-  
-  // 4. Otwórz stronę wydruku w nowej karcie
-  window.open(finalUrl, '_blank');
-});
+    // 2. Ustal bazowy adres URL do NOWEGO widoku PDF
+    var baseUrl = "{% url 'chrzest_pdf' chrzest.pk %}";
+    var finalUrl = baseUrl;
+
+    // 3. Dodaj wartość jako parametr URL
+    if (cel) {
+      // Jeśli URL ma już parametry (rzadko w Django URLach, ale bezpieczniej sprawdzić)
+      var separator = finalUrl.includes('?') ? '&' : '?';
+      finalUrl += separator + 'cel=' + encodeURIComponent(cel);
+    }
+    
+    // 4. Otwórz stronę wydruku w nowej karcie
+    window.open(finalUrl, '_blank');
+  });
 </script>
-
 
 {% endblock %}

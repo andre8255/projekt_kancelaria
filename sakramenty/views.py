@@ -3,6 +3,7 @@
 # === IMPORTY ===
 from django.views.generic import View
 from parafia.utils_pdf import render_to_pdf
+from django.conf import settings
 from django import forms
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -200,7 +201,7 @@ class ChrzestPDFView(LoginRequiredMixin, View): # Używamy View, nie DetailView
     def get(self, request, *args, **kwargs):
         # Pobieramy chrzest
         chrzest = get_object_or_404(Chrzest, pk=kwargs['pk'])
-        
+        cel_wydania = request.GET.get('cel', '')
         # Pobieramy bierzmowanie tej samej osoby (do adnotacji)
         bierzmowanie = Bierzmowanie.objects.filter(osoba=chrzest.ochrzczony).first()
         
@@ -209,6 +210,9 @@ class ChrzestPDFView(LoginRequiredMixin, View): # Używamy View, nie DetailView
             'chrzest': chrzest,
             'bierzmowanie': bierzmowanie,
             'today': timezone.localdate(),
+            'parafia_nazwa': settings.PARAFIA_NAZWA,
+            'parafia_miejscowosc': settings.PARAFIA_MIEJSCOWOSC,
+            'cel_wydania': cel_wydania,
         }
         
         # Generujemy PDF
@@ -864,6 +868,8 @@ class KomuniaPDFView(LoginRequiredMixin, View):
             'komunia': komunia,
             'chrzest': chrzest,
             'today': timezone.localdate(),
+            'parafia_nazwa': settings.PARAFIA_NAZWA,
+            'parafia_miejscowosc': settings.PARAFIA_MIEJSCOWOSC,
         }
         filename = f"Komunia_{komunia.osoba.nazwisko}.pdf"
         return render_to_pdf('sakramenty/druki/komunia_pdf.html', context, filename)
@@ -879,6 +885,8 @@ class BierzmowaniePDFView(LoginRequiredMixin, View):
             'bierzmowanie': bierzmowanie,
             'chrzest': chrzest,
             'today': timezone.localdate(),
+            'parafia_nazwa': settings.PARAFIA_NAZWA,
+            'parafia_miejscowosc': settings.PARAFIA_MIEJSCOWOSC,
         }
         filename = f"Bierzmowanie_{bierzmowanie.osoba.nazwisko}.pdf"
         return render_to_pdf('sakramenty/druki/bierzmowanie_pdf.html', context, filename)
@@ -891,6 +899,8 @@ class MalzenstwoPDFView(LoginRequiredMixin, View):
         context = {
             'malzenstwo': malzenstwo,
             'today': timezone.localdate(),
+            'parafia_nazwa': settings.PARAFIA_NAZWA,
+            'parafia_miejscowosc': settings.PARAFIA_MIEJSCOWOSC,
         }
         filename = f"Slub_{malzenstwo.malzonek_a.nazwisko}_{malzenstwo.malzonek_b.nazwisko}.pdf"
         return render_to_pdf('sakramenty/druki/malzenstwo_pdf.html', context, filename)
@@ -903,6 +913,8 @@ class NamaszczeniePDFView(LoginRequiredMixin, View):
         context = {
             'namaszczenie': namaszczenie,
             'today': timezone.localdate(),
+            'parafia_nazwa': settings.PARAFIA_NAZWA,
+            'parafia_miejscowosc': settings.PARAFIA_MIEJSCOWOSC,
         }
         filename = f"Namaszczenie_{namaszczenie.osoba.nazwisko}.pdf"
         return render_to_pdf('sakramenty/druki/namaszczenie_pdf.html', context, filename)
@@ -921,6 +933,8 @@ class ZgonPDFView(LoginRequiredMixin, View):
             'zgon': zgon,
             'namaszczenie': ostatnie_namaszczenie,
             'today': timezone.localdate(),
+            'parafia_nazwa': settings.PARAFIA_NAZWA,
+            'parafia_miejscowosc': settings.PARAFIA_MIEJSCOWOSC,
         }
         filename = f"Zgon_{zgon.osoba.nazwisko}.pdf"
         return render_to_pdf('sakramenty/druki/zgon_pdf.html', context, filename)

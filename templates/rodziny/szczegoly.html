@@ -7,6 +7,9 @@
   
 
   <div class="ms-3 d-flex flex-wrap gap-2">
+    <a href="{% url 'rodzina_pdf' rodzina.pk %}" target="_blank" class="btn btn-outline-secondary btn-sm">
+      📄 Pobierz Kartotekę (PDF)
+    </a>
 
     <a href="{% url 'rodzina_druk' rodzina.pk %}" target="_blank" class="btn btn-outline-secondary btn-sm">
       🖨️ Drukuj kartotekę

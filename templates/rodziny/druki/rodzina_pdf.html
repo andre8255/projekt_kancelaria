@@ -1,0 +1,131 @@
+{% extends "base_pdf.html" %}
+{% block title %}Kartoteka - {{ rodzina.nazwa }}{% endblock %}
+
+{% block content %}
+<style>
+    /* Specyficzne style dla tabeli członków w PDF */
+    .members-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 10pt;
+        margin-top: 10px;
+    }
+    .members-table th {
+        background-color: #f0f0f0;
+        border: 1px solid #000;
+        padding: 4px;
+        font-weight: bold;
+        text-align: center;
+    }
+    .members-table td {
+        border: 1px solid #000;
+        padding: 4px;
+        text-align: center;
+        vertical-align: middle;
+    }
+    .members-table td.align-left {
+        text-align: left;
+        padding-left: 5px;
+    }
+    
+    /* Info box z adresem */
+    .info-box {
+        border: 1px solid #000;
+        padding: 10px;
+        margin-bottom: 20px;
+        font-size: 11pt;
+    }
+    .info-label {
+        font-weight: bold;
+        display: inline-block;
+        width: 80px;
+    }
+</style>
+
+    <div class="text-center" style="margin-bottom: 0.5cm; font-size: 10pt;">
+     {{ parafia_nazwa }} -
+     {{ parafia_miejscowosc }}
+    </div>
+
+    <h1>KARTOTEKA RODZINY</h1>
+    <h2>{{ rodzina.nazwa }}</h2>
+
+    <div class="info-box">
+        <div>
+            <span class="info-label">Adres:</span>
+            {{ rodzina.ulica }} {{ rodzina.nr_domu }}{% if rodzina.nr_mieszkania %}/{{ rodzina.nr_mieszkania }}{% endif %}
+            {% if rodzina.kod_pocztowy %}, {{ rodzina.kod_pocztowy }}{% endif %}
+            {{ rodzina.miejscowosc }}
+        </div>
+        
+        {% if rodzina.telefon_kontaktowy %}
+        <div style="margin-top: 5px;">
+            <span class="info-label">Telefon:</span> {{ rodzina.telefon_kontaktowy }}
+        </div>
+        {% endif %}
+        
+        {% if rodzina.email_kontaktowy %}
+        <div style="margin-top: 5px;">
+            <span class="info-label">E-mail:</span> {{ rodzina.email_kontaktowy }}
+        </div>
+        {% endif %}
+    </div>
+
+    <h3>Członkowie rodziny</h3>
+
+    <table class="members-table">
+        <thead>
+            <tr>
+                <th width="5%">Lp.</th>
+                <th width="35%">Imię i Nazwisko</th>
+                <th width="14%">Data ur.</th>
+                <th width="14%">Rola</th>
+                <th width="8%">Chrz.</th>
+                <th width="8%">Kom.</th>
+                <th width="8%">Bierz.</th>
+                <th width="8%">Małż.</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in czlonkowie_posortowani %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td class="align-left">
+                    <strong>{{ item.osoba.imie_pierwsze }}</strong><br>
+                    {{ item.osoba.nazwisko }}
+                </td>
+                <td>{{ item.osoba.data_urodzenia|date:"d.m.Y"|default:"-" }}</td>
+                <td>{{ item.relacja.get_rola_display }}</td>
+                
+                <td>{% if item.sakramenty.chrzest %}X{% endif %}</td>
+                <td>{% if item.sakramenty.komunia %}X{% endif %}</td>
+                <td>{% if item.sakramenty.bierzmowanie %}X{% endif %}</td>
+                <td>{% if item.sakramenty.malzenstwo %}X{% endif %}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div style="margin-top: 1cm;">
+        <strong>Uwagi duszpasterskie:</strong>
+        <div style="border: 1px dotted #999; padding: 10px; min-height: 2cm; margin-top: 5px; font-size: 10pt;">
+            {{ rodzina.uwagi|linebreaksbr|default:"(brak uwag)" }}
+        </div>
+    </div>
+    
+    {% if rodzina.wizyty.exists %}
+    <div style="margin-top: 0.5cm;">
+        <strong>Ostatnie wizyty (Kolęda):</strong>
+        <ul style="font-size: 10pt; list-style-type: disc; margin-top: 5px;">
+            {% for w in rodzina.wizyty.all|slice:":5" %}
+                <li>{{ w.rok }} - {{ w.get_status_display }} ({{ w.ksiadz|default:"-" }})</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <div class="footer">
+        <p>Data wydruku: {{ today|date:"d.m.Y" }}</p>
+    </div>
+
+{% endblock %}

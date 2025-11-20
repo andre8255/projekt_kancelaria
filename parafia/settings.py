@@ -90,3 +90,9 @@ from django.contrib.messages import constants as messages
 MESSAGE_TAGS = { messages.ERROR: "danger" }
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+# DANE PARAFII DO WYDRUKÓW
+PARAFIA_NAZWA = "RZYMSKOKATOLICKA PARAFIA PW. ŚW. LEONARDA OPATA"
+PARAFIA_MIEJSCOWOSC = "MYKANÓW"
+PARAFIA_ADRES = "ul. Cicha 1, 42-233 Mykanów"

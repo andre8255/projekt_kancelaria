@@ -2,6 +2,10 @@
 {% block title %}Akt Zgonu{% endblock %}
 {% block content %}
 
+    <div class="text-center" style="margin-bottom: 0.5cm; font-size: 10pt;">
+     {{ parafia_nazwa }} -
+     {{ parafia_miejscowosc }}
+    </div>
 
     <h1>Akt Zgonu</h1>
     <h2>Nr aktu: {{ zgon.rok }}/{{ zgon.akt_nr }}</h2>
