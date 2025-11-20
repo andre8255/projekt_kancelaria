@@ -1,52 +1,148 @@
 {% extends "base_panel.html" %}
+
 {% block content %}
 
 <div class="d-flex justify-content-between align-items-start mb-3">
-  <h1 class="h5 mb-0">Namaszczenie chorych / posługa</h1>
+  <div>
+    <h1 class="h5 mb-1">Namaszczenie chorych</h1>
+    <div class="text-muted small">Szczegóły posługi sakramentalnej</div>
+  </div>
 
   <div class="d-flex flex-wrap gap-2 ms-auto">
+    {# Tylko nowy PDF, stary druk HTML pomijamy #}
     <a href="{% url 'namaszczenie_pdf' namaszczenie.pk %}" target="_blank" class="btn btn-outline-secondary btn-sm">
-    📄 Pobierz PDF (Zaświadczenie)
-  </a>
-    <a href="{% url 'namaszczenie_druk' namaszczenie.pk %}" target="_blank" class="btn btn-outline-primary btn-sm">Drukuj</a>
-    <a href="{% url 'namaszczenie_edytuj' namaszczenie.pk %}" class="btn btn-outline-secondary btn-sm">Edytuj</a>
-    <a href="{% url 'namaszczenie_usun' namaszczenie.pk %}" class="btn btn-outline-danger btn-sm">Usuń</a>
-    <a href="{% url 'namaszczenie_lista' %}" class="btn btn-outline-secondary btn-sm">Powrót</a>
+      📄 Pobierz PDF (Zaświadczenie)
+    </a>
+ <a href="{% url 'namaszczenie_druk' namaszczenie.pk %}" class="btn btn-outline-secondary btn-sm">
+      🖨️Drukuj</a>
+    <a href="{% url 'namaszczenie_edytuj' namaszczenie.pk %}" class="btn btn-outline-secondary btn-sm">✏️ Edytuj</a>
+    <a href="{% url 'namaszczenie_usun' namaszczenie.pk %}" class="btn btn-outline-danger btn-sm">🗑️ Usuń</a>
+    <a href="{% url 'namaszczenie_lista' %}" class="btn btn-outline-secondary btn-sm">⬅ Powrót</a>
   </div>
 </div>
 
-<div class="card shadow-sm small">
-  <div class="card-header fw-semibold">
-    Dane posługi
+<div class="row g-4">
+
+  {# --- LEWA STRONA: DANE POSŁUGI --- #}
+  <div class="col-md-6">
+    <div class="card shadow-sm border-0 h-100">
+      <div class="card-header bg-light fw-semibold border-bottom">
+        Szczegóły wizyty
+      </div>
+      <div class="card-body small">
+        
+        <div class="row mb-3 align-items-center">
+          <div class="col-4 text-muted">Data:</div>
+          <div class="col-8 fs-6 fw-bold text-dark">
+             {{ namaszczenie.data|date:"d.m.Y"|default:"—" }}
+          </div>
+        </div>
+
+        <div class="row mb-2">
+          <div class="col-4 text-muted">Miejsce:</div>
+          <div class="col-8 fw-semibold">
+             {{ namaszczenie.miejsce|default:"—" }}
+          </div>
+        </div>
+
+        <div class="row mb-2">
+          <div class="col-4 text-muted">Szafarz:</div>
+          <div class="col-8">
+             {% if namaszczenie.szafarz %}
+                {{ namaszczenie.szafarz }}
+             {% else %}
+                —
+             {% endif %}
+          </div>
+        </div>
+
+        <hr>
+
+        <div class="mb-2 text-muted text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">
+            Udzielone sakramenty
+        </div>
+        
+        <div class="d-flex flex-column gap-2">
+            {% if namaszczenie.spowiedz %}
+                <div class="bg-success-subtle text-success-emphasis px-2 py-1 rounded border border-success-subtle d-flex align-items-center">
+                    <i class="bi bi-check-circle-fill me-2"></i> Spowiedź Święta
+                </div>
+            {% endif %}
+
+            {% if namaszczenie.komunia %}
+                <div class="bg-success-subtle text-success-emphasis px-2 py-1 rounded border border-success-subtle d-flex align-items-center">
+                    <i class="bi bi-check-circle-fill me-2"></i> Komunia Święta
+                </div>
+            {% endif %}
+
+            {% if namaszczenie.namaszczenie %}
+                <div class="bg-success-subtle text-success-emphasis px-2 py-1 rounded border border-success-subtle d-flex align-items-center">
+                    <i class="bi bi-check-circle-fill me-2"></i> Namaszczenie Chorych
+                </div>
+            {% endif %}
+
+            {% if not namaszczenie.spowiedz and not namaszczenie.komunia and not namaszczenie.namaszczenie %}
+                <div class="text-muted fst-italic px-2">Brak zaznaczonych sakramentów.</div>
+            {% endif %}
+        </div>
+
+      </div>
+    </div>
   </div>
-  <div class="card-body">
-    <p><strong>Osoba:</strong>
-      {{ namaszczenie.osoba.nazwisko }} {{ namaszczenie.osoba.imie_pierwsze }}
-    </p>
 
-    <p><strong>Data:</strong>
-      {{ namaszczenie.data|default:"brak" }}
-    </p>
+  {# --- PRAWA STRONA: OSOBA --- #}
+  <div class="col-md-6">
+    <div class="card shadow-sm border-0 h-100">
+      <div class="card-header bg-success-subtle text-warning-emphasis fw-semibold border-warning-subtle">
+        Osoba chora / objęta posługą
+      </div>
+      <div class="card-body small">
+        <h5 class="card-title mb-3">
+          {{ namaszczenie.osoba.imie_pierwsze }} {{ namaszczenie.osoba.nazwisko }}
+        </h5>
+        
+        <div class="row mb-2">
+          <div class="col-4 text-muted">Data urodzenia:</div>
+          <div class="col-8">
+             {{ namaszczenie.osoba.data_urodzenia|default:"—" }}
+          </div>
+        </div>
 
-    <p><strong>Miejsce:</strong>
-      {{ namaszczenie.miejsce|default:"brak" }}
-    </p>
+        <div class="row mb-2">
+            <div class="col-4 text-muted">Adres:</div>
+            <div class="col-8">
+               {{ namaszczenie.osoba.miejscowosc }} {{ namaszczenie.osoba.ulica }} {{ namaszczenie.osoba.nr_domu }}
+            </div>
+        </div>
+        
+        <div class="mt-3">
+           <a href="{% url 'osoba_szczegoly' namaszczenie.osoba.pk %}" class="btn btn-sm btn-outline-success">
+             Przejdź do profilu osoby ➞
+           </a>
+        </div>
 
-    <p><strong>Szafarz:</strong>
-      {{ namaszczenie.szafarz|default:"brak" }}
-    </p>
-
-    <p><strong>Udzielone sakramenty / posługa:</strong><br>
-      {% if namaszczenie.spowiedz %}Spowiedź ✔<br>{% endif %}
-      {% if namaszczenie.komunia %}Komunia św. ✔<br>{% endif %}
-      {% if namaszczenie.namaszczenie %}Namaszczenie chorych ✔<br>{% endif %}
-      {% if not namaszczenie.spowiedz and not namaszczenie.komunia and not namaszczenie.namaszczenie %}
-        brak
-      {% endif %}
-    </p>
-
-    <p><strong>Uwagi wewnętrzne:</strong><br>{{ namaszczenie.uwagi_wew|default:"—" }}</p>
+      </div>
+    </div>
   </div>
+
+  {# --- DOLNY WIERSZ: UWAGI --- #}
+  <div class="col-12">
+    <div class="card shadow-sm border-0">
+      <div class="card-body">
+        <h6 class="fw-bold text-muted text-uppercase small mb-3">Dodatkowe informacje</h6>
+        
+        <div class="p-3 bg-light rounded border">
+            <strong>Uwagi duszpasterskie:</strong><br>
+            {% if namaszczenie.uwagi_wew %}
+              <span style="white-space:pre-line;">{{ namaszczenie.uwagi_wew }}</span>
+            {% else %}
+              <span class="text-muted fst-italic">Brak uwag.</span>
+            {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 {% endblock %}

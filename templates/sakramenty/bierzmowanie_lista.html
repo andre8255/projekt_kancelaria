@@ -4,28 +4,36 @@
 <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
   <div>
     <h1 class="h5 mb-0">Bierzmowania</h1>
-    <div class="text-muted small">Rejestr bierzmowań</div>
+    <div class="text-muted small">Rejestr bierzmowanych</div>
   </div>
 
   <div class="d-flex flex-wrap gap-2 ms-auto">
-    <a href="{% url 'bierzmowanie_lista_druk' %}?{{ request.GET.urlencode }}" 
-       target="_blank" 
-       class="btn btn-outline-secondary btn-sm">
+    <a href="{% url 'bierzmowanie_lista_druk' %}?{{ request.GET.urlencode }}" target="_blank" class="btn btn-outline-secondary btn-sm">
       🖨️ Drukuj listę
     </a>
-    
     <a href="{% url 'bierzmowanie_dodaj' %}" class="btn btn-primary btn-sm">
       + Dodaj wpis
     </a>
   </div>
 </div>
 
-<form method="get" class="mb-3">
-  <div class="input-group input-group-sm" style="max-width:400px;">
-    <input class="form-control" type="search" name="q" value="{{ request.GET.q }}"
-           placeholder="Nazwisko, parafia, rok…">
-    <button class="btn btn-outline-secondary">Szukaj</button>
+<form method="get" class="mb-3 d-flex gap-2 align-items-center flex-wrap">
+  <div style="width: 100px;">
+    <input type="number" name="rok" class="form-control form-control-sm" value="{{ request.GET.rok }}" placeholder="Rok">
   </div>
+  <div class="input-group input-group-sm" style="max-width:400px;">
+    {# ZMIANA: Dodano "nr aktu" do placeholdera #}
+    <input class="form-control" type="search" name="q" value="{{ request.GET.q }}" placeholder="Nazwisko, parafia, nr aktu...">
+   <button class="btn btn-outline-secondary d-flex align-items-center gap-1">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+      </svg>
+      Szukaj
+    </button>
+  </div>
+  {% if request.GET.q or request.GET.rok %}
+    <a href="{% url 'bierzmowanie_lista' %}" class="btn btn-sm btn-link text-decoration-none text-secondary">✕ Wyczyść</a>
+  {% endif %}
 </form>
 
 <div class="card shadow-sm">
@@ -35,9 +43,9 @@
         <table class="table table-sm align-middle mb-0">
           <thead class="table-light">
             <tr>
-              <th>Rok/akt</th>
+              {# ZMIANA: Nagłówek kolumny #}
+              <th>Rok/nr aktu</th>
               <th>Osoba</th>
-              <th>Data</th>
               <th>Parafia</th>
               <th>Szafarz</th>
               <th class="text-end">Akcje</th>
@@ -46,33 +54,17 @@
           <tbody>
             {% for b in bierzmowania %}
             <tr>
-              <td>{{ b.rok|default:"—" }}/{{ b.akt_nr|default:"—" }}</td>
-              <td>{{ b.osoba.nazwisko }} {{ b.osoba.imie_pierwsze }}</td>            
-              <td>
-                {% if b.data_bierzmowania %}
-                  {{ b.data_bierzmowania }}
-                {% else %}
-                  —
-                {% endif %}
+              {# ZMIANA: Wyświetlanie Roku i Numeru Aktu #}
+              <td class="fw-semibold">
+                {{ b.rok|default:"—" }}/{{ b.akt_nr|default:"—" }}
               </td>
-              <td>
-                {% if b.parafia %}
-                  {{ b.parafia.nazwa }}
-                {% else %}
-                  —
-                {% endif %}
-              </td>
-              <td>
-                {% if b.szafarz %}
-                  {{ b.szafarz.tytul }} {{ b.szafarz.imie_nazwisko }}
-                {% else %}
-                  —
-                {% endif %}
-              </td>
+              
+              <td>{{ b.osoba.nazwisko }} {{ b.osoba.imie_pierwsze }}</td>
+              <td>{{ b.parafia|default:"—" }}</td>
+              <td>{{ b.szafarz|default:"—" }}</td>
               <td class="text-end">
                 <div class="btn-group btn-group-sm" role="group">
                   <a href="{% url 'bierzmowanie_szczegoly' b.pk %}" class="btn btn-outline-secondary">Szczegóły</a>
-                 
                   <a href="{% url 'bierzmowanie_usun' b.pk %}" class="btn btn-outline-danger">Usuń</a>
                 </div>
               </td>
@@ -82,9 +74,8 @@
         </table>
       </div>
     {% else %}
-      <div class="p-3 text-muted small">Brak wpisów.</div>
+      <div class="p-3 text-muted small">Brak wpisów pasujących do kryteriów.</div>
     {% endif %}
   </div>
 </div>
-
 {% endblock %}

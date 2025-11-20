@@ -81,34 +81,18 @@
   {% endif %}
 </p>
 
-        <p class="mb-2">
-          <strong>Telefon:</strong>
-          {% if osoba.telefon %}
-            {{ osoba.telefon }}
-          {% else %}
-            <span class="text-muted">brak</span>
-          {% endif %}
-        </p>
-
-        <p class="mb-0">
-          <strong>Email:</strong>
-          {% if osoba.email %}
-            {{ osoba.email }}
-          {% else %}
-            <span class="text-muted">brak</span>
-          {% endif %}
-        </p>
+        
 
       </div>
     </div>
 
     <!-- Adres -->
     <div class="card shadow-sm">
-      <div class="card-header fw-semibold">Adres</div>
+      <div class="card-header fw-semibold">Adres zamieszkania</div>
       <div class="card-body small">
         <p class="mb-2">
           {% if osoba.ulica or osoba.nr_domu %}
-            {{ osoba.ulica }} {{ osoba.nr_domu }}{% if osoba.nr_mieszkania %}/{{ osoba.nr_mieszkania }}{% endif %}
+            ul. {{ osoba.ulica }} {{ osoba.nr_domu }} , {{osoba.miejscowosc}} {% if osoba.nr_mieszkania %}/{{ osoba.nr_mieszkania }}{% endif %}
           {% else %}
             <span class="text-muted">brak adresu</span>
           {% endif %}
@@ -127,6 +111,31 @@
         </p>
       </div>
     </div>
+
+    <!-- Kontakt-->
+    <div class="card shadow-sm">
+      <div class="card-header fw-semibold">Kontakt</div>
+      <div class="card-body small">
+        <p class="mb-2">
+          <strong>Telefon:</strong>
+          {% if osoba.telefon %}
+            {{ osoba.telefon }}
+          {% else %}
+            <span class="text-muted">brak</span>
+          {% endif %}
+        </p>
+
+        <p class="mb-2">
+          <strong>Email:</strong>
+          {% if osoba.email %}
+            {{ osoba.email }}
+          {% else %}
+            <span class="text-muted">brak</span>
+          {% endif %}
+        </p>
+      </div>
+    </div>
+
 
   </div><!-- /col-md-6 LEFT -->
 
@@ -362,9 +371,9 @@
                       <td>{{ m.rok|default:"brak" }}/{{ m.akt_nr|default:"–" }}</td>
                       <td>
                         {% if m.malzonek_a.pk == osoba.pk %}
-                          {{ m.malzonek_b.nazwisko }} {{ m.malzonek_b.imie_pierwsze }}
+                          {{ m.malzonek_b.nazwisko_rodowe }} {{ m.malzonek_b.imie_pierwsze }}
                         {% else %}
-                          {{ m.malzonek_a.nazwisko }} {{ m.malzonek_a.imie_pierwsze }}
+                          {{ m.malzonek_a.nazwisko_rodowe }} {{ m.malzonek_a.imie_pierwsze }}
                         {% endif %}
                       </td>
 

@@ -1,51 +1,151 @@
 {% extends "base_panel.html" %}
+
 {% block content %}
 
 <div class="d-flex justify-content-between align-items-start mb-3">
-  <h1 class="h5 mb-0">Zgon</h1>
+  <div>
+    <h1 class="h5 mb-1">Akt Zgonu</h1>
+    <div class="text-muted small">Szczegóły wpisu w księdze zmarłych</div>
+  </div>
 
   <div class="d-flex flex-wrap gap-2 ms-auto">
+    {# Tylko nowy PDF #}
     <a href="{% url 'zgon_pdf' zgon.pk %}" target="_blank" class="btn btn-outline-secondary btn-sm">
-    📄 Pobierz PDF (Zaświadczenie)
-  </a>
-    <a href="{% url 'zgon_druk' zgon.pk %}" target="_blank" class="btn btn-outline-primary btn-sm">Drukuj</a>
-    <a href="{% url 'zgon_edytuj' zgon.pk %}" class="btn btn-outline-secondary btn-sm">Edytuj</a>
-    <a href="{% url 'zgon_usun' zgon.pk %}" class="btn btn-outline-danger btn-sm">Usuń</a>
-    <a href="{% url 'zgon_lista' %}" class="btn btn-outline-secondary btn-sm">Powrót</a>
+      📄 Pobierz PDF (Akt Zgonu)
+    </a>
+    <a href="{% url 'zgon_druk' zgon.pk %}" class="btn btn-outline-secondary btn-sm">
+      🖨️Drukuj</a>
+    <a href="{% url 'zgon_edytuj' zgon.pk %}" class="btn btn-outline-secondary btn-sm">✏️ Edytuj</a>
+    <a href="{% url 'zgon_usun' zgon.pk %}" class="btn btn-outline-danger btn-sm">🗑️ Usuń</a>
+    <a href="{% url 'zgon_lista' %}" class="btn btn-outline-secondary btn-sm">⬅ Powrót</a>
   </div>
 </div>
 
-<div class="card shadow-sm small">
-  <div class="card-header fw-semibold">
-    Dane zgonu
+<div class="row g-4">
+
+  {# --- LEWA STRONA: DANE AKTU --- #}
+  <div class="col-md-6">
+    <div class="card shadow-sm border-0 h-100">
+      <div class="card-header bg-light fw-semibold border-bottom">
+        Szczegóły zgonu i pogrzebu
+      </div>
+      <div class="card-body small">
+        
+        <div class="row mb-2">
+          <div class="col-4 text-muted">Rok / Nr aktu:</div>
+          <div class="col-8 fw-bold">{{ zgon.rok|default:"—" }} / {{ zgon.akt_nr|default:"—" }}</div>
+        </div>
+
+        <hr class="my-2">
+
+        <div class="row mb-2">
+          <div class="col-4 text-muted">Data zgonu:</div>
+          <div class="col-8 fw-semibold">
+             {{ zgon.data_zgonu|date:"d.m.Y"|default:"—" }}
+          </div>
+        </div>
+
+        <div class="row mb-2">
+          <div class="col-4 text-muted">Miejsce zgonu:</div>
+          <div class="col-8">
+             {{ zgon.miejsce_zgonu|default:"—" }}
+          </div>
+        </div>
+
+        <hr class="my-2">
+
+        <div class="row mb-2">
+          <div class="col-4 text-muted">Data pogrzebu:</div>
+          <div class="col-8 fw-semibold">
+             {{ zgon.data_pogrzebu|date:"d.m.Y"|default:"—" }}
+          </div>
+        </div>
+
+        <div class="row mb-2">
+          <div class="col-4 text-muted">Cmentarz:</div>
+          <div class="col-8">
+             {{ zgon.cmentarz|default:"—" }}
+          </div>
+        </div>
+
+      </div>
+    </div>
   </div>
-  <div class="card-body">
-    <p><strong>Zmarły/a:</strong>
-      {{ zgon.osoba.nazwisko }} {{ zgon.osoba.imie_pierwsze }}
-    </p>
 
-    <p><strong>Rok / akt:</strong>
-      {{ zgon.rok|default:"brak" }} / {{ zgon.akt_nr|default:"–" }}
-    </p>
+  {# --- PRAWA STRONA: OSOBA ZMARŁA --- #}
+  <div class="col-md-6">
+    {# Używamy ciemniejszego tła dla nagłówka (szacunek/żałoba) #}
+    <div class="card shadow-sm border-0 h-100">
+      <div class="card-header bg-secondary-subtle text-secondary-emphasis fw-semibold border-secondary-subtle">
+        Osoba zmarła
+      </div>
+      <div class="card-body small">
+        <h5 class="card-title mb-3 text-dark">
+          {{ zgon.osoba.imie_pierwsze }} {{ zgon.osoba.nazwisko }}
+        </h5>
+        
+        <div class="row mb-2">
+          <div class="col-4 text-muted">Data urodzenia:</div>
+          <div class="col-8">
+             {{ zgon.osoba.data_urodzenia|default:"—" }}
+          </div>
+        </div>
 
-    <p><strong>Data zgonu:</strong>
-      {{ zgon.data_zgonu|default:"brak" }}
-    </p>
+        <div class="row mb-2">
+            <div class="col-4 text-muted">Imiona rodziców:</div>
+            <div class="col-8">
+               {{ zgon.osoba.imie_ojca|default:"..." }} i {{ zgon.osoba.imie_matki|default:"..." }}
+            </div>
+        </div>
+        
+        <div class="row mb-2">
+            <div class="col-4 text-muted">Ostatni adres:</div>
+            <div class="col-8">
+               {{ zgon.osoba.miejscowosc }} {{ zgon.osoba.ulica }} {{ zgon.osoba.nr_domu }}
+            </div>
+        </div>
 
-    <p><strong>Miejsce zgonu:</strong>
-      {{ zgon.miejsce_zgonu|default:"brak" }}
-    </p>
+        <div class="mt-3">
+           <a href="{% url 'osoba_szczegoly' zgon.osoba.pk %}" class="btn btn-sm btn-outline-secondary">
+             Przejdź do profilu osoby ➞
+           </a>
+        </div>
 
-    <p><strong>Data pogrzebu:</strong>
-      {{ zgon.data_pogrzebu|default:"brak" }}
-    </p>
-
-    <p><strong>Cmentarz:</strong>
-      {{ zgon.cmentarz|default:"brak" }}
-    </p>
-
-    <p><strong>Uwagi wewnętrzne:</strong><br>{{ zgon.uwagi_wew|default:"—" }}</p>
+      </div>
+    </div>
   </div>
+
+  {# --- DOLNY WIERSZ: UWAGI I ZAŁĄCZNIKI --- #}
+  <div class="col-12">
+    <div class="card shadow-sm border-0">
+      <div class="card-body">
+        <h6 class="fw-bold text-muted text-uppercase small mb-3">Dodatkowe informacje</h6>
+        
+        <div class="p-3 bg-light rounded border mb-3">
+            <strong>Uwagi kancelaryjne:</strong><br>
+            {% if zgon.uwagi_wew %}
+              <span style="white-space:pre-line;">{{ zgon.uwagi_wew }}</span>
+            {% else %}
+              <span class="text-muted fst-italic">Brak uwag.</span>
+            {% endif %}
+        </div>
+
+        {# --- SEKCJA SKANU --- #}
+        <div class="d-flex align-items-center gap-2">
+            <strong>Załącznik (skan):</strong>
+            {% if zgon.skan_aktu %}
+                <a href="{{ zgon.skan_aktu.url }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                  📄 Zobacz skan aktu
+                </a>
+            {% else %}
+                <span class="text-muted small">Brak załączonego pliku.</span>
+            {% endif %}
+        </div>
+
+      </div>
+    </div>
+  </div>
+
 </div>
 
 {% endblock %}

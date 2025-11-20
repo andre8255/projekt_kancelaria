@@ -216,7 +216,7 @@ class WyznanieEdycjaView(RolaWymaganaMixin, UpdateView):
 class WyznanieUsunView(RolaWymaganaMixin, DeleteView):
     dozwolone_role = [Rola.ADMIN]
     model = Wyznanie
-    template_name = "slowniki/potwierdz_usuniecie.html"
+    template_name = "slowniki/wyznanie_usun.html"
     success_url = reverse_lazy("slownik_wyznanie_lista")
 
     def post(self, request, *args, **kwargs):

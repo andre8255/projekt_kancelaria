@@ -1,98 +1,170 @@
 {% extends "base_panel.html" %}
+
 {% block content %}
 
 <div class="d-flex justify-content-between align-items-start mb-3">
-  <h1 class="h5 mb-0">Bierzmowanie</h1>
+  <div>
+    <h1 class="h5 mb-1">Bierzmowanie</h1>
+    <div class="text-muted small">Szczegóły przyjęcia sakramentu</div>
+  </div>
 
-  <div class="d-flex flex-wrap gap-2">
-      <a href="{% url 'bierzmowanie_druk' bierzmowanie.pk %}" target="_blank" class="btn btn-outline-primary btn-sm">
-      Drukuj
+  <div class="d-flex flex-wrap gap-2 ms-auto">
+    {# Zostawiam tylko nowy PDF, stary druk HTML można ukryć jeśli nie używasz #}
+    <a href="{% url 'bierzmowanie_pdf' bierzmowanie.pk %}" target="_blank" class="btn btn-outline-secondary btn-sm">
+      📄 Pobierz PDF (Świadectwo)
     </a>
-
-    <a href="{% url 'bierzmowanie_pdf' bierzmowanie.pk %}" target="_blank" class="btn btn-outline-primary btn-sm">
-      Drukuj pdf
-    </a>
-
-    <a href="{% url 'bierzmowanie_edytuj' bierzmowanie.pk %}" class="btn btn-outline-secondary btn-sm">
-      Edytuj
-    </a>
-    <a href="{% url 'bierzmowanie_usun' bierzmowanie.pk %}" class="btn btn-outline-danger btn-sm">
-      Usuń
-    </a>
-    <a href="{% url 'bierzmowanie_lista' %}" class="btn btn-outline-secondary btn-sm">
-      Powrót
-    </a>
+    <a href="{% url 'bierzmowanie_druk' bierzmowanie.pk %}" class="btn btn-outline-primary btn-sm">🖨️ Drukuj</a>
+    <a href="{% url 'bierzmowanie_edytuj' bierzmowanie.pk %}" class="btn btn-outline-secondary btn-sm">✏️ Edytuj</a>
+    <a href="{% url 'bierzmowanie_usun' bierzmowanie.pk %}" class="btn btn-outline-danger btn-sm">🗑️ Usuń</a>
+    <a href="{% url 'bierzmowanie_lista' %}" class="btn btn-outline-secondary btn-sm">⬅ Powrót</a>
   </div>
 </div>
 
-<div class="card shadow-sm small">
-  <div class="card-header fw-semibold">
-    Dane bierzmowania
+<div class="row g-4">
+
+  {# --- LEWA STRONA: DANE SAKRAMENTU --- #}
+  <div class="col-md-6">
+    <div class="card shadow-sm border-0 h-100">
+      <div class="card-header bg-light fw-semibold border-bottom">
+        Dane aktu bierzmowania
+      </div>
+      <div class="card-body small">
+        
+        <div class="row mb-2">
+          <div class="col-4 text-muted">Rok / Nr aktu:</div>
+          <div class="col-8 fw-bold">{{ bierzmowanie.rok|default:"—" }}/{{ bierzmowanie.akt_nr|default:"—" }}</div>
+        </div>
+
+        <div class="row mb-2">
+          <div class="col-4 text-muted">Data:</div>
+          <div class="col-8">
+             {{ bierzmowanie.data_bierzmowania|default:"—" }}
+          </div>
+        </div>
+
+        <div class="row mb-2">
+          <div class="col-4 text-muted">Parafia:</div>
+          <div class="col-8">
+            {% if bierzmowanie.parafia %}
+                {{ bierzmowanie.parafia.nazwa }}
+                {% if bierzmowanie.parafia.miejscowosc %}
+                   <br><span class="text-muted">({{ bierzmowanie.parafia.miejscowosc }})</span>
+                {% endif %}
+            {% elif bierzmowanie.parafia_nazwa_reczna %}
+                {{ bierzmowanie.parafia_nazwa_reczna }}
+            {% else %}
+                —
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="row mb-2">
+          <div class="col-4 text-muted">Miejsce:</div>
+          <div class="col-8">
+             {{ bierzmowanie.miejsce_bierzmowania|default:"—" }}
+          </div>
+        </div>
+
+        <hr>
+
+        <div class="row mb-2">
+          <div class="col-4 text-muted">Szafarz:</div>
+          <div class="col-8 fw-semibold">
+            {% if bierzmowanie.szafarz %}
+              {{ bierzmowanie.szafarz }}
+            {% elif bierzmowanie.szafarz_opis_reczny %}
+              {{ bierzmowanie.szafarz_opis_reczny }}
+            {% else %}
+              —
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="row mb-0">
+          <div class="col-4 text-muted">Świadek:</div>
+          <div class="col-8">
+             {{ bierzmowanie.swiadek|default:"—" }}
+          </div>
+        </div>
+
+      </div>
+    </div>
   </div>
-  <div class="card-body">
-    <p><strong>Osoba:</strong> {{ bierzmowanie.osoba.nazwisko }} {{ bierzmowanie.osoba.imie_pierwsze }}</p>
 
-    <p><strong>Rok / akt:</strong>
-      {{ bierzmowanie.rok|default:"brak" }} / {{ bierzmowanie.akt_nr|default:"–" }}
-    </p>
+  {# --- PRAWA STRONA: OSOBA --- #}
+  <div class="col-md-6">
+    <div class="card shadow-sm border-0 h-100">
+      <div class="card-header bg-success-subtle text-danger-emphasis fw-semibold border-danger-subtle">
+        Osoba bierzmowana
+      </div>
+      <div class="card-body small">
+        <h5 class="card-title mb-3">
+          {{ bierzmowanie.osoba.imie_pierwsze }} {{ bierzmowanie.osoba.nazwisko }}
+        </h5>
+        
+        {# Wyróżnione imię z bierzmowania #}
+        <div class="alert alert-light border d-flex align-items-center p-2 mb-3">
+            <span class="text-muted me-2">Imię z bierzmowania:</span>
+            <span class="fw-bold fs-6 text-dark">
+                {{ bierzmowanie.imie_bierzmowania|default:"(brak danych)" }}
+            </span>
+        </div>
 
-    <p><strong>Data bierzmowania:</strong>
-      {% if bierzmowanie.data_bierzmowania %}
-        {{ bierzmowanie.data_bierzmowania }}
-      {% else %}
-        brak
-      {% endif %}
-    </p>
+        <div class="row mb-2">
+          <div class="col-4 text-muted">Data urodzenia:</div>
+          <div class="col-8">
+             {{ bierzmowanie.osoba.data_urodzenia|default:"—" }}
+          </div>
+        </div>
+        
+        <div class="row mb-2">
+          <div class="col-4 text-muted">Rodzice:</div>
+          <div class="col-8">
+             {{ bierzmowanie.osoba.imie_ojca|default:"..." }} i {{ bierzmowanie.osoba.imie_matki|default:"..." }}
+          </div>
+        </div>
+        
+        <div class="mt-3">
+           <a href="{% url 'osoba_szczegoly' bierzmowanie.osoba.pk %}" class="btn btn-sm btn-outline-success">
+             Przejdź do profilu osoby ➞
+           </a>
+        </div>
 
-  <p><strong>Imię bierzmowania:</strong>
-      {% if bierzmowanie.imie_bierzmowania %}
-        {{ bierzmowanie.imie_bierzmowania }}
-      {% else %}
-        brak
-      {% endif %}
-    </p>
-
-    <p><strong>Parafia:</strong>
-  {% if bierzmowanie.parafia %}
-    
-    {{ bierzmowanie.parafia.nazwa }}
-    
-    {% if bierzmowanie.parafia.miejscowosc %}
-      - {{ bierzmowanie.parafia.miejscowosc }}
-    {% endif %}
-
-  {% elif bierzmowanie.parafia_nazwa_reczna %}
-    {{ bierzmowanie.parafia_nazwa_reczna }}
-  {% else %}
-    <span class="text-muted">—</span>
-  {% endif %}
-</p>
-
-   <p><strong>Szafarz:</strong>
-      {% if bierzmowanie.szafarz %}
-        {{ bierzmowanie.szafarz }}
-      {% elif bierzmowanie.szafarz_opis_reczny %}
-        {{ bierzmowanie.szafarz_opis_reczny }}
-      {% else %}
-        <span class="text-muted">—</span>
-      {% endif %}
-    </p>
-
-    <p><strong>Świadek:</strong> {{ bierzmowanie.swiadek|default:"brak" }}</p>
-
-    <p><strong>Uwagi wewnętrzne:</strong><br>{{ bierzmowanie.uwagi_wew|default:"—" }}</p>
-
-    <hr>
-    <p class="mb-1"><strong>Załącznik (skan):</strong></p>
-    {% if bierzmowanie.skan_aktu %}
-      <a href="{{ bierzmowanie.skan_aktu.url }}" target="_blank" class="btn btn-outline-primary btn-sm">
-        📄 Zobacz skan aktu
-      </a>
-    {% else %}
-      <span class="text-muted">Brak załączonego pliku.</span>
-    {% endif %}
-
+      </div>
+    </div>
   </div>
+
+  {# --- DOLNY WIERSZ: UWAGI I SKANY --- #}
+  <div class="col-12">
+    <div class="card shadow-sm border-0">
+      <div class="card-body">
+        
+        <h6 class="fw-bold text-muted text-uppercase small mb-3">Dodatkowe informacje</h6>
+        
+        <div class="mb-3 p-3 bg-light rounded border">
+            <strong>Uwagi kancelaryjne:</strong><br>
+            {% if bierzmowanie.uwagi_wew %}
+              <span style="white-space:pre-line;">{{ bierzmowanie.uwagi_wew }}</span>
+            {% else %}
+              <span class="text-muted fst-italic">Brak uwag.</span>
+            {% endif %}
+        </div>
+
+        <div class="d-flex align-items-center gap-2">
+            <strong>Załącznik (skan):</strong>
+            {% if bierzmowanie.skan_aktu %}
+                <a href="{{ bierzmowanie.skan_aktu.url }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                  📄 Zobacz skan aktu
+                </a>
+            {% else %}
+                <span class="text-muted small">Brak załączonego pliku.</span>
+            {% endif %}
+        </div>
+
+      </div>
+    </div>
+  </div>
+
 </div>
 
 {% endblock %}

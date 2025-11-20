@@ -446,6 +446,13 @@ class Zgon(models.Model):
     # Uwagi
     uwagi_wew = models.TextField("Uwagi kancelaryjne (wewnętrzne)", blank=True)
 
+    skan_aktu = models.FileField(
+        "Skan aktu zgonu",
+        upload_to="skany/zgony/",
+        null=True,
+        blank=True
+    )
+    
     class Meta:
         constraints = [
             models.UniqueConstraint(

@@ -8,39 +8,30 @@
   </div>
 
   <div class="d-flex flex-wrap gap-2 ms-auto">
-    <a href="{% url 'namaszczenie_lista_druk' %}?{{ request.GET.urlencode }}" 
-       target="_blank" 
-       class="btn btn-outline-secondary btn-sm">
+    <a href="{% url 'namaszczenie_lista_druk' %}?{{ request.GET.urlencode }}" target="_blank" class="btn btn-outline-secondary btn-sm">
       🖨️ Drukuj listę
     </a>
-    
     <a href="{% url 'namaszczenie_dodaj' %}" class="btn btn-primary btn-sm">
       + Dodaj wpis
     </a>
   </div>
 </div>
 
-{# --- ZMIANA: Formularz teraz zawiera pole ROK --- #}
 <form method="get" class="mb-3 d-flex gap-2 align-items-center flex-wrap">
-  
-  {# Pole Rok #}
   <div style="width: 100px;">
-    <input type="number" name="rok" class="form-control form-control-sm" 
-           value="{{ request.GET.rok }}" placeholder="Rok">
+    <input type="number" name="rok" class="form-control form-control-sm" value="{{ request.GET.rok }}" placeholder="Rok">
   </div>
-
-  {# Główne pole wyszukiwania #}
   <div class="input-group input-group-sm" style="max-width:400px;">
-    <input class="form-control" type="search" name="q" value="{{ request.GET.q }}"
-           placeholder="Nazwisko, ksiądz, miejsce…">
-    <button class="btn btn-outline-secondary">Szukaj</button>
+    <input class="form-control" type="search" name="q" value="{{ request.GET.q }}" placeholder="Nazwisko, miejsce...">
+    <button class="btn btn-outline-secondary d-flex align-items-center gap-1">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+      </svg>
+      Szukaj
+    </button>
   </div>
-  
-  {# Przycisk czyszczenia filtrów (opcjonalny, ale przydatny) #}
   {% if request.GET.q or request.GET.rok %}
-    <a href="{% url 'namaszczenie_lista' %}" class="btn btn-sm btn-link text-decoration-none text-secondary">
-      ✕ Wyczyść
-    </a>
+    <a href="{% url 'namaszczenie_lista' %}" class="btn btn-sm btn-link text-decoration-none text-secondary">✕ Wyczyść</a>
   {% endif %}
 </form>
 
@@ -54,7 +45,6 @@
               <th>Data</th>
               <th>Osoba</th>
               <th>Miejsce</th>
-              <th>Szafarz</th>
               <th>Udzielone</th>
               <th class="text-end">Akcje</th>
             </tr>
@@ -62,29 +52,17 @@
           <tbody>
             {% for n in namaszczenia %}
             <tr>
-              <td>{{ n.data|default:"—" }}</td>
+              <td>{{ n.data|date:"d.m.Y" }}</td>
               <td>{{ n.osoba.nazwisko }} {{ n.osoba.imie_pierwsze }}</td>
-              
               <td>{{ n.miejsce|default:"—" }}</td>
-              <td>
-                {% if n.szafarz %}
-                  {{ n.szafarz.tytul }} {{ n.szafarz.imie_nazwisko }}
-                {% else %}
-                  —
-                {% endif %}
-              </td>
               <td class="small">
-                {% if n.spowiedz %}Spowiedź✔ {% endif %}
-                {% if n.komunia %}Komunia✔ {% endif %}
-                {% if n.namaszczenie %}Namaszczenie✔{% endif %}
-                {% if not n.spowiedz and not n.komunia and not n.namaszczenie %}
-                  <span class="text-muted">—</span>
-                {% endif %}
+                {% if n.spowiedz %}Spowiedź {% endif %}
+                {% if n.komunia %}Komunia {% endif %}
+                {% if n.namaszczenie %}Namaszczenie {% endif %}
               </td>
               <td class="text-end">
                 <div class="btn-group btn-group-sm" role="group">
                   <a href="{% url 'namaszczenie_szczegoly' n.pk %}" class="btn btn-outline-secondary">Szczegóły</a>
-      
                   <a href="{% url 'namaszczenie_usun' n.pk %}" class="btn btn-outline-danger">Usuń</a>
                 </div>
               </td>
@@ -94,9 +72,8 @@
         </table>
       </div>
     {% else %}
-      <div class="p-3 text-muted small">Brak wpisów pasujących do kryteriów.</div>
+      <div class="p-3 text-muted small">Brak wpisów.</div>
     {% endif %}
   </div>
 </div>
-
 {% endblock %}

@@ -349,7 +349,7 @@ class KomuniaDrukView(LoginRequiredMixin, DetailView):
 # === BIERZMOWANIE
 # =============================================================================
 
-class BierzmowanieListaView(LoginRequiredMixin, ListView): # <-- Poprawka: ListView i LoginRequiredMixin
+class BierzmowanieListaView(LoginRequiredMixin, ListView):
     model = Bierzmowanie
     template_name = "sakramenty/bierzmowanie_lista.html"
     context_object_name = "bierzmowania"
@@ -357,11 +357,9 @@ class BierzmowanieListaView(LoginRequiredMixin, ListView): # <-- Poprawka: ListV
     ordering = ["-rok", "osoba__nazwisko", "osoba__imie_pierwsze"]
 
     def get_queryset(self):
-        qs = (
-            super()
-            .get_queryset()
-            .select_related("osoba", "parafia", "szafarz")
-        )
+        qs = super().get_queryset().select_related("osoba", "parafia", "szafarz")
+        
+        # Filtrowanie po frazie
         q = (self.request.GET.get("q") or "").strip()
         if q:
             for slowo in q.split():
@@ -370,9 +368,13 @@ class BierzmowanieListaView(LoginRequiredMixin, ListView): # <-- Poprawka: ListV
                     | Q(osoba__imie_pierwsze__icontains=slowo)
                     | Q(akt_nr__icontains=slowo)
                     | Q(parafia__nazwa__icontains=slowo)
-                    | Q(szafarz__imie_nazwisko__icontains=slowo) # Zakładam, że model Duchowny ma pole imie_nazwisko
-                    | Q(rok__icontains=slowo)
                 )
+        
+        # NOWE: Filtrowanie po roku
+        rok = (self.request.GET.get("rok") or "").strip()
+        if rok and rok.isdigit():
+            qs = qs.filter(rok=rok)
+            
         return qs
 
 
@@ -494,7 +496,7 @@ class BierzmowanieDrukView(LoginRequiredMixin, DetailView):
 # === MAŁŻEŃSTWO
 # =============================================================================
 
-class MalzenstwoListaView(LoginRequiredMixin, ListView): # <-- Poprawka: ListView i LoginRequiredMixin
+class MalzenstwoListaView(LoginRequiredMixin, ListView):
     model = Malzenstwo
     template_name = "sakramenty/malzenstwo_lista.html"
     context_object_name = "malzenstwa"
@@ -502,24 +504,44 @@ class MalzenstwoListaView(LoginRequiredMixin, ListView): # <-- Poprawka: ListVie
     ordering = ["-rok", "malzonek_a__nazwisko", "malzonek_b__nazwisko"]
 
     def get_queryset(self):
-        qs = (
-            super()
-            .get_queryset()
-            .select_related("malzonek_a", "malzonek_b", "parafia", "swiadek_urzedowy")
-        )
+        qs = super().get_queryset().select_related("malzonek_a", "malzonek_b", "parafia")
+        
+        # Filtrowanie po frazie
         q = (self.request.GET.get("q") or "").strip()
         if q:
             for slowo in q.split():
                 qs = qs.filter(
+                    # 1. MAŁŻONEK A (np. Mąż)
                     Q(malzonek_a__nazwisko__icontains=slowo)
+                    | Q(malzonek_a__nazwisko_rodowe__icontains=slowo) # <--- DODANO RODOWE
                     | Q(malzonek_a__imie_pierwsze__icontains=slowo)
+                    
+                    # 2. MAŁŻONEK B (np. Żona)
                     | Q(malzonek_b__nazwisko__icontains=slowo)
+                    | Q(malzonek_b__nazwisko_rodowe__icontains=slowo) # <--- DODANO RODOWE
                     | Q(malzonek_b__imie_pierwsze__icontains=slowo)
-                    | Q(rok__icontains=slowo)
+                    
                     | Q(akt_nr__icontains=slowo)
                     | Q(parafia__nazwa__icontains=slowo)
-                    | Q(swiadek_urzedowy__imie_nazwisko__icontains=slowo) # Zakładam pole imie_nazwisko
+                    | Q(akt_nr__icontains=slowo)  
+                    # --- NOWE: Wyszukiwanie po PARAFII ---
+                    # Szukamy w nazwie parafii (z relacji ForeignKey)
+                    | Q(parafia__nazwa__icontains=slowo)
+                    # Oraz w polu ręcznym (jeśli wpisano spoza listy)
+                    | Q(parafia_opis_reczny__icontains=slowo)
+                    
+                    # --- NOWE: Wyszukiwanie po ŚWIADKU URZĘDOWYM ---
+                    # Szukamy w imieniu i nazwisku duchownego (z relacji ForeignKey)
+                    | Q(swiadek_urzedowy__imie_nazwisko__icontains=slowo)
+                    # Oraz w polu ręcznym
+                    | Q(swiadek_urzedowy_opis_reczny__icontains=slowo)  
                 )
+
+        # NOWE: Filtrowanie po roku
+        rok = (self.request.GET.get("rok") or "").strip()
+        if rok and rok.isdigit():
+            qs = qs.filter(rok=rok)
+
         return qs
 
 
@@ -626,23 +648,21 @@ class NamaszczenieListaView(LoginRequiredMixin, ListView):
         qs = (
             NamaszczenieChorych.objects.all()
             .select_related("osoba", "szafarz")
-            .order_by("-data", "osoba__nazwisko", "osoba__imie_pierwsze")
+            .order_by("-data", "osoba__nazwisko")
         )
         
-        # 1. Filtrowanie po frazie (istniejące)
+        # Filtrowanie po frazie
         q = (self.request.GET.get("q") or "").strip()
         if q:
             qs = qs.filter(
                 Q(osoba__nazwisko__icontains=q)
                 | Q(osoba__imie_pierwsze__icontains=q)
                 | Q(miejsce__icontains=q)
-                | Q(szafarz__imie_nazwisko__icontains=q)
             )
 
-        # 2. Filtrowanie po ROKU (Nowe)
+        # NOWE: Filtrowanie po roku (tutaj filtrujemy po dacie, bo Namaszczenie nie ma pola 'rok')
         rok = (self.request.GET.get("rok") or "").strip()
         if rok and rok.isdigit():
-            # Filtrujemy po roku z pola daty (data__year)
             qs = qs.filter(data__year=rok)
 
         return qs
@@ -747,10 +767,12 @@ class ZgonListaView(LoginRequiredMixin, ListView):
     template_name = "sakramenty/zgon_lista.html"
     context_object_name = "zgony"
     paginate_by = 20
-    ordering = ["-rok", "osoba__nazwisko", "osoba__imie_pierwsze"]
+    ordering = ["-rok", "osoba__nazwisko"]
 
     def get_queryset(self):
         qs = super().get_queryset().select_related("osoba")
+        
+        # Filtrowanie po frazie
         q = (self.request.GET.get("q") or "").strip()
         if q:
             for slowo in q.split():
@@ -759,10 +781,13 @@ class ZgonListaView(LoginRequiredMixin, ListView):
                     | Q(osoba__imie_pierwsze__icontains=slowo)
                     | Q(akt_nr__icontains=slowo)
                     | Q(cmentarz__icontains=slowo)
-                    | Q(rok__icontains=slowo)
                 )
-        return qs
 
+        # NOWE: Filtrowanie po roku
+        rok = (self.request.GET.get("rok") or "").strip()
+        if rok and rok.isdigit():
+            qs = qs.filter(rok=rok)
+        return qs
 
 class ZgonSzczegolyView(LoginRequiredMixin, DetailView):
     model = Zgon

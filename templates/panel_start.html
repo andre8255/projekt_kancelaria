@@ -264,7 +264,7 @@
           <ul class="list-group list-group-flush">
             {% for s in ostatnie_sluby %}
               <li class="list-group-item d-flex justify-content-between">
-                <span>{{ s.rok }}/{{ s.akt_nr|default:"—" }} — {{ s.malzonek_a }} &amp; {{ s.malzonek_b }}</span>
+                <span>{{ s.rok }}/{{ s.akt_nr|default:"—" }} — {{ s.malzonek_a.nazwisko_rodowe }} {{ s.malzonek_a.imie_pierwsze }} &amp; {{ s.malzonek_b.nazwisko_rodowe }} {{ s.malzonek_b.imie_pierwsze }}</span>
                 <a class="btn btn-sm btn-outline-secondary" href="{% url 'malzenstwo_szczegoly' s.pk %}">Pokaż</a>
               </li>
             {% endfor %}

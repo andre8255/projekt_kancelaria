@@ -4,85 +4,133 @@
 <div class="d-flex justify-content-between align-items-start mb-3">
   <h1 class="h5 mb-0">Małżeństwo</h1>
 
-
-    <div class="d-flex flex-wrap gap-2 ms-auto">
+  <div class="d-flex flex-wrap gap-2 ms-auto">
     <a href="{% url 'malzenstwo_pdf' malzenstwo.pk %}" target="_blank" class="btn btn-outline-secondary btn-sm">
-    📄 Pobierz PDF (Zaświadczenie)
-  </a>
-    <a href="{% url 'malzenstwo_druk' malzenstwo.pk %}" target="_blank" class="btn btn-outline-primary btn-sm">Drukuj</a>
-    <a href="{% url 'malzenstwo_edytuj' malzenstwo.pk %}" class="btn btn-outline-secondary btn-sm">Edytuj</a>
-    <a href="{% url 'malzenstwo_usun' malzenstwo.pk %}" class="btn btn-outline-danger btn-sm">Usuń</a>
-    <a href="{% url 'malzenstwo_lista' %}" class="btn btn-outline-secondary btn-sm">Powrót</a>
+      📄 Pobierz PDF (Zaświadczenie)
+    </a>
+    <a href="{% url 'malzenstwo_druk' malzenstwo.pk %}" class="btn btn-outline-secondary btn-sm">
+      🖨️Drukuj</a>
+    <a href="{% url 'malzenstwo_edytuj' malzenstwo.pk %}" class="btn btn-outline-secondary btn-sm">✏️ Edytuj</a>
+    <a href="{% url 'malzenstwo_usun' malzenstwo.pk %}" class="btn btn-outline-danger btn-sm">🗑️ Usuń</a>
+    <a href="{% url 'malzenstwo_lista' %}" class="btn btn-outline-secondary btn-sm">⬅ Powrót</a>
   </div>
 </div>
 
-<div class="card shadow-sm small">
-  <div class="card-header fw-semibold">
-    Dane małżeństwa
-  </div>
+<div class="card shadow-sm border-0">
   <div class="card-body">
-    <p><strong>Małżonek A: </strong>
-      {{ malzenstwo.malzonek_a.nazwisko }} {{ malzenstwo.malzonek_a.imie_pierwsze }}
-    </p>
-
-    <p><strong>Małżonek B: </strong>
-      {{ malzenstwo.malzonek_b.nazwisko }} {{ malzenstwo.malzonek_b.imie_pierwsze }} z domu {{ malzenstwo.malzonek_b.nazwisko_rodowe }} 
-    </p>
-
-    <p><strong>Rok/akt: </strong>
-      {{ malzenstwo.rok|default:"brak" }}/{{ malzenstwo.akt_nr|default:"–" }}
-    </p>
-
-    <p><strong>Parafia ślubu:</strong>
-     {% if malzenstwo.parafia %}
     
-    {{ malzenstwo.parafia.nazwa }}
-    
-    {% if malzenstwo.parafia.miejscowosc %}
-      - {{ malzenstwo.parafia.miejscowosc }}
-    {% endif %}
-
-  {% elif malzenstwo.parafia_nazwa_reczna %}
-    {{ malzenstwo.parafia_nazwa_reczna }}
-  {% else %}
-    <span class="text-muted">—</span>
-  {% endif %}
-    </p>
-
-    <p><strong>Świadek urzędowy/asystujący: </strong>
-      {% if malzenstwo.swiadek_urzedowy %}
-        {{ malzenstwo.swiadek_urzedowy }}
-      {% elif malzenstwo.swiadek_urzedowy_opis_reczny %}
-        {{ malzenstwo.swiadek_urzedowy_opis_reczny }}
-      {% else %}
-        <span class="text-muted">—</span>
-      {% endif %}
-    </p>
-
-    <p><strong>Świadkowie:</strong>
-       {{ malzenstwo.swiadek_a|default:"—" }} / 
-      {{ malzenstwo.swiadek_b|default:"—" }}
-    </p>
-
-    <p><strong>Uwagi wewnętrzne: </strong><br>{{ malzenstwo.uwagi_wew|default:"—" }}</p>
-  </div>
-
-  {# --- SEKCJA ZAŁĄCZNIKA --- #}
-  <div class="col-md-12 mt-3">
-    <div class="card shadow-sm border-0">
-      <div class="card-header fw-semibold">
-        Załączniki
-      </div>
-      <div class="card-body small">
-        {% if malzenstwo.skan_aktu %}
-          <a href="{{ malzenstwo.skan_aktu.url }}" target="_blank" class="btn btn-outline-primary btn-sm">
-            📄 Zobacz skan aktu/protokołu
-          </a>
-        {% else %}
-          <span class="text-muted">Brak załączonego skanu.</span>
-        {% endif %}
+    {# --- DANE OGÓLNE AKTU --- #}
+    <div class="row mb-4">
+      <div class="col-12">
+        <h6 class="fw-bold text-muted text-uppercase small mb-3">Dane aktu</h6>
+        <p class="mb-1">
+            <strong>Rok / Nr aktu:</strong> {{ malzenstwo.rok }}/{{ malzenstwo.akt_nr }}
+        </p>
+        <p class="mb-1">
+            <strong>Data ślubu:</strong> {{ malzenstwo.data_slubu|default:"—" }}
+        </p>
+        <p class="mb-1">
+            <strong>Parafia ślubu:</strong>
+            {% if malzenstwo.parafia %}
+                {{ malzenstwo.parafia.nazwa }} 
+                {% if malzenstwo.parafia.miejscowosc %}({{ malzenstwo.parafia.miejscowosc }}){% endif %}
+            {% elif malzenstwo.parafia_opis_reczny %}
+                {{ malzenstwo.parafia_opis_reczny }}
+            {% else %}
+                <span class="text-muted">—</span>
+            {% endif %}
+        </p>
+        <p class="mb-1">
+            <strong>Świadek urzędowy / asystujący:</strong>
+            {% if malzenstwo.swiadek_urzedowy %}
+                {{ malzenstwo.swiadek_urzedowy }}
+            {% elif malzenstwo.swiadek_urzedowy_opis_reczny %}
+                {{ malzenstwo.swiadek_urzedowy_opis_reczny }}
+            {% else %}
+                <span class="text-muted">—</span>
+            {% endif %}
+        </p>
       </div>
     </div>
+
+    {# --- KARTY MAŁŻONKÓW OBOK SIEBIE --- #}
+    <div class="row g-4 mb-4">
+        
+      {# KARTA MĘŻA #}
+      <div class="col-md-6">
+        <div class="card h-100 border-primary-subtle">
+          <div class="card-header bg-primary-subtle text-primary border-primary-subtle fw-semibold">
+            Małżonek A (Mąż)
+          </div>
+          <div class="card-body small">
+            <h5 class="card-title mb-1">
+                {{ malzenstwo.malzonek_a.imie_pierwsze }} {{ malzenstwo.malzonek_a.nazwisko }}
+            </h5>
+            {% if malzenstwo.malzonek_a.nazwisko_rodowe and malzenstwo.malzonek_a.nazwisko != malzenstwo.malzonek_a.nazwisko_rodowe %}
+                <div class="text-muted mb-2">z domu: {{ malzenstwo.malzonek_a.nazwisko_rodowe }}</div>
+            {% endif %}
+            
+            <hr>
+            <p class="mb-1"><strong>Urodzony:</strong> {{ malzenstwo.malzonek_a.data_urodzenia|default:"—" }}</p>
+            <p class="mb-1"><strong>Miejsce:</strong> {{ malzenstwo.malzonek_a.miejsce_urodzenia|default:"—" }}</p>
+            <p class="mb-0"><strong>Świadek:</strong> {{ malzenstwo.swiadek_a|default:"—" }}</p>
+          </div>
+        </div>
+      </div>
+
+      {# KARTA ŻONY #}
+      <div class="col-md-6">
+        <div class="card h-100 border-danger-subtle">
+          <div class="card-header bg-danger-subtle text-danger border-danger-subtle fw-semibold">
+            Małżonek B (Żona)
+          </div>
+          <div class="card-body small">
+            <h5 class="card-title mb-1">
+                {{ malzenstwo.malzonek_b.imie_pierwsze }} {{ malzenstwo.malzonek_b.nazwisko }}
+            </h5>
+            
+            {# LOGIKA DLA DRUGIEGO MAŁŻEŃSTWA #}
+            {% if malzenstwo.malzonek_b.nazwisko_rodowe and malzenstwo.malzonek_b.nazwisko != malzenstwo.malzonek_b.nazwisko_rodowe %}
+                <div class="text-muted mb-2">
+                    z domu: <strong>{{ malzenstwo.malzonek_b.nazwisko_rodowe }}</strong>
+                </div>
+            {% endif %}
+
+            <hr>
+            <p class="mb-1"><strong>Urodzona:</strong> {{ malzenstwo.malzonek_b.data_urodzenia|default:"—" }}</p>
+            <p class="mb-1"><strong>Miejsce:</strong> {{ malzenstwo.malzonek_b.miejsce_urodzenia|default:"—" }}</p>
+            <p class="mb-0"><strong>Świadek:</strong> {{ malzenstwo.swiadek_b|default:"—" }}</p>
+          </div>
+        </div>
+      </div>
+
+    </div> {# /row małżonków #}
+
+    {# --- UWAGI I ZAŁĄCZNIKI --- #}
+    <div class="row">
+        <div class="col-12">
+            <div class="mb-3 p-3 bg-light rounded border">
+                <strong>Uwagi wewnętrzne: </strong><br>
+                {{ malzenstwo.uwagi_wew|default:"(brak uwag)" }}
+            </div>
+
+            <div class="card shadow-sm border-0">
+                <div class="card-header fw-semibold">
+                  Załączniki
+                </div>
+                <div class="card-body small">
+                  {% if malzenstwo.skan_aktu %}
+                    <a href="{{ malzenstwo.skan_aktu.url }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                      📄 Zobacz skan aktu/protokołu
+                    </a>
+                  {% else %}
+                    <span class="text-muted">Brak załączonego skanu.</span>
+                  {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
   </div>
 </div>
 
