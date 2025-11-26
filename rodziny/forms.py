@@ -96,7 +96,8 @@ class WizytaForm(BootstrapFormMixin, forms.ModelForm):
         model = WizytaDuszpasterska
         fields = ["rok", "data_wizyty", "ksiadz", "status", "ofiara", "notatka"]
         widgets = {
-            "data_wizyty": forms.DateInput(attrs={"type": "date"}),
+            # --- POPRAWKA: Dodano format='%Y-%m-%d' ---
+            "data_wizyty": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
             "notatka": forms.Textarea(attrs={"rows": 3}),
         }
 
