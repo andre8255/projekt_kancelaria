@@ -1,10 +1,12 @@
 # parafia/settings.py
 from pathlib import Path
+from decouple import config
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = "na-razie-dev"
-DEBUG = True
+SECRET_KEY = config("SECRET_KEY")
+# cast=bool sprawia, że napis "True"/"False" z pliku .env zostanie zamieniony na poprawną wartość logiczną w Pythonie
+DEBUG = config("DEBUG", default=False, cast=bool)
 ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
@@ -78,9 +80,9 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 # LOGOWANIE
-LOGIN_URL = "logowanie"
+LOGIN_URL = "konta:logowanie"
 LOGIN_REDIRECT_URL = "panel_start"     # wspólny dashboard po zalogowaniu
-LOGOUT_REDIRECT_URL = "logowanie"
+LOGOUT_REDIRECT_URL = "konta:logowanie"
 
 # E-maile w trybie offline (nic nie wysyła)
 EMAIL_BACKEND = "django.core.mail.backends.dummy.EmailBackend"

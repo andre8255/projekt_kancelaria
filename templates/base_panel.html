@@ -1,15 +1,15 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="pl">
+<html lang="pl" data-theme="light">
 <head>
   <meta charset="utf-8">
   <title>Kancelaria parafialna</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'vendor/bootstrap-icons/bootstrap-icons.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/theme.css' %}">
 
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-  
   <style>
       /* Ulepszenia dropdownów */
       .dropdown-item {
@@ -29,7 +29,7 @@
       .dropdown-item:active i {
           color: white; /* ikona biała przy kliknięciu */
       }
-      
+
       /* Nagłówki grup w menu */
       .dropdown-header {
           font-size: 0.75rem;
@@ -42,7 +42,7 @@
           font-weight: 700;
           letter-spacing: 0.5px;
       }
-      
+
       /* Cień pod menu */
       .dropdown-menu {
           border: none;
@@ -52,7 +52,7 @@
       }
   </style>
 </head>
-<body class="bg-light">
+<body>
 
 <nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top shadow-sm" style="height: 70px;">
   <div class="container">
@@ -93,7 +93,7 @@
             Akta
           </a>
           <ul class="dropdown-menu" style="min-width: 220px;">
-            
+
             <li>
               <a class="dropdown-item" href="{% url 'chrzest_lista' %}">
                 <i class="bi bi-droplet"></i> Chrzty
@@ -174,12 +174,23 @@
 
       </ul>
 
-      {# --- PRAWA STRONA: USER --- #}
+      {# --- PRAWA STRONA: przełącznik motywu + użytkownik --- #}
       <ul class="navbar-nav ms-auto border-start ps-3">
+
+        {# Przycisk motywu – zawsze widoczny #}
+        <li class="nav-item d-flex align-items-center me-3">
+          <button id="theme-toggle"
+                  class="btn btn-sm btn-outline-secondary"
+                  type="button"
+                  title="Przełącz motyw">
+            <i class="bi bi-moon-stars" id="theme-toggle-icon"></i>
+          </button>
+        </li>
+
         {% if user.is_authenticated %}
           <li class="nav-item dropdown">
              <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" data-bs-toggle="dropdown">
-                <div class="bg-primary-subtle text-primary rounded-circle d-flex justify-content-center align-items-center" 
+                <div class="bg-primary-subtle text-primary rounded-circle d-flex justify-content-center align-items-center"
                      style="width: 35px; height: 35px;">
                     <i class="bi bi-person-fill"></i>
                 </div>
@@ -235,9 +246,9 @@
     const rok = dzis.getFullYear();
     const miesiac = String(dzis.getMonth() + 1).padStart(2, '0');
     const dzien = String(dzis.getDate()).padStart(2, '0');
-    
+
     const dataString = `${rok}-${miesiac}-${dzien}`;
-    
+
     const pole = document.getElementById(idPola);
     if (pole) {
       pole.value = dataString;
@@ -248,7 +259,7 @@
   function ustawRok(idPola) {
     const dzis = new Date();
     const rok = dzis.getFullYear();
-    
+
     const pole = document.getElementById(idPola);
     if (pole) {
       pole.value = rok;
@@ -258,5 +269,57 @@
 
 <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
 
+<script>
+  (function () {
+    const STORAGE_KEY = "kp-theme";
+
+    function applyTheme(theme) {
+      const html = document.documentElement;
+      const next = theme === "dark" ? "dark" : "light";
+      html.setAttribute("data-theme", next);
+
+      const icon = document.getElementById("theme-toggle-icon");
+      if (icon) {
+        // jeśli używasz Bootstrap Icons
+        if (icon.classList.contains("bi")) {
+          icon.classList.remove("bi-moon-stars", "bi-sun");
+          icon.classList.add(next === "dark" ? "bi-sun" : "bi-moon-stars");
+        } else {
+          // fallback dla zwykłego <span> z emoji
+          icon.textContent = next === "dark" ? "☀️" : "🌙";
+        }
+      }
+    }
+
+    // wybór startowy: z localStorage albo z ustawień systemu
+    let saved = null;
+    try {
+      saved = localStorage.getItem(STORAGE_KEY);
+    } catch (e) {
+      saved = null;
+    }
+
+    const prefersDark =
+      window.matchMedia &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+    const initial = saved || (prefersDark ? "dark" : "light");
+    applyTheme(initial);
+
+    const btn = document.getElementById("theme-toggle");
+    if (!btn) return;
+
+    btn.addEventListener("click", function () {
+      const current = document.documentElement.getAttribute("data-theme");
+      const next = current === "dark" ? "light" : "dark";
+      applyTheme(next);
+      try {
+        localStorage.setItem(STORAGE_KEY, next);
+      } catch (e) {
+        // w trybie „brak pamięci” po prostu ignorujemy
+      }
+    });
+  })();
+</script>
 </body>
 </html>

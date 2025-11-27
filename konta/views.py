@@ -29,7 +29,7 @@ class WylogujView(View):
     def post(self, request):
         logout(request)
         messages.success(request, "Wylogowano.")
-        return redirect("logowanie")
+        return redirect("konta:logowanie")
     
 # Używamy staff_member_required, aby tylko obsługa (admini) mogła pobrać bazę
 @staff_member_required

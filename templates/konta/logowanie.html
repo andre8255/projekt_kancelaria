@@ -1,11 +1,13 @@
-<!--konta/logowanie.html-->
+<!-- konta/logowanie.html -->
 {% extends "base_public.html" %}
+
 {% block content %}
-<div class="container" style="max-width:420px">
   <h1 class="h5 mb-3 text-center">Zaloguj się</h1>
 
   {% if form.errors %}
-    <div class="alert alert-danger small">Nieprawidłowy login lub hasło.</div>
+    <div class="alert alert-danger small">
+      Nieprawidłowy login lub hasło.
+    </div>
   {% endif %}
 
   <form method="post" class="card p-3 shadow-sm">
@@ -20,5 +22,4 @@
     </div>
     <button class="btn btn-primary w-100">Zaloguj</button>
   </form>
-</div>
 {% endblock %}

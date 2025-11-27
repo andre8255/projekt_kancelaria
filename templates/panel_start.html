@@ -3,73 +3,167 @@
 
 <style>
   .mini-cal { --gap: .5rem; }
-  .mini-cal .week { display: grid; grid-template-columns: repeat(7, 1fr); gap: var(--gap); }
-  .mini-cal .day {
-    position: relative; padding: .6rem .5rem; border-radius: .6rem;
-    background: #fff; border: 1px solid #eef1f4; min-height: 80px;
-    transition: transform .1s ease, box-shadow .1s ease, border-color .1s ease;
-    display: flex; flex-direction: column; justify-content: space-between;
+  .mini-cal .week {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: var(--gap);
   }
-  .mini-cal .day:hover {
-    transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,.07);
-    border-color: #e0e0e0;
-  }
-  .mini-cal .dm-muted { opacity: .5; background: #fdfdfd; }
-  .mini-cal .dow { font-size: .72rem; letter-spacing: .02em; color: #6c757d; }
-  .mini-cal .num { font-weight: 600; font-size: 0.85rem; }
-  .mini-cal .today {
-    background: #eef5ff; border-color: #aaccff; box-shadow: none;
-  }
-  .mini-cal .today .num { color: #0d6efd; font-weight: 700; }
-  .mini-cal .day-status { display: flex; align-items: center; gap: .35rem; }
-  .mini-cal .status-text { font-size: .7rem; font-weight: 500; color: #555; }
-  .mini-cal .dot {
-    width: .45rem; height: .45rem; border-radius: 50%; display: inline-block; vertical-align: middle;
-  }
-  .dot-free { background:#198754; } .dot-busy { background:#dc3545; }
-  .legend { gap: .5rem; }
-  .mini-cal a { text-decoration: none; color: inherit; }
 
-  /* Dodatkowe style dla ładniejszych kafelków */
+  .mini-cal .day {
+    position: relative;
+    padding: .6rem .5rem;
+    border-radius: .6rem;
+    background: var(--kp-bg-alt);
+    border: 1px solid var(--kp-border);
+    min-height: 80px;
+    transition: transform .1s ease, box-shadow .1s ease, border-color .1s ease, background-color .1s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    color: var(--kp-text);
+  }
+
+  .mini-cal .day:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,.12);
+    border-color: var(--kp-border);
+    background-color: var(--kp-bg-alt);
+  }
+
+  .mini-cal .dm-muted {
+    opacity: .6;
+    /* delikatne przygaszenie, bez zmian tła (żeby motyw działał) */
+  }
+
+  .mini-cal .dow {
+    font-size: .72rem;
+    letter-spacing: .02em;
+    color: var(--kp-text-muted);
+  }
+
+  .mini-cal .num {
+    font-weight: 600;
+    font-size: 0.85rem;
+  }
+
+  /* Dzień dzisiejszy – jasny motyw */
+  .mini-cal .today {
+    background: #eef5ff;
+    border-color: #aaccff;
+    box-shadow: none;
+  }
+
+  .mini-cal .today .num {
+    color: #0d6efd;
+    font-weight: 700;
+  }
+
+  .mini-cal .day-status {
+    display: flex;
+    align-items: center;
+    gap: .35rem;
+  }
+
+  .mini-cal .status-text {
+    font-size: .7rem;
+    font-weight: 500;
+    color: var(--kp-text-muted);
+  }
+
+  .mini-cal .dot {
+    width: .45rem;
+    height: .45rem;
+    border-radius: 50%;
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  .dot-free  { background:#198754; }
+  .dot-busy  { background:#dc3545; }
+
+  .legend { gap: .5rem; }
+  .mini-cal a {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  /* Karty statystyk */
   .stat-card .icon-box {
-    width: 50px; height: 50px;
-    display: grid; place-items: center;
+    width: 50px;
+    height: 50px;
+    display: grid;
+    place-items: center;
     border-radius: .75rem;
     font-size: 1.5rem;
   }
-  .stat-card-osoby .icon-box { background-color: #e6f0ff; color: #0d6efd; }
+  .stat-card-osoby   .icon-box { background-color: #e6f0ff; color: #0d6efd; }
   .stat-card-rodziny .icon-box { background-color: #e6f9f0; color: #198754; }
-  .stat-card-chrzty .icon-box { background-color: #eef1f4; color: #495057; }
-  .stat-card-bierzm .icon-box { background-color: #fff0e6; color: #fd7e14; }
-  .stat-card-sluby .icon-box { background-color: #fde7ea; color: #dc3545; }
+  .stat-card-chrzty  .icon-box { background-color: #eef1f4; color: #495057; }
+  .stat-card-bierzm  .icon-box { background-color: #fff0e6; color: #fd7e14; }
+  .stat-card-sluby   .icon-box { background-color: #fde7ea; color: #dc3545; }
 
+  /* Podświetlenie dni wolne / zajęte – wersja bazowa (jasny motyw) */
+  .mini-cal .day-free {
+    background: #f6fef9; /* bardzo jasny zielony */
+  }
 
-  /* Nowe style dla podświetlenia dni */
-.mini-cal .day-free {
-  background: #f6fef9; /* Bardzo jasny zielony */
-}
-.mini-cal .day-busy {
-  background: #fef7f7; /* Bardzo jasny czerwony */
-}
+  .mini-cal .day-busy {
+    background: #fef7f7; /* bardzo jasny czerwony */
+  }
 
-/* Poprawka, aby styl .today wygrywał z tłem */
-.mini-cal .today.day-free,
-.mini-cal .today.day-busy {
-  background: linear-gradient(180deg, #f8fbff, #ffffff);
-}
+  /* Dzień dzisiejszy z podświetleniem – w jasnym motywie */
+  .mini-cal .today.day-free,
+  .mini-cal .today.day-busy {
+    background: linear-gradient(180deg, #f8fbff, #ffffff);
+  }
 
-/* Poprawka, aby najechanie myszką zawsze dawało białe tło */
-.mini-cal .day:hover {
-  background: #fff;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 18px rgba(0,0,0,.06);
-}
+  /* === DOPASOWANIA DLA CIEMNEGO MOTYWU === */
+
+  html[data-theme="dark"] .mini-cal .day {
+    box-shadow: 0 3px 10px rgba(0,0,0,.6);
+  }
+
+  html[data-theme="dark"] .mini-cal .day:hover {
+    box-shadow: 0 4px 14px rgba(0,0,0,.8);
+  }
+
+  html[data-theme="dark"] .mini-cal .dow {
+    color: var(--kp-text-muted);
+  }
+
+  /* Dziś – w ciemnym motywie */
+  html[data-theme="dark"] .mini-cal .today {
+    background: #1f2933;
+    border-color: #4dabf7;
+  }
+
+  html[data-theme="dark"] .mini-cal .today .num {
+    color: #4dabf7;
+  }
+
+  /* Wolne / zajęte – delikatnie mocniejsze tło w ciemnym */
+  html[data-theme="dark"] .mini-cal .day-free {
+    background: rgba(25, 135, 84, 0.18);
+  }
+
+  html[data-theme="dark"] .mini-cal .day-busy {
+    background: rgba(220, 53, 69, 0.18);
+  }
+
+  html[data-theme="dark"] .mini-cal .today.day-free,
+  html[data-theme="dark"] .mini-cal .today.day-busy {
+    background: linear-gradient(180deg, #202838, #151926);
+  }
+
+  /* Hover – ciemny motyw */
+  html[data-theme="dark"] .mini-cal .day:hover {
+    background-color: #252b38;
+  }
 </style>
-
 
 {# MINI KALENDARZ #}
 <div class="card shadow-sm border-0 mb-4">
-  <div class="card-header bg-white d-flex justify-content-between align-items-center">
+  <div class="card-header d-flex justify-content-between align-items-center">
     <div class="fw-semibold">Kalendarz mszy – {{ mini_kalendarz.month_label }}</div>
     <div class="legend d-none d-sm-flex align-items-center">
       <span class="dot dot-free me-1"></span><span class="text-muted small me-3">wolna</span>
@@ -81,35 +175,39 @@
     <div class="mini-cal">
       {# Nagłówki dni (pn–nd) #}
       <div class="week mb-2">
-      {% for dow in dni_tyg %}
-    <div class="text-center dow">{{ dow }}</div>
-      {% endfor %}
+        {% for dow in dni_tyg %}
+          <div class="text-center dow">{{ dow }}</div>
+        {% endfor %}
       </div>
-
 
       {# Tygodnie #}
       {% for week in mini_kalendarz.weeks %}
         <div class="week mb-2">
           {% for day in week %}
-            {# link do listy mszy z filtrem daty #}
-            <a class="day {% if day.is_other_month %}dm-muted{% endif %} {% if day.is_today %}today{% endif %} {% if day.all > day.busy %}day-free{% elif day.busy > 0 %}day-busy{% endif %}"
-   href="{% url 'msza_lista' %}?data={{ day.date|date:'Y-m-d' }}"
-   title="{% if day.all %}Msze: {{ day.all }}, zajęte: {{ day.busy }}{% else %}Brak mszy{% endif %}">
+            <a class="day
+                      {% if day.is_other_month %} dm-muted{% endif %}
+                      {% if day.is_today %} today{% endif %}
+                      {% if day.all > day.busy %} day-free
+                      {% elif day.busy > 0 %} day-busy
+                      {% endif %}"
+               href="{% url 'msza_lista' %}?data={{ day.date|date:'Y-m-d' }}"
+               title="{% if day.all %}Msze: {{ day.all }}, zajęte: {{ day.busy }}{% else %}Brak mszy{% endif %}">
               <div class="d-flex justify-content-between align-items-start">
-  <span class="num">{{ day.date.day }}</span>
+                <span class="num">{{ day.date.day }}</span>
 
-  {# POPRAWIONA LOGIKA KROPKI #}
-  {% if day.all > day.busy %}
-    <span class="dot dot-free" aria-hidden="true"></span>
-  {% elif day.busy > 0 %}
-    <span class="dot dot-busy" aria-hidden="true"></span>
-  {% endif %}
-</div>
+                {% if day.all > day.busy %}
+                  <span class="dot dot-free" aria-hidden="true"></span>
+                {% elif day.busy > 0 %}
+                  <span class="dot dot-busy" aria-hidden="true"></span>
+                {% endif %}
+              </div>
 
               {% if day.all %}
-                <div class="chips">
+                <div class="chips" style="margin-top:.35rem; font-size:.72rem;">
                   <span class="chip chip-all">{{ day.all }} msz.</span>
-                  {% if day.busy %}<span class="chip chip-busy">{{ day.busy }} zaj.</span>{% endif %}
+                  {% if day.busy %}
+                    <span class="chip chip-busy">{{ day.busy }} zaj.</span>
+                  {% endif %}
                 </div>
               {% else %}
                 <div class="text-muted" style="font-size:.72rem; margin-top:.35rem;">—</div>
@@ -131,7 +229,7 @@
   {# Najbliższe msze #}
   <div class="col-lg-6">
     <div class="card shadow-sm border-0 h-100">
-      <div class="card-header bg-white fw-semibold">Najbliższe msze</div>
+      <div class="card-header fw-semibold">Najbliższe msze</div>
       <div class="card-body small">
         {% if msze_najblizsze %}
           <ul class="list-group list-group-flush">
@@ -139,8 +237,11 @@
               <li class="list-group-item d-flex justify-content-between">
                 <span>
                   {{ m.data }} {{ m.godzina }} — {{ m.miejsce|default:"—" }}
-                  {% if m.intencje.exists %}<span class="badge bg-danger-subtle text-danger ms-1">zajęta</span>
-                  {% else %}<span class="badge bg-success-subtle text-success ms-1">wolna</span>{% endif %}
+                  {% if m.intencje.exists %}
+                    <span class="badge bg-danger-subtle text-danger ms-1">zajęta</span>
+                  {% else %}
+                    <span class="badge bg-success-subtle text-success ms-1">wolna</span>
+                  {% endif %}
                 </span>
                 <a class="btn btn-sm btn-outline-secondary" href="{% url 'msza_szczegoly' m.pk %}">Szczegóły</a>
               </li>
@@ -156,7 +257,7 @@
   {# Ostatnie wpisy #}
   <div class="col-lg-6">
     <div class="card shadow-sm border-0 mb-4">
-      <div class="card-header bg-white fw-semibold">Ostatnie chrzty</div>
+      <div class="card-header fw-semibold">Ostatnie chrzty</div>
       <div class="card-body small">
         {% if ostatnie_chrzty %}
           <ul class="list-group list-group-flush">
@@ -174,13 +275,18 @@
     </div>
 
     <div class="card shadow-sm border-0">
-      <div class="card-header bg-white fw-semibold">Ostatnie małżeństwa</div>
+      <div class="card-header fw-semibold">Ostatnie małżeństwa</div>
       <div class="card-body small">
         {% if ostatnie_sluby %}
           <ul class="list-group list-group-flush">
             {% for s in ostatnie_sluby %}
               <li class="list-group-item d-flex justify-content-between">
-                <span>{{ s.rok }}/{{ s.akt_nr|default:"—" }} — {{ s.malzonek_a.nazwisko_rodowe }} {{ s.malzonek_a.imie_pierwsze }} &amp; {{ s.malzonek_b.nazwisko_rodowe }} {{ s.malzonek_b.imie_pierwsze }}</span>
+                <span>
+                  {{ s.rok }}/{{ s.akt_nr|default:"—" }} —
+                  {{ s.malzonek_a.nazwisko_rodowe }} {{ s.malzonek_a.imie_pierwsze }}
+                  &amp;
+                  {{ s.malzonek_b.nazwisko_rodowe }} {{ s.malzonek_b.imie_pierwsze }}
+                </span>
                 <a class="btn btn-sm btn-outline-secondary" href="{% url 'malzenstwo_szczegoly' s.pk %}">Pokaż</a>
               </li>
             {% endfor %}
@@ -193,27 +299,27 @@
   </div>
 </div>
 
-{# --- TUTAJ ZOSTAL WKLEJONY NOWY KOD BACKUPU --- #}
+{# --- KARTA BACKUPU --- #}
 <div class="row mt-4">
-    <div class="col-12">
-        <div class="card border-warning">
-            <div class="card-header bg-warning text-dark">
-                <i class="bi bi-shield-lock-fill"></i> Bezpieczeństwo Danych
-            </div>
-            <div class="card-body d-flex justify-content-between align-items-center">
-                <div>
-                    <h5 class="card-title">Kopia Zapasowa (Backup)</h5>
-                    <p class="card-text text-muted small">
-                        Pobierz plik bazy danych i zapisz go na dysku zewnętrznym (pendrive).
-                        Zalecane wykonywanie raz w tygodniu.
-                    </p>
-                </div>
-                <a href="{% url 'konta:pobierz_backup' %}" class="btn btn-dark">
-                    <i class="bi bi-download"></i> Pobierz kopię bazy
-                </a>
-            </div>
+  <div class="col-12">
+    <div class="card border-warning">
+      <div class="card-header bg-warning text-dark">
+        <i class="bi bi-shield-lock-fill"></i> Bezpieczeństwo Danych
+      </div>
+      <div class="card-body d-flex justify-content-between align-items-center">
+        <div>
+          <h5 class="card-title">Kopia Zapasowa (Backup)</h5>
+          <p class="card-text text-muted small">
+            Pobierz plik bazy danych i zapisz go na dysku zewnętrznym (pendrive).
+            Zalecane wykonywanie raz w tygodniu.
+          </p>
         </div>
+        <a href="{% url 'konta:pobierz_backup' %}" class="btn btn-dark">
+          <i class="bi bi-download"></i> Pobierz kopię bazy
+        </a>
+      </div>
     </div>
+  </div>
 </div>
 
 {% endblock %}
