@@ -191,7 +191,7 @@
                  </li>
                  <li><hr class="dropdown-divider"></li>
                  <li>
-                    <form method="post" action="{% url 'wyloguj' %}" class="d-inline">
+                    <form method="post" action="{% url 'konta:wyloguj' %}" class="d-inline">
                       {% csrf_token %}
                       <button class="dropdown-item text-danger fw-medium" type="submit">
                           <i class="bi bi-box-arrow-right me-2"></i> Wyloguj
@@ -202,7 +202,7 @@
           </li>
         {% else %}
           <li class="nav-item">
-            <a class="btn btn-primary px-4 rounded-pill" href="{% url 'logowanie' %}">
+            <a class="btn btn-primary px-4 rounded-pill" href="{% url 'konta:logowanie' %}">
                 Zaloguj
             </a>
           </li>

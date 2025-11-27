@@ -65,91 +65,7 @@
   box-shadow: 0 4px 18px rgba(0,0,0,.06);
 }
 </style>
-<!--
-{# SZYBKIE AKCJE - "ODKOMENTOWANE" I ŁADNIEJSZE #}
-<div class="card shadow-sm border-0 mb-4" style="background: linear-gradient(135deg, #f8f9fa, #ffffff);">
-  <div class="card-body p-4 p-md-4">
-    <h3 class="fw-light mb-1">Witaj w panelu!</h3>
-    <p class="text-muted small">Wybierz jedną z szybkich akcji, aby rozpocząć.</p>
-    <div class="d-flex flex-wrap gap-2 mt-3">
-      <a href="{% url 'osoba_nowa' %}" class="btn btn-primary btn-sm"><i class="bi bi-person-plus-fill me-1"></i> Nowa osoba</a>
-      <a href="{% url 'chrzest_dodaj' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-droplet-half me-1"></i> Nowy chrzest</a>
-      <a href="{% url 'malzenstwo_dodaj' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-heart-fill me-1"></i> Nowe małżeństwo</a>
-      <a href="{% url 'msza_nowa' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-calendar-plus-fill me-1"></i> Nowa msza</a>
-    </div>
-  </div>
-</div>
--->
-<!--
-{# KAFELKI - "ODKOMENTOWANE" I Z IKONAMI #}
-<div class="row g-3 mb-4">
-  <div class="col-sm-6 col-lg-3">
-    <div class="card shadow-sm border-0 h-100 stat-card stat-card-osoby">
-      <div class="card-body d-flex align-items-center">
-        <div class="icon-box me-3 flex-shrink-0">
-          <i class="bi bi-people-fill"></i>
-        </div>
-        <div>
-          <div class="text-muted small">Osoby</div>
-          <div class="h4 mb-0">{{ stats.osoby }}</div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="col-sm-6 col-lg-3">
-    <div class="card shadow-sm border-0 h-100 stat-card stat-card-rodziny">
-      <div class="card-body d-flex align-items-center">
-        <div class="icon-box me-3 flex-shrink-0">
-          <i class="bi bi-house-heart-fill"></i>
-        </div>
-        <div>
-          <div class="text-muted small">Rodziny</div>
-          <div class="h4 mb-0">{{ stats.rodziny }}</div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="col-sm-4 col-lg-2">
-    <div class="card shadow-sm border-0 h-100 stat-card stat-card-chrzty">
-      <div class="card-body d-flex align-items-center">
-        <div class="icon-box me-3 flex-shrink-0">
-          <i class="bi bi-droplet-fill"></i>
-        </div>
-        <div>
-          <div class="text-muted small">Chrzty</div>
-          <div class="h4 mb-0">{{ stats.chrzty }}</div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="col-sm-4 col-lg-2">
-    <div class="card shadow-sm border-0 h-100 stat-card stat-card-bierzm">
-      <div class="card-body d-flex align-items-center">
-        <div class="icon-box me-3 flex-shrink-0">
-          <i class="bi bi-wind"></i>
-        </div>
-        <div>
-          <div class="text-muted small">Bierzm.</div>
-          <div class="h4 mb-0">{{ stats.bierzmowania }}</div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="col-sm-4 col-lg-2">
-    <div class="card shadow-sm border-0 h-100 stat-card stat-card-sluby">
-      <div class="card-body d-flex align-items-center">
-        <div class="icon-box me-3 flex-shrink-0">
-          <i class="bi bi-gem"></i>
-        </div>
-        <div>
-          <div class="text-muted small">Śluby</div>
-          <div class="h4 mb-0">{{ stats.sluby }}</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
--->
+
 
 {# MINI KALENDARZ #}
 <div class="card shadow-sm border-0 mb-4">
@@ -275,6 +191,29 @@
       </div>
     </div>
   </div>
+</div>
+
+{# --- TUTAJ ZOSTAL WKLEJONY NOWY KOD BACKUPU --- #}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card border-warning">
+            <div class="card-header bg-warning text-dark">
+                <i class="bi bi-shield-lock-fill"></i> Bezpieczeństwo Danych
+            </div>
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="card-title">Kopia Zapasowa (Backup)</h5>
+                    <p class="card-text text-muted small">
+                        Pobierz plik bazy danych i zapisz go na dysku zewnętrznym (pendrive).
+                        Zalecane wykonywanie raz w tygodniu.
+                    </p>
+                </div>
+                <a href="{% url 'konta:pobierz_backup' %}" class="btn btn-dark">
+                    <i class="bi bi-download"></i> Pobierz kopię bazy
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
 
 {% endblock %}

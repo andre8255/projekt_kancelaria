@@ -14,6 +14,7 @@ urlpatterns = [
     path("", root_redirect, name="root"),
     path("admin/", admin.site.urls),
     path("", include("konta.urls")),
+    path('konta/', include('konta.urls')),
     path("panel/", include("osoby.urls")),
     path("panel/", include("rodziny.urls")),
     path("panel/", include("msze.urls")),
