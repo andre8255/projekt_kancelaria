@@ -1,0 +1,50 @@
+{% extends "base_pdf.html" %}
+
+{% block content %}
+<h2 style="text-align: center; margin-bottom: 10px;">
+  Historia operacji w systemie
+</h2>
+
+<p style="font-size: 11px; text-align: right; margin-bottom: 20px;">
+  Data generowania: {{ today }}
+</p>
+
+<table style="width: 100%; border-collapse: collapse; font-size: 10px;">
+  <thead>
+    <tr>
+      <th style="border-bottom: 1px solid #000; padding: 4px;">Data</th>
+      <th style="border-bottom: 1px solid #000; padding: 4px;">Użytkownik</th>
+      <th style="border-bottom: 1px solid #000; padding: 4px;">Akcja</th>
+      <th style="border-bottom: 1px solid #000; padding: 4px;">Obiekt</th>
+      <th style="border-bottom: 1px solid #000; padding: 4px;">Opis</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for log in logi %}
+      <tr>
+        <td style="border-bottom: 1px solid #ccc; padding: 3px;">
+          {{ log.kiedy|date:"Y-m-d H:i" }}
+        </td>
+        <td style="border-bottom: 1px solid #ccc; padding: 3px;">
+          {{ log.uzytkownik|default:"(system)" }}
+        </td>
+        <td style="border-bottom: 1px solid #ccc; padding: 3px;">
+          {{ log.akcja }}
+        </td>
+        <td style="border-bottom: 1px solid #ccc; padding: 3px;">
+          {{ log.model }}{% if log.obiekt_id %} #{{ log.obiekt_id }}{% endif %}
+        </td>
+        <td style="border-bottom: 1px solid #ccc; padding: 3px;">
+          {{ log.opis }}
+        </td>
+      </tr>
+    {% empty %}
+      <tr>
+        <td colspan="5" style="text-align:center; padding: 10px;">
+          Brak zapisanych operacji.
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

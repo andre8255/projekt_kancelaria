@@ -1,12 +1,15 @@
-
-<!--templates/msze/msza_szczegolu.html-->
 {% extends "base_panel.html" %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
   <div>
-    <h1 class="h4 mb-1 fw-semibold">
+    <h1 class="h4 mb-1 fw-semibold d-flex align-items-center gap-2">
       Msza: {{ msza.data }} godz. {{ msza.godzina }}
+      
+      {# Efekt WOW: Kolorowa plakietka z typem mszy #}
+      <span class="badge rounded-pill text-bg-light border fw-normal fs-6">
+        {{ msza.get_typ_display }}
+      </span>
     </h1>
     <div class="text-muted small">
       {{ msza.miejsce }}{% if msza.celebrans %}, celebrans: {{ msza.celebrans }}{% endif %}
@@ -15,13 +18,13 @@
 
   <div class="d-flex flex-wrap gap-2">
     <a href="{% url 'msza_edytuj' msza.pk %}" class="btn btn-outline-secondary btn-sm">
-      Edytuj mszę
+      ✏️ Edytuj mszę
     </a>
     <a href="{% url 'intencja_nowa' msza.pk %}" class="btn btn-primary btn-sm">
       + Dodaj intencję
     </a>
     <a href="{% url 'msza_lista' %}" class="btn btn-outline-secondary btn-sm">
-      Powrót
+      ⬅ Powrót
     </a>
   </div>
 </div>
@@ -35,16 +38,23 @@
       <div class="card-body small">
         <p><strong>Data:</strong> {{ msza.data }}</p>
         <p><strong>Godzina:</strong> {{ msza.godzina }}</p>
-        <p><strong>Miejsce:</strong> {{ msza.miejsce }}</p>
+        <p><strong>Rodzaj:</strong> {{ msza.get_typ_display }}</p> <p><strong>Miejsce:</strong> {{ msza.miejsce }}</p>
+        
         {% if msza.celebrans %}
-        <p><strong>Celebrans:</strong> {{ msza.celebrans }}</p>
+          <p><strong>Celebrans:</strong> {{ msza.celebrans }}</p>
+        {% elif msza.celebrans_opis %}
+          <p><strong>Celebrans:</strong> {{ msza.celebrans_opis }}</p>
         {% endif %}
+
         {% if msza.uwagi %}
-        <p><strong>Uwagi:</strong><br>{{ msza.uwagi|linebreaksbr }}</p>
+          <p><strong>Uwagi:</strong><br>{{ msza.uwagi|linebreaksbr }}</p>
         {% endif %}
-        <p><strong>Intencje:</strong> {{ msza.intencje.count }}</p>
+        
+        <hr>
+        
+        <p><strong>Liczba intencji:</strong> {{ msza.intencje.count }}</p>
         {% if msza.intencje.count == 0 %}
-        <p class="text-success fw-semibold mb-0">Ten termin jest wolny.</p>
+          <p class="text-success fw-semibold mb-0">Ten termin jest wolny.</p>
         {% endif %}
       </div>
     </div>
@@ -79,17 +89,17 @@
                 <td class="small">{{ i.zamawiajacy }}</td>
                 <td class="small">{{ i.ofiara }}</td>
                 <td class="text-end">
-  <a href="{% url 'intencja_edytuj' i.pk %}" class="btn btn-outline-secondary btn-sm me-1">
-    Edytuj
-  </a>
-  <a href="{% url 'intencja_usun' i.pk %}" class="btn btn-outline-danger btn-sm">
-    Usuń
-  </a>
-</td>
+                  <a href="{% url 'intencja_edytuj' i.pk %}" class="btn btn-outline-secondary btn-sm me-1">
+                     Edytuj
+                  </a>
+                  <a href="{% url 'intencja_usun' i.pk %}" class="btn btn-outline-danger btn-sm">
+                    Usuń
+                  </a>
+                </td>
               </tr>
             {% empty %}
               <tr>
-                <td colspan="3" class="text-muted p-3 small">
+                <td colspan="4" class="text-muted p-3 small text-center">
                   Brak intencji. Termin wolny.
                 </td>
               </tr>

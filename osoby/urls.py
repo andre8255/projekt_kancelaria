@@ -10,4 +10,6 @@ urlpatterns = [
     path("osoby/<int:pk>/", views.OsobaSzczegolyView.as_view(), name="osoba_szczegoly"),
     path("osoby/<int:pk>/edytuj/", views.OsobaEdycjaView.as_view(), name="osoba_edytuj"),
     path("osoby/<int:pk>/usun/", views.OsobaUsunView.as_view(), name="osoba_usun"),
+    path('osoby/<int:pk>/pdf/', views.OsobaPDFView.as_view(), name='osoba_pdf'),
+    path("szukaj/", views.GlobalSearchView.as_view(), name="global_search"),
 ]

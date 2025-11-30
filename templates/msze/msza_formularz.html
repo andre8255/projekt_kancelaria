@@ -10,7 +10,7 @@
   </h1>
   <div class="d-flex gap-2">
     <a href="{% url 'msza_lista' %}" class="btn btn-outline-secondary btn-sm">
-      Powrót
+      ⬅ Powrót
     </a>
   </div>
 </div>
@@ -23,11 +23,11 @@
       <div class="alert alert-danger small">{{ form.non_field_errors }}</div>
     {% endif %}
 
-    {# --- WIERSZ 1: Data, Godzina, Miejsce --- #}
+    {# --- WIERSZ 1: Data, Godzina, TYP, Miejsce --- #}
     <div class="row g-3">
       
-      {# 1. DATA Z RÓŻDŻKĄ #}
-      <div class="col-md-4">
+      {# 1. DATA #}
+      <div class="col-md-3">
         <label class="form-label small fw-semibold text-muted">{{ form.data.label }}</label>
         <div class="input-group">
           {{ form.data }}
@@ -51,15 +51,21 @@
         {% endif %}
       </div>
 
-      {# 3. MIEJSCE #}
-      <div class="col-md-6">
+      {# 3. TYP MSZY (NOWE) #}
+      <div class="col-md-3">
+        <label class="form-label small fw-semibold text-muted">{{ form.typ.label }}</label>
+        {{ form.typ }}
+        {% if form.typ.errors %}
+          <div class="text-danger small">{{ form.typ.errors }}</div>
+        {% endif %}
+      </div>
+
+      {# 4. MIEJSCE #}
+      <div class="col-md-4">
         <label class="form-label small fw-semibold text-muted">{{ form.miejsce.label }}</label>
         {{ form.miejsce }}
         {% if form.miejsce.errors %}
           <div class="text-danger small">{{ form.miejsce.errors }}</div>
-        {% endif %}
-        {% if form.miejsce.help_text %}
-          <div class="form-text small">{{ form.miejsce.help_text }}</div>
         {% endif %}
       </div>
     </div>
@@ -75,7 +81,7 @@
           <div class="text-danger small">{{ form.celebrans.errors }}</div>
         {% endif %}
         <div class="form-text small">
-          Wybierz z listy duchownych (tytuł np. "ks." doda się sam).
+          Wybierz z listy duchownych.
         </div>
       </div>
 
@@ -86,7 +92,7 @@
           <div class="text-danger small">{{ form.celebrans_opis.errors }}</div>
         {% endif %}
         <div class="form-text small">
-          Wypełnij TYLKO jeśli księdza nie ma na liście obok (np. gość).
+          Wypełnij TYLKO jeśli księdza nie ma na liście obok.
         </div>
       </div>
     </div>

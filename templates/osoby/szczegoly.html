@@ -6,17 +6,24 @@
     {{ osoba.nazwisko }} {{ osoba.imie_pierwsze }}
   </h1>
 
+
+
+  
   <div class="d-flex flex-wrap gap-2 ms-auto">
+
+    <a href="{% url 'osoba_pdf' osoba.pk %}" target="_blank" class="btn btn-outline-primary btn-sm">
+    📄 Pobierz Kartotekę Osoby (PDF) 
+</a>
     <a href="{% url 'osoba_edytuj' osoba.pk %}" class="btn btn-outline-secondary btn-sm">
-      Edytuj
+     ✏️ Edytuj
     </a>
 
     <a href="{% url 'osoba_usun' osoba.pk %}" class="btn btn-outline-danger btn-sm">
-      Usuń
+     🗑️ Usuń
     </a>
 
     <a href="{% url 'osoba_lista' %}" class="btn btn-outline-secondary btn-sm">
-      Powrót
+     ⬅ Powrót
     </a>
   </div>
 </div>
@@ -223,16 +230,16 @@
                       <td class="text-end">
   <div class="btn-group btn-group-sm" role="group">
     <a class="btn btn-outline-secondary"
-       href="{% url 'chrzest_szczegoly' ch.pk %}">
-      Szczegóły
+       href="{% url 'chrzest_szczegoly' ch.pk %}" title="Szczegóły">
+      <i class="bi bi-eye"></i>
     </a>
     <a class="btn btn-outline-secondary"
-       href="{% url 'chrzest_edytuj' ch.pk %}">
-      Edytuj
+       href="{% url 'chrzest_edytuj' ch.pk %}" title="Edytuj">
+      <i class="bi bi-pencil"></i>
     </a>
     <a class="btn btn-outline-danger"
-       href="{% url 'chrzest_usun' ch.pk %}">
-      Usuń
+       href="{% url 'chrzest_usun' ch.pk %}" title="Usuń">
+     <i class="bi bi-trash"></i>
     </a>
   </div>
 </td>
@@ -269,16 +276,16 @@
                     <td class="text-end">
   <div class="btn-group btn-group-sm" role="group">
     <a class="btn btn-outline-secondary"
-       href="{% url 'komunia_szczegoly' komunia_osoby.pk %}">
-      Szczegóły
+       href="{% url 'komunia_szczegoly' komunia_osoby.pk %}" title="Szczegóły">
+      <i class="bi bi-eye"></i>
     </a>
     <a class="btn btn-outline-secondary"
-       href="{% url 'komunia_edytuj' komunia_osoby.pk %}">
-      Edytuj
+       href="{% url 'komunia_edytuj' komunia_osoby.pk %}"title="Edytuj">
+      <i class="bi bi-pencil"></i>
     </a>
     <a class="btn btn-outline-danger"
-       href="{% url 'komunia_usun' komunia_osoby.pk %}">
-      Usuń
+       href="{% url 'komunia_usun' komunia_osoby.pk %}"title="Usuń">
+     <i class="bi bi-trash"></i>
     </a>
   </div>
 </td>
@@ -333,16 +340,16 @@
                     <td class="text-end">
   <div class="btn-group btn-group-sm" role="group">
     <a class="btn btn-outline-secondary"
-       href="{% url 'bierzmowanie_szczegoly' bierzmowanie_osoby.pk %}">
-      Szczegóły
+       href="{% url 'bierzmowanie_szczegoly' bierzmowanie_osoby.pk %}"title="Szczegóły">
+      <i class="bi bi-eye"></i>
     </a>
     <a class="btn btn-outline-secondary"
-       href="{% url 'bierzmowanie_edytuj' bierzmowanie_osoby.pk %}">
-      Edytuj
+       href="{% url 'bierzmowanie_edytuj' bierzmowanie_osoby.pk %}"title="Edytuj">
+      <i class="bi bi-pencil"></i>
     </a>
     <a class="btn btn-outline-danger"
-       href="{% url 'bierzmowanie_usun' bierzmowanie_osoby.pk %}">
-      Usuń
+       href="{% url 'bierzmowanie_usun' bierzmowanie_osoby.pk %}"title="Usuń">
+     <i class="bi bi-trash"></i>
     </a>
   </div>
 </td
@@ -391,16 +398,16 @@
                       <td class="text-end">
   <div class="btn-group btn-group-sm" role="group">
     <a class="btn btn-outline-secondary"
-       href="{% url 'malzenstwo_szczegoly' m.pk %}">
-      Szczegóły
+       href="{% url 'malzenstwo_szczegoly' m.pk %}"title="Szczegóły">
+      <i class="bi bi-eye"></i>
     </a>
     <a class="btn btn-outline-secondary"
-       href="{% url 'malzenstwo_edytuj' m.pk %}">
-      Edytuj
+       href="{% url 'malzenstwo_edytuj' m.pk %}"title="Edytuj">
+      <i class="bi bi-pencil"></i>
     </a>
     <a class="btn btn-outline-danger"
-       href="{% url 'malzenstwo_usun' m.pk %}">
-      Usuń
+       href="{% url 'malzenstwo_usun' m.pk %}"title="Usuń">
+     <i class="bi bi-trash"></i>
     </a>
   </div>
 </td>
@@ -449,16 +456,16 @@
                       <td class="text-end">
   <div class="btn-group btn-group-sm" role="group">
     <a class="btn btn-outline-secondary"
-       href="{% url 'namaszczenie_szczegoly' n.pk %}">
-      Szczegóły
+       href="{% url 'namaszczenie_szczegoly' n.pk %}"title="Szczegóły">
+      <i class="bi bi-eye"></i>
     </a>
     <a class="btn btn-outline-secondary"
-       href="{% url 'namaszczenie_edytuj' n.pk %}">
-      Edytuj
+       href="{% url 'namaszczenie_edytuj' n.pk %}"title="Edytuj">
+      <i class="bi bi-pencil"></i>
     </a>
     <a class="btn btn-outline-danger"
-       href="{% url 'namaszczenie_usun' n.pk %}">
-      Usuń
+       href="{% url 'namaszczenie_usun' n.pk %}"title="Usuń">
+     <i class="bi bi-trash"></i>
     </a>
   </div>
 </td>
@@ -509,16 +516,16 @@
                     <td class="text-end">
   <div class="btn-group btn-group-sm" role="group">
     <a class="btn btn-outline-secondary"
-       href="{% url 'zgon_szczegoly' zgon_osoby.pk %}">
-      Szczegóły
+       href="{% url 'zgon_szczegoly' zgon_osoby.pk %}" title="Szczegóły">
+      <i class="bi bi-eye"></i>
     </a>
     <a class="btn btn-outline-secondary"
-       href="{% url 'zgon_edytuj' zgon_osoby.pk %}">
-      Edytuj
+       href="{% url 'zgon_edytuj' zgon_osoby.pk %}" title="Edytuj">
+      <i class="bi bi-pencil"></i>
     </a>
     <a class="btn btn-outline-danger"
-       href="{% url 'zgon_usun' zgon_osoby.pk %}">
-      Usuń
+       href="{% url 'zgon_usun' zgon_osoby.pk %}" title="Usuń">
+     <i class="bi bi-trash"></i>
     </a>
   </div>
 </td>

@@ -161,15 +161,36 @@
   }
 </style>
 
-{# MINI KALENDARZ #}
-<div class="card shadow-sm border-0 mb-4">
-  <div class="card-header d-flex justify-content-between align-items-center">
-    <div class="fw-semibold">Kalendarz mszy – {{ mini_kalendarz.month_label }}</div>
-    <div class="legend d-none d-sm-flex align-items-center">
-      <span class="dot dot-free me-1"></span><span class="text-muted small me-3">wolna</span>
-      <span class="dot dot-busy me-1"></span><span class="text-muted small">zajęta</span>
+{# --- ZMODYFIKOWANY NAGŁÓWEK KALENDARZA --- #}
+<div class="card-header d-flex justify-content-between align-items-center">
+  
+  <div class="d-flex align-items-center gap-3">
+    
+    <div class="fw-semibold d-none d-md-block">
+      Kalendarz mszy
     </div>
+
+    <div class="btn-group btn-group-sm shadow-sm">
+      <a href="{{ nav_prev }}" class="btn btn-outline-secondary border" title="Poprzedni miesiąc">
+        <i class="bi bi-chevron-left"></i>
+      </a>
+
+      <a href="{{ nav_current }}" class="btn btn-outline-secondary border fw-bold px-3" style="min-width: 140px;" title="Wróć do obecnego miesiąca">
+        {{ mini_kalendarz.month_label }}
+      </a>
+
+      <a href="{{ nav_next }}" class="btn btn-outline-secondary border" title="Następny miesiąc">
+        <i class="bi bi-chevron-right"></i>
+      </a>
+    </div>
+
   </div>
+
+  <div class="legend d-none d-sm-flex align-items-center">
+    <span class="dot dot-free me-1"></span><span class="text-muted small me-3">wolna</span>
+    <span class="dot dot-busy me-1"></span><span class="text-muted small">zajęta</span>
+  </div>
+</div>
 
   <div class="card-body">
     <div class="mini-cal">

@@ -1,131 +1,245 @@
-{% extends "base_pdf.html" %}
-{% block title %}Kartoteka - {{ rodzina.nazwa }}{% endblock %}
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Kartoteka Rodziny</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 1.5cm;
+            @bottom-center {
+                content: "Strona " counter(page) " z " counter(pages);
+                font-size: 9pt;
+                color: #888;
+            }
+        }
 
-{% block content %}
-<style>
-    /* Specyficzne style dla tabeli członków w PDF */
-    .members-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 10pt;
-        margin-top: 10px;
-    }
-    .members-table th {
-        background-color: #f0f0f0;
-        border: 1px solid #000;
-        padding: 4px;
-        font-weight: bold;
-        text-align: center;
-    }
-    .members-table td {
-        border: 1px solid #000;
-        padding: 4px;
-        text-align: center;
-        vertical-align: middle;
-    }
-    .members-table td.align-left {
-        text-align: left;
-        padding-left: 5px;
-    }
-    
-    /* Info box z adresem */
-    .info-box {
-        border: 1px solid #000;
-        padding: 10px;
-        margin-bottom: 20px;
-        font-size: 11pt;
-    }
-    .info-label {
-        font-weight: bold;
-        display: inline-block;
-        width: 80px;
-    }
-</style>
+        body {
+            font-family: "Times New Roman", serif;
+            font-size: 10pt; /* Nieco mniejsza czcionka, by zmieścić tabele */
+            color: #000;
+            line-height: 1.3;
+        }
 
-    <div class="text-center" style="margin-bottom: 0.5cm; font-size: 10pt;">
-     {{ parafia_nazwa }} -
-     {{ parafia_miejscowosc }}
+        /* --- NAGŁÓWKI --- */
+        .parish-header {
+            text-align: center;
+            margin-bottom: 0.5cm;
+            color: #444;
+            font-size: 9pt;
+        }
+        .parish-name {
+            font-weight: bold;
+            font-size: 12pt;
+            text-transform: uppercase;
+            color: #000;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 16pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin: 0.5cm 0 0.2cm 0;
+            border-bottom: 2px solid #000;
+            padding-bottom: 5px;
+        }
+
+        .family-name {
+            text-align: center;
+            font-size: 14pt;
+            font-weight: bold;
+            margin-bottom: 1cm;
+            color: #063267;
+        }
+
+        /* --- SEKCJA ADRESOWA --- */
+        .info-box {
+            width: 100%;
+            margin-bottom: 1cm;
+            border: 1px solid #ccc;
+            padding: 10px;
+            background-color: #fcfcfc;
+        }
+        .info-row {
+            margin-bottom: 5px;
+        }
+        .label {
+            font-weight: bold;
+            color: #555;
+            display: inline-block;
+            width: 80px;
+        }
+
+        /* --- TABELE --- */
+        .section-title {
+            font-size: 12pt;
+            font-weight: bold;
+            margin-bottom: 0.3cm;
+            margin-top: 0.5cm;
+            text-transform: uppercase;
+            border-bottom: 1px solid #aaa;
+            color: #063267;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 0.5cm;
+        }
+        
+        th {
+            background-color: #eee;
+            font-weight: bold;
+            text-align: left;
+            padding: 6px 4px;
+            border: 1px solid #aaa;
+            font-size: 9pt;
+        }
+        
+        td {
+            padding: 5px 4px;
+            border: 1px solid #aaa;
+            vertical-align: middle;
+        }
+
+        /* Specyficzne kolumny */
+        .col-center { text-align: center; }
+        .col-small { font-size: 8pt; color: #444; }
+        
+        /* Statusy */
+        .sacrament-yes { color: #000; font-weight: bold; }
+        .sacrament-no { color: #ccc; font-size: 8pt; }
+
+        .status-wyprow { color: #d63384; font-style: italic; }
+        .status-zmarl { color: #000; background-color: #ddd; }
+
+        /* --- WIZYTY --- */
+        .notes {
+            font-style: italic;
+            color: #444;
+            font-size: 9pt;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="parish-header">
+        <div class="parish-name">{{ parafia.nazwa }}</div>
     </div>
 
-    <h1>KARTOTEKA RODZINY</h1>
-    <h2>{{ rodzina.nazwa }}</h2>
+    <h1>Kartoteka Rodzinna</h1>
+    <div class="family-name">{{ rodzina.nazwa }}</div>
 
     <div class="info-box">
-        <div>
-            <span class="info-label">Adres:</span>
-            {{ rodzina.ulica }} {{ rodzina.nr_domu }}{% if rodzina.nr_mieszkania %}/{{ rodzina.nr_mieszkania }}{% endif %}
-            {% if rodzina.kod_pocztowy %}, {{ rodzina.kod_pocztowy }}{% endif %}
-            {{ rodzina.miejscowosc }}
+        <div class="info-row">
+            <span class="label">Adres:</span> 
+            {{ rodzina.ulica }} {{ rodzina.nr_domu }}{% if rodzina.nr_mieszkania %}/{{ rodzina.nr_mieszkania }}{% endif %}, 
+            {{ rodzina.kod_pocztowy }} {{ rodzina.miejscowosc }}
         </div>
-        
         {% if rodzina.telefon_kontaktowy %}
-        <div style="margin-top: 5px;">
-            <span class="info-label">Telefon:</span> {{ rodzina.telefon_kontaktowy }}
+        <div class="info-row">
+            <span class="label">Telefon:</span> {{ rodzina.telefon_kontaktowy }}
         </div>
         {% endif %}
-        
         {% if rodzina.email_kontaktowy %}
-        <div style="margin-top: 5px;">
-            <span class="info-label">E-mail:</span> {{ rodzina.email_kontaktowy }}
+        <div class="info-row">
+            <span class="label">Email:</span> {{ rodzina.email_kontaktowy }}
+        </div>
+        {% endif %}
+        {% if rodzina.uwagi %}
+        <div class="info-row" style="margin-top: 5px; border-top: 1px dotted #ccc; padding-top: 5px;">
+            <span class="label">Uwagi:</span> {{ rodzina.uwagi }}
         </div>
         {% endif %}
     </div>
 
-    <h3>Członkowie rodziny</h3>
-
-    <table class="members-table">
+    <div class="section-title">Członkowie Rodziny</div>
+    <table>
         <thead>
             <tr>
-                <th width="5%">Lp.</th>
-                <th width="35%">Imię i Nazwisko</th>
-                <th width="14%">Data ur.</th>
-                <th width="14%">Rola</th>
-                <th width="8%">Chrz.</th>
-                <th width="8%">Kom.</th>
-                <th width="8%">Bierz.</th>
-                <th width="8%">Małż.</th>
+                <th style="width: 12%;">Rola</th>
+                <th style="width: 30%;">Imię i Nazwisko</th>
+                <th style="width: 15%;">Data ur.</th>
+                <th style="width: 43%; text-align: center;">Sakramenty</th>
             </tr>
         </thead>
         <tbody>
-            {% for item in czlonkowie_posortowani %}
-            <tr>
-                <td>{{ forloop.counter }}</td>
-                <td class="align-left">
-                    <strong>{{ item.osoba.imie_pierwsze }}</strong><br>
-                    {{ item.osoba.nazwisko }}
+            {% for w in czlonkowie_posortowani %}
+            <tr class="{% if w.relacja.status == 'ZMARL' %}status-zmarl{% endif %}">
+                <td>
+                    <b>{{ w.relacja.get_rola_display }}</b>
+                    {% if w.relacja.status != 'MIESZKA' %}
+                        <br><span class="col-small">({{ w.relacja.get_status_display }})</span>
+                    {% endif %}
                 </td>
-                <td>{{ item.osoba.data_urodzenia|date:"d.m.Y"|default:"-" }}</td>
-                <td>{{ item.relacja.get_rola_display }}</td>
-                
-                <td>{% if item.sakramenty.chrzest %}X{% endif %}</td>
-                <td>{% if item.sakramenty.komunia %}X{% endif %}</td>
-                <td>{% if item.sakramenty.bierzmowanie %}X{% endif %}</td>
-                <td>{% if item.sakramenty.malzenstwo %}X{% endif %}</td>
+                <td>
+                    {{ w.osoba.imie_pierwsze }} {{ w.osoba.nazwisko }}
+                </td>
+                <td>
+                    {{ w.osoba.data_urodzenia|default:"-" }}
+                </td>
+                <td class="col-center">
+                    <span class="{% if w.sakramenty.chrzest %}sacrament-yes{% else %}sacrament-no{% endif %}">CHRZ</span> &bull;
+                    <span class="{% if w.sakramenty.komunia %}sacrament-yes{% else %}sacrament-no{% endif %}">KOM</span> &bull;
+                    <span class="{% if w.sakramenty.bierzmowanie %}sacrament-yes{% else %}sacrament-no{% endif %}">BIERZ</span> &bull;
+                    <span class="{% if w.sakramenty.malzenstwo %}sacrament-yes{% else %}sacrament-no{% endif %}">MAŁŻ</span> &bull;
+                    <span class="{% if w.sakramenty.namaszczenie %}sacrament-yes{% else %}sacrament-no{% endif %}">NAM</span>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" style="text-align: center; padding: 20px;">Brak przypisanych osób.</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
-
-    <div style="margin-top: 1cm;">
-        <strong>Uwagi duszpasterskie:</strong>
-        <div style="border: 1px dotted #999; padding: 10px; min-height: 2cm; margin-top: 5px; font-size: 10pt;">
-            {{ rodzina.uwagi|linebreaksbr|default:"(brak uwag)" }}
-        </div>
+    <div style="font-size: 8pt; text-align: right; color: #666;">
+        Legenda: <b>CHRZ</b> - Chrzest, <b>KOM</b> - I Komunia, <b>BIERZ</b> - Bierzmowanie, <b>MAŁŻ</b> - Małżeństwo, <b>NAM</b> - Namaszczenie
     </div>
-    
-    {% if rodzina.wizyty.exists %}
-    <div style="margin-top: 0.5cm;">
-        <strong>Ostatnie wizyty (Kolęda):</strong>
-        <ul style="font-size: 10pt; list-style-type: disc; margin-top: 5px;">
-            {% for w in rodzina.wizyty.all|slice:":5" %}
-                <li>{{ w.rok }} - {{ w.get_status_display }} ({{ w.ksiadz|default:"-" }})</li>
+
+
+    <div class="section-title">Historia Wizyt Duszpasterskich</div>
+    {% if wizyty %}
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 10%;">Rok</th>
+                <th style="width: 15%;">Data</th>
+                <th style="width: 15%;">Status</th>
+                <th style="width: 20%;">Kapłan</th>
+                <th style="width: 40%;">Notatka / Ofiara</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for wizyta in wizyty %}
+            <tr>
+                <td class="col-center"><b>{{ wizyta.rok }}</b></td>
+                <td>{{ wizyta.data_wizyty|date:"d.m.Y"|default:"-" }}</td>
+                <td>
+                    {% if wizyta.status == 'PRZYJETA' %}Przyjęta
+                    {% elif wizyta.status == 'NIEOBECNI' %}Nieobecni
+                    {% elif wizyta.status == 'ODMOWA' %}Odmowa
+                    {% else %}{{ wizyta.get_status_display }}{% endif %}
+                </td>
+                <td>{{ wizyta.ksiadz|default:"-" }}</td>
+                <td class="notes">
+                    {% if wizyta.ofiara %}[Ofiara: {{ wizyta.ofiara }}] {% endif %}
+                    {{ wizyta.notatka }}
+                </td>
+            </tr>
             {% endfor %}
-        </ul>
+        </tbody>
+    </table>
+    {% else %}
+    <div style="border: 1px dashed #ccc; padding: 15px; text-align: center; color: #777;">
+        Brak odnotowanych wizyt w systemie.
     </div>
     {% endif %}
 
-    <div class="footer">
-        <p>Data wydruku: {{ today|date:"d.m.Y" }}</p>
+    <div style="margin-top: 1cm; border-top: 1px solid #000; padding-top: 5px; font-size: 8pt; text-align: center;">
+        Wydruk wygenerowano dnia: {{ today|date:"d.m.Y" }} z systemu Kancelaria.
     </div>
 
-{% endblock %}
+</body>
+</html>

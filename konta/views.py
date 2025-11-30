@@ -11,6 +11,13 @@ from django.conf import settings
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
+from django.views.generic import ListView
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from parafia.utils_pdf import render_to_pdf
+from .models import LogAkcji
+
+
+
 
 
 class LogowanieView(LoginView):
@@ -52,3 +59,33 @@ def pobierz_backup(request):
         # 5. Nagłówek informujący przeglądarkę, że to plik do pobrania
         response['Content-Disposition'] = f'attachment; filename={filename}'
         return response
+    
+class LogAkcjiListaView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    model = LogAkcji
+    template_name = "konta/log_akcji_lista.html"
+    context_object_name = "logi"
+    paginate_by = 50
+
+    def test_func(self):
+        """
+        Dostęp tylko dla proboszcza (grupa 'Proboszcz') albo superusera.
+        Możesz to dostosować do swojego systemu ról.
+        """
+        user = self.request.user
+        if not user.is_authenticated:
+            return False
+        if user.is_superuser:
+            return True
+        return user.groups.filter(name="Proboszcz").exists()
+
+class LogAkcjiPDFView(LogAkcjiListaView):
+    """
+    Generuje PDF z historii operacji – bez paginacji, wszystkie wpisy.
+    """
+    paginate_by = None
+    template_name = "konta/log_akcji_pdf.html"
+
+    def render_to_response(self, context, **response_kwargs):
+        context["today"] = timezone.localdate()
+        filename = f"Historia_operacji_{timezone.localdate()}.pdf"
+        return render_to_pdf("konta/log_akcji_pdf.html", context, filename)

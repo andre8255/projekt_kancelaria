@@ -28,8 +28,8 @@
       <td>{{ w.nazwa }}</td>
       <td class="text-end">
         <div class="btn-group btn-group-sm" role="group">
-          <a href="{% url 'slownik_wyznanie_edytuj' w.pk %}" class="btn btn-outline-secondary">Edytuj</a>
-          <a href="{% url 'slownik_wyznanie_usun' w.pk %}" class="btn btn-outline-danger">Usuń</a>
+          <a href="{% url 'slownik_wyznanie_edytuj' w.pk %}" class="btn btn-outline-secondary"> ✏️ Edytuj</a>
+          <a href="{% url 'slownik_wyznanie_usun' w.pk %}" class="btn btn-outline-danger"> <i class="bi bi-trash"></i> Usuń</a>
         </div>
       </td>
     </tr>

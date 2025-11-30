@@ -1,0 +1,37 @@
+{% extends "base_panel.html" %}
+{% block content %}
+<div class="container py-4">
+  <h3 class="mb-4">
+    <i class="bi bi-search"></i> Wyniki wyszukiwania
+    {% if q %}<small class="text-muted">dla: "{{ q }}"</small>{% endif %}
+  </h3>
+
+  {% if not q %}
+    <p>Wpisz tekst w polu wyszukiwania w górnym pasku.</p>
+  {% else %}
+    <div class="row">
+      <div class="col-md-6 mb-4">
+        <h5>Osoby ({{ wyniki_osoby|length }})</h5>
+        <ul class="list-group">
+          {% for o in wyniki_osoby %}
+            <li class="list-group-item">
+              <a href="{% url 'osoba_szczegoly' o.pk %}">
+                {{ o.imie_pierwsze }} {{ o.nazwisko }}
+              </a>
+            </li>
+          {% empty %}
+            <li class="list-group-item text-muted">Brak wyników</li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <div class="col-md-6 mb-4">
+        <h5>Rodziny ({{ wyniki_rodziny|length }})</h5>
+        <!-- analogicznie -->
+      </div>
+    </div>
+
+    <!-- analogicznie sekcje dla chrztów / ślubów -->
+  {% endif %}
+</div>
+{% endblock %}

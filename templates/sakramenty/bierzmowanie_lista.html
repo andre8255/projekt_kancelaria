@@ -8,8 +8,8 @@
   </div>
 
   <div class="d-flex flex-wrap gap-2 ms-auto">
-    <a href="{% url 'bierzmowanie_lista_druk' %}?{{ request.GET.urlencode }}" target="_blank" class="btn btn-outline-secondary btn-sm">
-      🖨️ Drukuj listę
+    <a href="{% url 'bierzmowanie_lista_pdf' %}?{{ request.GET.urlencode }}" target="_blank" class="btn btn-outline-secondary btn-sm">
+      📄 Pobierz listę (PDF)
     </a>
     <a href="{% url 'bierzmowanie_dodaj' %}" class="btn btn-primary btn-sm">
       + Dodaj wpis
@@ -64,8 +64,8 @@
               <td>{{ b.szafarz|default:"—" }}</td>
               <td class="text-end">
                 <div class="btn-group btn-group-sm" role="group">
-                  <a href="{% url 'bierzmowanie_szczegoly' b.pk %}" class="btn btn-outline-secondary">Szczegóły</a>
-                  <a href="{% url 'bierzmowanie_usun' b.pk %}" class="btn btn-outline-danger">Usuń</a>
+                  <a href="{% url 'bierzmowanie_szczegoly' b.pk %}" class="btn btn-outline-secondary"> <i class="bi bi-eye"></i> Szczegóły</a>
+                  <a href="{% url 'bierzmowanie_usun' b.pk %}" class="btn btn-outline-danger"><i class="bi bi-trash"></i> Usuń</a>
                 </div>
               </td>
             </tr>
