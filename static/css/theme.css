@@ -26,14 +26,14 @@ html:not([data-theme]) {
 
 /* Ciemny motyw */
 html[data-theme="dark"] {
-  --kp-bg: #0f1115;
-  --kp-bg-alt: #1c1f26;
+  --kp-bg: #050608;
+  --kp-bg-alt: #111827;      /* było #1c1f26 – teraz ciemniej */
   --kp-text: #f8f9fa;
   --kp-text-muted: #adb5bd;
   --kp-border: #343a40;
 
-  --kp-nav-bg: #111827;
-  --kp-nav-border: #1f2933;
+  --kp-nav-bg: #020617;      /* navbar jeszcze ciemniejszy */
+  --kp-nav-border: #111827;
   --kp-nav-text: #f9fafb;
 
   --kp-link: #4dabf7;
@@ -233,4 +233,135 @@ a:hover {
 #theme-toggle:focus {
   outline: none;
   box-shadow: none;
+}
+
+/* =============== DOPIESZCZENIE CIEMNEGO MOTYWU =============== */
+
+/* Navbar i dropdowny mniej „świecące” */
+html[data-theme="dark"] .navbar,
+html[data-theme="dark"] .navbar.bg-white {
+  background-color: var(--kp-nav-bg) !important;
+  border-color: var(--kp-nav-border) !important;
+}
+
+html[data-theme="dark"] .dropdown-menu {
+  background-color: #020617 !important;   /* bardzo ciemne */
+  color: var(--kp-text) !important;
+  border-color: var(--kp-border) !important;
+}
+
+html[data-theme="dark"] .dropdown-item {
+  color: var(--kp-text) !important;
+}
+
+html[data-theme="dark"] .dropdown-item:hover,
+html[data-theme="dark"] .dropdown-item:focus {
+  background-color: #111827 !important;
+  color: var(--kp-text) !important;
+}
+
+/* mniej „agresywne” zaznaczenie w menu */
+html[data-theme="dark"] .dropdown-item:active {
+  background-color: #1d2838 !important;
+  color: var(--kp-text) !important;
+}
+
+/* Pola formularzy – ciemniejsze tło również po wypełnieniu/fokusie */
+html[data-theme="dark"] .form-control,
+html[data-theme="dark"] .form-select,
+html[data-theme="dark"] .form-control:focus,
+html[data-theme="dark"] .form-select:focus {
+  background-color: #111827 !important;
+  color: var(--kp-text) !important;
+  border-color: #3b4252 !important;
+  box-shadow: 0 0 0 0.12rem rgba(77, 171, 247, 0.35) !important;
+}
+
+html[data-theme="dark"] .form-control::placeholder {
+  color: var(--kp-text-muted) !important;
+}
+
+/* Autofill (Chrome/Edge) – żeby nie było żółtej plamy */
+html[data-theme="dark"] input:-webkit-autofill,
+html[data-theme="dark"] textarea:-webkit-autofill,
+html[data-theme="dark"] select:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 30px #111827 inset !important;
+  -webkit-text-fill-color: var(--kp-text) !important;
+}
+
+/* Badge'y subtelne też w ciemnym motywie */
+html[data-theme="dark"] .bg-success-subtle {
+  background-color: rgba(25,135,84,0.18) !important;
+  color: #8ff0a4 !important;
+}
+
+html[data-theme="dark"] .bg-danger-subtle {
+  background-color: rgba(220,53,69,0.2) !important;
+  color: #ffb3c0 !important;
+}
+
+/* ============================
+   TWARDY RESET INPUTÓW W CIEMNYM MOTYWIE
+   ============================ */
+
+html[data-theme="dark"] input,
+html[data-theme="dark"] select,
+html[data-theme="dark"] textarea {
+  background-color: #111827 !important;
+  color: var(--kp-text) !important;
+  border-color: #3b4252 !important;
+}
+
+html[data-theme="dark"] input:focus,
+html[data-theme="dark"] select:focus,
+html[data-theme="dark"] textarea:focus {
+  background-color: #111827 !important;
+  color: var(--kp-text) !important;
+  border-color: #4dabf7 !important;
+  box-shadow: 0 0 0 0.12rem rgba(77, 171, 247, 0.35) !important;
+}
+
+/* Autofill (Chrome/Edge) – usuwa żółte pole */
+html[data-theme="dark"] input:-webkit-autofill,
+html[data-theme="dark"] textarea:-webkit-autofill,
+html[data-theme="dark"] select:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 30px #111827 inset !important;
+  -webkit-text-fill-color: var(--kp-text) !important;
+}
+
+/* ============================
+   AUTOFILL – CIEMNY MOTYW
+   ============================ */
+
+/* Chrome / Edge (WebKit) */
+html[data-theme="dark"] input:-webkit-autofill,
+html[data-theme="dark"] input:-webkit-autofill:hover,
+html[data-theme="dark"] input:-webkit-autofill:focus,
+html[data-theme="dark"] textarea:-webkit-autofill,
+html[data-theme="dark"] textarea:-webkit-autofill:hover,
+html[data-theme="dark"] textarea:-webkit-autofill:focus,
+html[data-theme="dark"] select:-webkit-autofill,
+html[data-theme="dark"] select:-webkit-autofill:hover,
+html[data-theme="dark"] select:-webkit-autofill:focus {
+  /* tło pola – zamiast żółtego */
+  -webkit-box-shadow: 0 0 0 1000px #111827 inset !important;
+  background-color: #111827 !important;
+
+  /* kolor tekstu i kursora */
+  -webkit-text-fill-color: #f8f9fa !important;
+  caret-color: #f8f9fa !important;
+
+  /* obramowanie jak przy fokusie */
+  border-color: #4dabf7 !important;
+}
+
+/* Firefox */
+html[data-theme="dark"] input:-moz-autofill,
+html[data-theme="dark"] textarea:-moz-autofill,
+html[data-theme="dark"] select:-moz-autofill {
+  box-shadow: 0 0 0 1000px #111827 inset !important;
+  background-color: #111827 !important;
+  color: #f8f9fa !important;
+  caret-color: #f8f9fa !important;
+  border-color: #4dabf7 !important;
 }

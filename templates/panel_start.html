@@ -234,17 +234,22 @@
         {% if msze_najblizsze %}
           <ul class="list-group list-group-flush">
             {% for m in msze_najblizsze %}
-              <li class="list-group-item d-flex justify-content-between">
-                <span>
-                  {{ m.data }} {{ m.godzina }} — {{ m.miejsce|default:"—" }}
-                  {% if m.intencje.exists %}
-                    <span class="badge bg-danger-subtle text-danger ms-1">zajęta</span>
-                  {% else %}
-                    <span class="badge bg-success-subtle text-success ms-1">wolna</span>
-                  {% endif %}
-                </span>
-                <a class="btn btn-sm btn-outline-secondary" href="{% url 'msza_szczegoly' m.pk %}">Szczegóły</a>
-              </li>
+              {% with m_data=m.data|date:"Y-m-d" m_godzina=m.godzina|date:"H:i" %}
+              {% now "Y-m-d" as dzis %}{% now "H:i" as teraz %}
+              {% if m_data > dzis or m_data == dzis and m_godzina >= teraz %}
+                <li class="list-group-item d-flex justify-content-between">
+                  <span>
+                    {{ m.data }} {{ m.godzina }} — {{ m.miejsce|default:"—" }}
+                    {% if m.intencje.exists %}
+                      <span class="badge bg-danger-subtle text-danger ms-1">zajęta</span>
+                    {% else %}
+                      <span class="badge bg-success-subtle text-success ms-1">wolna</span>
+                    {% endif %}
+                  </span>
+                  <a class="btn btn-sm btn-outline-secondary" href="{% url 'msza_szczegoly' m.pk %}">Szczegóły</a>
+                </li>
+              {% endif %}
+              {% endwith %}
             {% endfor %}
           </ul>
         {% else %}

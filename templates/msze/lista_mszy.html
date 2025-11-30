@@ -63,8 +63,16 @@
           <tr>
             <td>{{ msza.data }}</td>
             <td>{{ msza.godzina }}</td>
-            <td>{{ msza.miejsce }}</td>
-            <td>{{ msza.celebrans }}</td>
+            <td>{{ msza.miejsce|default:"—" }}</td>
+            <td>
+  {% if msza.celebrans %}
+    {{ msza.celebrans }}
+  {% elif msza.celebrans_opis %}
+    {{ msza.celebrans_opis }}
+  {% else %}
+    —
+  {% endif %}
+</td>
             <td>
               {% if msza.ile_intencji %}
                 {{ msza.ile_intencji }} int.

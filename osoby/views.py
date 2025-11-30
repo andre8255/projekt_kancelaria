@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
 from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views.generic import (
     ListView,
@@ -226,31 +226,26 @@ class OsobaEdycjaView(RolaWymaganaMixin, UpdateView):
 
 class OsobaUsunView(RolaWymaganaMixin, View):
     dozwolone_role = [Rola.ADMIN, Rola.KSIAZD]
+    template_name = "osoby/osoba_usun.html"
+
+    def get_object(self):
+        return get_object_or_404(Osoba, pk=self.kwargs.get("pk"))
 
     def get(self, request, *args, **kwargs):
-        osoba = get_object_or_404(Osoba, pk=self.kwargs.get("pk"))
-        try:
-            osoba.delete()
-            messages.success(request, f"Osoba {osoba} została usunięta.")
-            return HttpResponseRedirect(reverse_lazy("osoba_lista"))
-        except:
-             messages.error(
-                request,
-                f"Nie można usunąć osoby '{osoba}', "
-                f"ponieważ jest powiązana z aktami (np. chrztu, ślubu) lub rodziną."
-            )
-             return redirect("osoba_szczegoly", pk=osoba.pk)
+        osoba = self.get_object()
+        # TYLKO pokazujemy stronę z pytaniem
+        return render(request, self.template_name, {"object": osoba})
 
     def post(self, request, *args, **kwargs):
-        osoba = get_object_or_404(Osoba, pk=self.kwargs.get("pk"))
+        osoba = self.get_object()
         try:
             osoba.delete()
             messages.success(request, f"Osoba {osoba} została usunięta.")
-            return HttpResponseRedirect(reverse_lazy("osoba_lista"))
-        except:
-             messages.error(
+            return redirect("osoba_lista")
+        except Exception:
+            messages.error(
                 request,
                 f"Nie można usunąć osoby '{osoba}', "
                 f"ponieważ jest powiązana z aktami (np. chrztu, ślubu) lub rodziną."
             )
-             return redirect("osoba_szczegoly", pk=osoba.pk)
+            return redirect("osoba_szczegoly", pk=osoba.pk)
