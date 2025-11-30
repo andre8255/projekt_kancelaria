@@ -6,7 +6,7 @@ from slowniki.models import Duchowny
 # === NOWY KOD: Słownik typów mszy ===
 class TypMszy(models.TextChoices):
     POWSZEDNIA = "POWSZEDNIA", "Powszednia"
-    NIEDZIELNA = "NIEDZIELNA", "Niedzielna / Uroczystość"
+    NIEDZIELNA = "NIEDZIELNA", "Niedzielna"
     SLUBNA = "SLUBNA", "Ślubna"
     POGRZEBOWA = "POGRZEBOWA", "Pogrzebowa"
     ODPUSTOWA = "ODPUSTOWA", "Odpustowa"

@@ -295,17 +295,8 @@ class KalendarzMszyView(LoginRequiredMixin, TemplateView):
 
 def kalendarz_mszy_dane(request):
     """
-    Zwraca listę wydarzeń dla FullCalendar.
-    Tytuł = złączone treści intencji (lub 'wolna' gdy brak).
-    Pokazuje tylko msze dzisiejsze i przyszłe.
-    Uwzględnia opcjonalne GET:start / GET:end wysyłane przez FullCalendar.
+    Zwraca listę wydarzeń dla FullCalendar z uwzględnieniem kolorów typów mszy.
     """
-    
-    # Ten widok powinien być również chroniony. 
-    # Najprostszy sposób to dodanie dekoratora @login_required na górze,
-    # ale ponieważ nie edytujemy teraz importów, zakładamy, że 
-    # główny URL (w parafia/urls.py) chroni całą sekcję 'panel/'.
-    
     start_str = request.GET.get("start")
     end_str = request.GET.get("end")
 
@@ -313,7 +304,6 @@ def kalendarz_mszy_dane(request):
         if not dt_str:
             return None
         try:
-            # FullCalendar wysyła ISO 8601, często z 'Z'
             return datetime.fromisoformat(dt_str.replace("Z", "+00:00"))
         except ValueError:
             return None
@@ -321,7 +311,6 @@ def kalendarz_mszy_dane(request):
     start_dt = parse_iso(start_str)
     end_dt = parse_iso(end_str)
 
-    # bazowy queryset: tylko msze dziś i w przyszłości
     today = timezone.localdate()
     msze_qs = (
         Msza.objects
@@ -330,7 +319,6 @@ def kalendarz_mszy_dane(request):
         .prefetch_related("intencje")
     )
 
-    # jeśli FullCalendar poda zakres – zawężamy dodatkowo
     if start_dt and end_dt:
         msze_qs = msze_qs.filter(
             data__gte=start_dt.date(),
@@ -340,20 +328,35 @@ def kalendarz_mszy_dane(request):
     events = []
     for msza in msze_qs:
         dt = datetime.combine(msza.data, msza.godzina)
+        has_intencje = msza.intencje.exists()
 
-        if msza.intencje.exists():
+        # 1. Tytuł wydarzenia
+        if has_intencje:
             tresci = list(msza.intencje.values_list("tresc", flat=True))
             tytul = " • ".join(tresci)
-            kolor = "#dc3545"   # zajęta
         else:
-            tytul = "wolna"
-            kolor = "#198754"   # wolna
+            # Jeśli to specjalny typ (np. Ślub), pokaż go w tytule zamiast "wolna"
+            if msza.typ != 'POWSZEDNIA':
+                tytul = f"({msza.get_typ_display()}) - Wolny termin"
+            else:
+                tytul = "wolna"
+
+        # 2. Kolor (Logika Hybrydowa)
+        # Dla mszy powszedniej: Czerwony (zajęta) lub Zielony (wolna - z Twojej metody)
+        if msza.typ == 'POWSZEDNIA' and has_intencje:
+            kolor = "#dc3545" # Czerwony (Zajęta)
+        else:
+            # Dla wszystkich innych typów (Ślub, Pogrzeb, lub Wolna Powszednia)
+            # bierzemy Twój piękny kolor z modelu
+            kolor = msza.get_kolor_kalendarza()
 
         events.append({
             "title": tytul,
-            "start": dt.isoformat(),   # np. "2025-11-02T18:00:00"
+            "start": dt.isoformat(),
             "url": msza.get_absolute_url(),
             "color": kolor,
+            # Opcjonalnie: dodajemy ramkę, jeśli msza jest specjalna ale wolna
+            "borderColor": "#000" if not has_intencje and msza.typ != 'POWSZEDNIA' else kolor
         })
 
     return JsonResponse(events, safe=False)
