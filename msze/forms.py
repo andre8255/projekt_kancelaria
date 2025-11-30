@@ -18,6 +18,10 @@ class BootstrapFormMixin:
                 widget.attrs["placeholder"] = field.label
 
 class MszaForm(BootstrapFormMixin, forms.ModelForm):
+<<<<<<< HEAD
+=======
+    # ... pole celebrans bez zmian ...
+>>>>>>> a4977c8373d30717df428e9c3bc44163a3cf6a4f
     celebrans = forms.ModelChoiceField(
         queryset=Duchowny.objects.filter(aktywny=True).order_by("imie_nazwisko"),
         required=False,
@@ -30,7 +34,11 @@ class MszaForm(BootstrapFormMixin, forms.ModelForm):
         fields = [
             "data",
             "godzina",
+<<<<<<< HEAD
             "typ",             # <--- WAŻNE: Musi być w polach formularza
+=======
+            "typ",            
+>>>>>>> a4977c8373d30717df428e9c3bc44163a3cf6a4f
             "miejsce",
             "celebrans",
             "celebrans_opis",
@@ -41,7 +49,8 @@ class MszaForm(BootstrapFormMixin, forms.ModelForm):
             "godzina": forms.TimeInput(attrs={"type": "time"}, format="%Y-%m-%d"),
             "uwagi": forms.Textarea(attrs={"rows":3}),
         }
-        
+    
+    # ... reszta metod (__init__, clean, clean_data) bez zmian ...
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["data"].input_formats = ["%Y-%m-%d", "%d.%m.%Y", "%d-%m-%Y"]
@@ -52,10 +61,16 @@ class MszaForm(BootstrapFormMixin, forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
+<<<<<<< HEAD
         
         # 1. Logika celebransa (bez zmian)
         celebrans = cleaned_data.get("celebrans")
         opis = cleaned_data.get("celebrans_opis")
+=======
+        celebrans = cleaned_data.get("celebrans")
+        opis = cleaned_data.get("celebrans_opis")
+
+>>>>>>> a4977c8373d30717df428e9c3bc44163a3cf6a4f
         if celebrans and opis:
             cleaned_data["celebrans_opis"] = ""
 
