@@ -1,78 +1,345 @@
-{% extends "base_pdf.html" %}
-{% block title %}Świadectwo Ślubu{% endblock %}
-{% block content %}
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Świadectwo Ślubu</title>
+    <style>
+        @page { 
+            size: A4; 
+            margin: 1.5cm; 
+        }
 
-    <div class="text-center" style="margin-bottom: 0.5cm; font-size: 10pt;">
-     {{ parafia_nazwa }} -
-     {{ parafia_miejscowosc }}
+        body {
+            font-family: "Times New Roman", serif;
+            font-size: 11pt;
+            color: #063267; /* Twój niebieski kolor */
+            line-height: 1.3;
+        }
+
+        .doc {
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* --- NAGŁÓWEK --- */
+        .parish-header {
+            text-align: center;
+            margin-bottom: 0.5cm;
+            font-size: 12pt;
+            font-weight: bold;
+            color: #000; /* Nagłówek parafii czarny dla czytelności */
+        }
+
+        h1 { 
+            text-align: center; 
+            margin: 0.2cm 0 0.1cm; 
+            font-size: 18pt; 
+            text-transform: uppercase;
+            color: #063267;
+        }
+        
+        .subtitle {
+            text-align: center;
+            margin-bottom: 0.8cm;
+            font-size: 10pt;
+            letter-spacing: 1px;
+            font-weight: bold;
+            color: #063267;
+        }
+
+        /* Symulacja pieczęci w lewym rogu */
+        .seal-container {
+            overflow: hidden; 
+            margin-bottom: 10px;
+        }
+        .seal {
+            float: left;
+            width: 5cm; 
+            height: 1.8cm;
+            border: 1px dashed #ccc;
+            color: #aaa;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9pt;
+            margin-right: 20px;
+        }
+
+        .bookref {
+            text-align: right;
+            margin-bottom: 0.2cm;
+            font-weight: bold;
+            color: #000;
+        }
+
+        /* --- TABELA --- */
+        .main-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid #000;
+            margin-top: 0.5cm;
+            color: #063267;
+        }
+
+        .main-table th, .main-table td {
+            padding: 8px;
+            vertical-align: top;
+            border: 1px solid #000; /* Pełna kratka jak w starych drukach */
+        }
+
+        /* Nagłówki kolumn */
+        .main-table th {
+            text-align: center;
+            font-weight: bold;
+            background-color: #f9f9f9;
+            width: 35%; /* Równe kolumny dla małżonków */
+        }
+        .main-table th.label-col-head {
+            width: 30%; /* Węższa kolumna opisowa */
+            background-color: #fff;
+            border-right: 1px solid #000;
+        }
+
+        .la { 
+            font-weight: normal; 
+            font-style: italic; 
+            font-size: 9pt; 
+            color: #555; 
+            display: block;
+            margin-top: 2px;
+        }
+
+        /* Kolumna opisowa (lewa) */
+        .label-col {
+            font-weight: bold;
+            width: 30%;
+        }
+
+        /* Dane wypełniane - CZARNE i pogrubione */
+        .user-data {
+            font-weight: bold;
+            color: #000; 
+        }
+        
+        /* Komórki tabeli z danymi */
+        .data-cell {
+            color: #000;
+            font-weight: bold;
+        }
+
+        /* --- STOPKA --- */
+        .footer-table {
+            width: 100%;
+            margin-top: 1.5cm;
+            border: none;
+        }
+        .footer-table td {
+            border: none;
+            vertical-align: top;
+        }
+        .signature-line {
+            border-top: 1px dotted #000;
+            width: 80%;
+            margin: 1.5cm auto 0;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="doc">
+
+    <div class="parish-header">
+        {{ parafia.nazwa }}<br>
     </div>
 
-    <h1>Świadectwo Ślubu</h1>
-    <h2>Nr aktu: {{ malzenstwo.rok }}/{{ malzenstwo.akt_nr }}</h2>
-
-    <div class="text-center"  style="margin-bottom: 1cm;">
-        Na podstawie ksiąg małżeńskich parafii tutejszej zaświadcza się, <br>że dnia:
-        <strong>{{ malzenstwo.data_slubu|date:"d E Y" }} roku</strong>
-        zawarli sakramentalny związek małżeński:
-    </div>
-
-    <h3>MĄŻ</h3>
-    <table class="dane-table">
-        <tr>
-            <td class="label">Nazwisko i Imię:</td>
-            <td class="value bold">{{ malzenstwo.malzonek_a.nazwisko }} {{ malzenstwo.malzonek_a.imie_pierwsze }}</td>
-        </tr>
-        <tr>
-            <td class="label">Urodzony:</td>
-            <td class="value">{{ malzenstwo.malzonek_a.data_urodzenia|date:"d.m.Y" }} r.</td>
-        </tr>
-        <tr>
-            <td class="label">Rodzice:</td>
-            <td class="value">{% if chrzest_a %}
-            {{ chrzest_a.ojciec|default:"—" }} i {{ chrzest_a.matka|default:"—" }}
-          {% else %}
-            {{ malzenstwo.malzonek_a.imie_ojca|default:"—" }} i {{ malzenstwo.malzonek_a.imie_matki|default:"—" }}
-          {% endif %}</td>
-        </tr>
-
-    </table>
-
-    <h3>ŻONA</h3>
-    <table class="dane-table">
-        <tr>
-            <td class="label">Nazwisko i Imię:</td>
-            <td class="value bold">{{ malzenstwo.malzonek_b.nazwisko_rodowe }} {{ malzenstwo.malzonek_b.imie_pierwsze }}</td>
-        </tr>
-        <tr>
-            <td class="label">Urodzona:</td>
-            <td class="value">{{ malzenstwo.malzonek_b.data_urodzenia|date:"d.m.Y" }} r.</td>
-        </tr>
-        <tr>
-            <td class="label">Rodzice:</td>
-            <td class="value">{% if chrzest_a %}
-            {{ chrzest_b.ojciec|default:"—" }} i {{ chrzest_b.matka|default:"—" }}
-          {% else %}
-            {{ malzenstwo.malzonek_b.imie_ojca|default:"—" }} i {{ malzenstwo.malzonek_b.imie_matki|default:"—" }}
-          {% endif %}</td>
-        </tr>
-    </table>
-
-    <div style="margin-top: 1 cm;">
-        <p><strong>Świadkowie:</strong> 
-            {{ malzenstwo.swiadek_a|default:"..." }} i {{ malzenstwo.swiadek_b|default:"..." }}
-        </p>
-        <p><strong>Świadek urzędowy/asystujący:</strong> 
-            {% if malzenstwo.swiadek_urzedowy %}
-                {{ malzenstwo.swiadek_urzedowy }}
+    <div class="seal-container">
+        <div class="seal">
+            {% if parafia.logo %}
+                <img src="{{ parafia.logo.path }}" style="max-height: 1.6cm; max-width: 4.5cm;">
             {% else %}
-                {{ malzenstwo.swiadek_urzedowy_opis_reczny }}
+                (Pieczęć Parafii)
             {% endif %}
-        </p>
+        </div>
+        
+        <h1>ŚWIADECTWO ŚLUBU</h1>
+        <div class="subtitle">TESTIMONIUM MATRIMONII CONTRACTI</div>
     </div>
 
-    <div class="footer">
-        <p>Miejscowość, dnia: {{ today|date:"d.m.Y" }}</p>
-        <br>
-        <p>........................................................<br><small>(Proboszcz)</small></p>
+    <div class="bookref">
+        Rok i numer księgi: <span class="user-data">{{ malzenstwo.rok|default:"—" }} / {{ malzenstwo.akt_nr|default:"—" }}</span>
     </div>
-{% endblock %}
+
+    <table class="main-table">
+        <thead>
+            <tr>
+                <th class="label-col-head"></th>
+                <th>MAŁŻONEK<br><span class="la">SPONSUS</span></th>
+                <th>MAŁŻONKA<br><span class="la">SPONSA</span></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="label-col">
+                    1. Imię i nazwisko
+                    <span class="la">Nomen, cognomen</span>
+                </td>
+                <td class="data-cell">
+                    {{ malzenstwo.malzonek_a.imie_pierwsze }}<br>
+                    {{ malzenstwo.malzonek_a.nazwisko_rodowe|default:malzenstwo.malzonek_a.nazwisko }}
+                </td>
+                <td class="data-cell">
+                    {{ malzenstwo.malzonek_b.imie_pierwsze }}<br>
+                    {{ malzenstwo.malzonek_b.nazwisko_rodowe|default:malzenstwo.malzonek_b.nazwisko }}
+                </td>
+            </tr>
+
+            <tr>
+                <td class="label-col">
+                    2. Imiona rodziców
+                    <span class="la">Nomina patris et matris</span>
+                </td>
+                <td class="data-cell">
+                    {% if chrzest_a %}
+                        {{ chrzest_a.ojciec|default:"—" }}<br>
+                        {{ chrzest_a.matka|default:"—" }}
+                    {% else %}
+                        {{ malzenstwo.malzonek_a.imie_ojca|default:"—" }}<br>
+                        {{ malzenstwo.malzonek_a.imie_matki|default:"—" }}
+                    {% endif %}
+                </td>
+                <td class="data-cell">
+                    {% if chrzest_b %}
+                        {{ chrzest_b.ojciec|default:"—" }}<br>
+                        {{ chrzest_b.matka|default:"—" }}
+                    {% else %}
+                        {{ malzenstwo.malzonek_b.imie_ojca|default:"—" }}<br>
+                        {{ malzenstwo.malzonek_b.imie_matki|default:"—" }}
+                    {% endif %}
+                </td>
+            </tr>
+
+            <tr>
+                <td class="label-col">
+                    3. Data i miejsce ur.
+                    <span class="la">Dies et locus nativitatis</span>
+                </td>
+                <td class="data-cell">
+                    {% if chrzest_a.data_urodzenia %}
+                        {{ chrzest_a.data_urodzenia|date:"d.m.Y" }}
+                    {% else %}
+                        {{ malzenstwo.malzonek_a.data_urodzenia|date:"d.m.Y"|default:"—" }}
+                    {% endif %}
+                    <br>
+                    <span style="font-weight:normal; font-size:10pt;">
+                    {% if chrzest_a.miejsce_urodzenia %}
+                        {{ chrzest_a.miejsce_urodzenia }}
+                    {% elif malzenstwo.malzonek_a.miejsce_urodzenia %}
+                        {{ malzenstwo.malzonek_a.miejsce_urodzenia }}
+                    {% endif %}
+                    </span>
+                </td>
+                <td class="data-cell">
+                    {% if chrzest_b.data_urodzenia %}
+                        {{ chrzest_b.data_urodzenia|date:"d.m.Y" }}
+                    {% else %}
+                        {{ malzenstwo.malzonek_b.data_urodzenia|date:"d.m.Y"|default:"—" }}
+                    {% endif %}
+                    <br>
+                    <span style="font-weight:normal; font-size:10pt;">
+                    {% if chrzest_b.miejsce_urodzenia %}
+                        {{ chrzest_b.miejsce_urodzenia }}
+                    {% elif malzenstwo.malzonek_b.miejsce_urodzenia %}
+                        {{ malzenstwo.malzonek_b.miejsce_urodzenia }}
+                    {% endif %}
+                    </span>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="label-col">
+                    4. Wyznanie (obrządek)
+                    <span class="la">Religio (ritus)</span>
+                </td>
+                <td class="data-cell">
+                    {{ malzenstwo.malzonek_a.wyznanie|default:"—" }}
+                </td>
+                <td class="data-cell">
+                    {{ malzenstwo.malzonek_b.wyznanie|default:"—" }}
+                </td>
+            </tr>
+
+            <tr>
+                <td class="label-col">
+                    5. Data i miejsce ślubu
+                    <span class="la">Dies et locus matrimonii</span>
+                </td>
+                <td colspan="2" class="data-cell" style="text-align: center;">
+                    {{ malzenstwo.data_slubu|date:"d.m.Y"|default:"—" }} ,  
+                    {% if malzenstwo.parafia %}
+                        {{ malzenstwo.parafia.nazwa }} - 
+                        {{ malzenstwo.parafia.miejscowosc }}
+                    {% elif malzenstwo.parafia_opis_reczny %}
+                        {{ malzenstwo.parafia_opis_reczny }}
+                    {% else %}
+                        (w tutejszej parafii)
+                    {% endif %}
+                </td>
+            </tr>
+
+            <tr>
+                <td class="label-col">
+                    6. Asystujący
+                    <span class="la">Assistens</span>
+                </td>
+                <td colspan="2" class="data-cell">
+                    {% if malzenstwo.swiadek_urzedowy %}
+                        {{ malzenstwo.swiadek_urzedowy }}
+                    {% elif malzenstwo.swiadek_urzedowy_opis_reczny %}
+                        {{ malzenstwo.swiadek_urzedowy_opis_reczny }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+            </tr>
+
+            <tr>
+                <td class="label-col">
+                    7. Świadkowie
+                    <span class="la">Testes</span>
+                </td>
+                <td colspan="2" class="data-cell">
+                    1. {{ malzenstwo.swiadek_a|default:"—" }}<br>
+                    2. {{ malzenstwo.swiadek_b|default:"—" }}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <table class="footer-table">
+        <tr>
+            <td style="width: 45%;">
+                <br>
+                <b>Miejsce i data:</b><br>
+                <span class="user-data">
+                    {{ parafia.miejscowosc }}, {{ today|date:"d.m.Y" }}
+                </span>
+                <span class="la">Locus et dies</span>
+            </td>
+            <td style="width: 55%; text-align: center;">
+                <div style="margin-bottom: 10px;">
+                    Potwierdzam zgodność z księgą zaślubionych
+                    <span class="la">Concordat cum libro matrimoniorum</span>
+                </div>
+                
+                <div class="signature-line"></div>
+                <div>Proboszcz / Wikariusz</div>
+                <span class="la">Parochus / Vicarius</span>
+            </td>
+        </tr>
+    </table>
+
+</div>
+</body>
+</html>

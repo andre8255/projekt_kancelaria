@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Kartoteka Osobowa</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 1.5cm;
+            @bottom-center {
+                content: "Strona " counter(page) " z " counter(pages);
+                font-size: 9pt;
+                color: #888;
+            }
+        }
+
+        body {
+            font-family: "Times New Roman", serif;
+            font-size: 11pt;
+            color: #000;
+            line-height: 1.3;
+        }
+
+        /* --- NAGŁÓWEK PARAFII --- */
+        .parish-header {
+            text-align: center;
+            margin-bottom: 0.5cm;
+            color: #444;
+            font-size: 9pt;
+        }
+        .parish-name {
+            font-weight: bold;
+            font-size: 12pt;
+            text-transform: uppercase;
+            color: #000;
+        }
+
+        /* --- TYTUŁ --- */
+        h1 {
+            text-align: center;
+            font-size: 16pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin: 0.2cm 0;
+            color: #063267;
+            border-bottom: 2px solid #063267;
+            padding-bottom: 10px;
+        }
+
+        .person-header {
+            text-align: center;
+            margin-bottom: 1cm;
+            font-size: 18pt;
+            font-weight: bold;
+        }
+
+        /* --- SEKCJE DANYCH --- */
+        .section-title {
+            background-color: #eee;
+            padding: 5px 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 10pt;
+            margin-top: 0.5cm;
+            margin-bottom: 0.3cm;
+            border-left: 5px solid #063267;
+        }
+
+        /* --- TABELA INFO --- */
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+        }
+        .info-table td {
+            padding: 4px;
+            vertical-align: top;
+        }
+        .label {
+            width: 30%;
+            color: #555;
+            font-weight: bold;
+        }
+        .value {
+            width: 70%;
+            font-weight: bold;
+        }
+
+        /* --- TABELE SAKRAMENTÓW --- */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 0.5cm;
+        }
+        .data-table th {
+            background-color: #f9f9f9;
+            border-bottom: 1px solid #000;
+            text-align: left;
+            padding: 5px;
+            font-size: 10pt;
+        }
+        .data-table td {
+            border-bottom: 1px dotted #ccc;
+            padding: 5px;
+            font-size: 10pt;
+        }
+        
+        /* --- SPECJALNE --- */
+        .dead-badge {
+            color: #dc3545; /* Czerwony */
+            font-weight: bold;
+            border: 2px solid #dc3545;
+            padding: 5px 10px;
+            display: inline-block;
+            margin-top: 10px;
+            text-transform: uppercase;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="parish-header">
+        <div class="parish-name">{{ parafia.nazwa }}</div>
+    </div>
+
+    <h1>Kartoteka Osobowa</h1>
+    
+    <div class="person-header">
+        {{ osoba.nazwisko }} {{ osoba.imie_pierwsze }}
+    </div>
+
+    {% if zgon_osoby or osoba.data_zgonu %}
+    <div style="text-align: center; margin-bottom: 20px;">
+        <span class="dead-badge">✝ Osoba Zmarła</span>
+        <div style="margin-top: 5px;">Data zgonu: {{ osoba.data_zgonu|default:zgon_osoby.data_zgonu }}</div>
+    </div>
+    {% endif %}
+
+    <div class="section-title">Dane podstawowe</div>
+    <table class="info-table">
+        <tr>
+            <td class="label">Imię i nazwisko:</td>
+            <td class="value">
+                {{ osoba.imie_pierwsze }} {{ osoba.nazwisko }}
+                {% if osoba.imie_drugie %} ({{ osoba.imie_drugie }}){% endif %}
+            </td>
+        </tr>
+        {% if osoba.nazwisko_rodowe %}
+        <tr>
+            <td class="label">Nazwisko rodowe:</td>
+            <td class="value">{{ osoba.nazwisko_rodowe }}</td>
+        </tr>
+        {% endif %}
+        <tr>
+            <td class="label">Data i miejsce ur.:</td>
+            <td class="value">
+                {{ osoba.data_urodzenia|default:"—" }}
+                {% if osoba.miejsce_urodzenia %}, {{ osoba.miejsce_urodzenia }}{% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td class="label">Rodzice:</td>
+            <td class="value">
+                {{ osoba.imie_ojca|default:"..." }} i {{ osoba.imie_matki|default:"..." }}
+                {% if osoba.nazwisko_matki_rodowe %}(z d. {{ osoba.nazwisko_matki_rodowe }}){% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td class="label">Wyznanie:</td>
+            <td class="value">{{ osoba.wyznanie|default:"—" }}</td>
+        </tr>
+    </table>
+
+    <div class="section-title">Adres i Kontakt</div>
+    <table class="info-table">
+        <tr>
+            <td class="label">Adres:</td>
+            <td class="value">
+                {{ osoba.ulica }} {{ osoba.nr_domu }}{% if osoba.nr_mieszkania %}/{{ osoba.nr_mieszkania }}{% endif %}
+                <br>{{ osoba.kod_pocztowy }} {{ osoba.miejscowosc }}
+            </td>
+        </tr>
+        {% if osoba.telefon %}
+        <tr>
+            <td class="label">Telefon:</td>
+            <td class="value">{{ osoba.telefon }}</td>
+        </tr>
+        {% endif %}
+        {% if osoba.email %}
+        <tr>
+            <td class="label">E-mail:</td>
+            <td class="value">{{ osoba.email }}</td>
+        </tr>
+        {% endif %}
+    </table>
+
+    {% if chrzty %}
+    <div class="section-title">Chrzest Święty</div>
+    <table class="data-table">
+        <thead>
+            <tr><th>Akt</th><th>Data</th><th>Miejsce</th></tr>
+        </thead>
+        <tbody>
+            {% for ch in chrzty %}
+            <tr>
+                <td>{{ ch.rok }}/{{ ch.akt_nr }}</td>
+                <td>{{ ch.data_chrztu|default:ch.rok_chrztu }}</td>
+                <td>{{ ch.miejsce_chrztu|default:"—" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    {% if komunie %}
+    <div class="section-title">I Komunia Święta</div>
+    <table class="data-table">
+        <thead><tr><th>Rok</th><th>Parafia</th></tr></thead>
+        <tbody>
+            {% for k in komunie %}
+            <tr>
+                <td>{{ k.rok }}</td>
+                <td>{{ k.parafia.nazwa|default:"Tutejsza / Brak danych" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    {% if bierzmowania %}
+    <div class="section-title">Bierzmowanie</div>
+    <table class="data-table">
+        <thead><tr><th>Akt</th><th>Data</th><th>Imię</th><th>Szafarz</th></tr></thead>
+        <tbody>
+            {% for b in bierzmowania %}
+            <tr>
+                <td>{{ b.rok }}/{{ b.akt_nr }}</td>
+                <td>{{ b.data_bierzmowania|default:"—" }}</td>
+                <td>{{ b.imie_bierzmowania|default:"—" }}</td>
+                <td>{{ b.szafarz|default:b.szafarz_opis_reczny|default:"—" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    {% if malzenstwa %}
+    <div class="section-title">Małżeństwo</div>
+    <table class="data-table">
+        <thead><tr><th>Akt</th><th>Współmałżonek</th><th>Data ślubu</th><th>Miejsce</th></tr></thead>
+        <tbody>
+            {% for m in malzenstwa %}
+            <tr>
+                <td>{{ m.rok }}/{{ m.akt_nr }}</td>
+                <td>
+                    {% if m.malzonek_a == osoba %}
+                        {{ m.malzonek_b }}
+                    {% else %}
+                        {{ m.malzonek_a }}
+                    {% endif %}
+                </td>
+                <td>{{ m.data_slubu|default:"—" }}</td>
+                <td>{{ m.parafia.nazwa|default:m.parafia_opis_reczny|default:"—" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    {% if namaszczenia %}
+    <div class="section-title">Namaszczenie Chorych / Posługa</div>
+    <table class="data-table">
+        <thead><tr><th>Data</th><th>Miejsce</th><th>Sakramenty</th></tr></thead>
+        <tbody>
+            {% for n in namaszczenia %}
+            <tr>
+                <td>{{ n.data|default:"—" }}</td>
+                <td>{{ n.miejsce|default:"—" }}</td>
+                <td>
+                    {% if n.spowiedz %}Spowiedź, {% endif %}
+                    {% if n.komunia %}Komunia, {% endif %}
+                    {% if n.namaszczenie %}Namaszczenie{% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    {% if zgon_osoby %}
+    <div class="section-title">Zgon i Pogrzeb</div>
+    <table class="info-table">
+        <tr>
+            <td class="label">Data zgonu:</td>
+            <td class="value">{{ zgon_osoby.data_zgonu|default:"—" }}</td>
+        </tr>
+        <tr>
+            <td class="label">Miejsce zgonu:</td>
+            <td class="value">{{ zgon_osoby.miejsce_zgonu|default:"—" }}</td>
+        </tr>
+        <tr>
+            <td class="label">Data pogrzebu:</td>
+            <td class="value">{{ zgon_osoby.data_pogrzebu|default:"—" }}</td>
+        </tr>
+        <tr>
+            <td class="label">Cmentarz:</td>
+            <td class="value">{{ zgon_osoby.cmentarz|default:"—" }}</td>
+        </tr>
+        <tr>
+            <td class="label">Akt zgonu:</td>
+            <td class="value">{{ zgon_osoby.rok }}/{{ zgon_osoby.akt_nr }}</td>
+        </tr>
+    </table>
+    {% endif %}
+
+    <div style="margin-top: 1.5cm; border-top: 1px solid #ccc; padding-top: 5px; font-size: 8pt; text-align: center; color: #666;">
+        Wydruk z systemu Kancelaria Parafialna. Data generowania: {{ today|date:"d.m.Y H:i" }}
+    </div>
+
+</body>
+</html>

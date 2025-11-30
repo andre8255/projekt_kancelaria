@@ -11,6 +11,7 @@ from django.utils.dateparse import parse_date
 from django.utils import timezone
 from django.db.models import Exists, OuterRef,Q
 from django.contrib.auth.mixins import LoginRequiredMixin
+from parafia.utils_pdf import render_to_pdf
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import (
@@ -20,8 +21,9 @@ from django.views.generic import (
 # Importy ról
 from konta.mixins import RolaWymaganaMixin
 from konta.models import Rola
+from konta.utils import zapisz_log
 
-from .models import Msza, IntencjaMszy
+from .models import Msza, IntencjaMszy, TypMszy
 from .forms import MszaForm, IntencjaForm
 
 class MszaListaView(LoginRequiredMixin, ListView):
@@ -31,42 +33,57 @@ class MszaListaView(LoginRequiredMixin, ListView):
     paginate_by = 50
 
     def get_queryset(self):
+        # Domyślne sortowanie: od najnowszych (żeby widzieć nadchodzące/ostatnie na górze)
+        # lub "data", "godzina" jeśli wolisz chronologicznie rosnąco.
         qs = Msza.objects.all().order_by("data", "godzina")
 
-        # Pokaż tylko dzisiejsze i przyszłe (jeśli tak chcesz)
-        qs = qs.filter(data__gte=timezone.localdate())
+        # --- 1. Filtr zakresu dat (OD - DO) ---
+        data_od = self.request.GET.get("data_od")
+        data_do = self.request.GET.get("data_do")
 
-        # Adnotacja: czy msza ma jakąkolwiek intencję
+        if data_od:
+            qs = qs.filter(data__gte=data_od)
+        else:
+            # Opcjonalnie: jeśli nie wybrano daty OD, pokaż tylko przyszłe (jak było wcześniej)
+            # Ale przy wyszukiwarce lepiej domyślnie pokazać np. bieżący rok lub wszystko.
+            # Tutaj zostawiamy "wszystko" lub filtr z poprzedniej logiki:
+            # qs = qs.filter(data__gte=timezone.localdate()) 
+            pass
+
+        if data_do:
+            qs = qs.filter(data__lte=data_do)
+
+        # --- 2. Filtr Typu Mszy ---
+        typ = self.request.GET.get("typ")
+        if typ:
+            qs = qs.filter(typ=typ)
+
+        # --- 3. Filtr Statusu (Wolna/Zajęta) ---
         qs = qs.annotate(
-            zajeta=Exists(
-                IntencjaMszy.objects.filter(msza=OuterRef("pk"))
-            )
+            zajeta=Exists(IntencjaMszy.objects.filter(msza=OuterRef("pk")))
         )
-        # --- filtr po dacie (YYYY-MM-DD z <input type="date">) ---
-        data_str = (self.request.GET.get("data") or "").strip()
-        if data_str:
-            d = parse_date(data_str)
-            if d:
-                qs = qs.filter(data=d)
-
-
-        # Filtr: wolna / zajeta
         status = (self.request.GET.get("status") or "").lower().strip()
         if status == "wolna":
             qs = qs.filter(zajeta=False)
         elif status == "zajeta":
             qs = qs.filter(zajeta=True)
 
-        # Prosty search (miejsce / celebrans)
+        # --- 4. Szukajka tekstowa ---
         q = (self.request.GET.get("q") or "").strip()
         if q:
-            qs = qs.filter(Q(miejsce__icontains=q) | Q(celebrans__icontains=q))
+            qs = qs.filter(Q(miejsce__icontains=q) | Q(celebrans__imie_nazwisko__icontains=q))
 
         return qs
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx["filtr_data"] = self.request.GET.get("data", "")
+        # Przekazujemy opcje do selecta w szablonie
+        ctx["typy_mszy"] = TypMszy.choices
+        
+        # Zachowujemy wartości filtrów w formularzu
+        ctx["filtr_data_od"] = self.request.GET.get("data_od", "")
+        ctx["filtr_data_do"] = self.request.GET.get("data_do", "")
+        ctx["filtr_typ"] = self.request.GET.get("typ", "")
         ctx["filtr_status"] = self.request.GET.get("status", "")
         ctx["filtr_q"] = self.request.GET.get("q", "")
         return ctx
@@ -78,35 +95,36 @@ class MszaNowaView(RolaWymaganaMixin, CreateView):
     template_name = "msze/msza_formularz.html"
 
     def get_initial(self):
-            # Pobieramy 'initial' z nadrzędnej klasy
-            initial = super().get_initial()
-            
-            # Pobieramy nasz parametr 'data' z adresu URL
-            data_str = self.request.GET.get('data')
-            
-            if data_str:
-                # 1. Próbujemy sparsować pełną datę i czas (np. z widoku tygodnia)
-                klikniety_czas = parse_datetime(data_str)
-                
-                if klikniety_czas:
-                    # SUKCES: Mamy datę i godzinę
-                    # WAŻNE: Użyj nazw pól, które masz w swoim formularzu
-                    initial['data'] = klikniety_czas.date()
-                    initial['godzina'] = klikniety_czas.time()
-                else:
-                    # 2. Jeśli się nie udało, próbujemy sparsować samą datę (np. z widoku miesiąca)
-                    kliknieta_data = parse_date(data_str)
-                    if kliknieta_data:
-                        # SUKCES: Mamy samą datę
-                        initial['data'] = kliknieta_data
-                        # Pole 'godzina' pozostanie puste, co jest poprawne
-                        
-            return initial
+        initial = super().get_initial()
+        data_str = self.request.GET.get('data')
+
+        if data_str:
+            klikniety_czas = parse_datetime(data_str)
+            if klikniety_czas:
+                initial['data'] = klikniety_czas.date()
+                initial['godzina'] = klikniety_czas.time()
+            else:
+                kliknieta_data = parse_date(data_str)
+                if kliknieta_data:
+                    initial['data'] = kliknieta_data
+        return initial
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+
+        zapisz_log(
+            self.request,
+            "DODANIE_MSZY",
+            self.object,
+            opis=f"Dodano mszę: {self.object.data} {self.object.godzina} w {self.object.miejsce}"
+        )
+
+        messages.success(self.request, "Dodano nową mszę.")
+        return response
 
     def get_success_url(self):
-        # ... (twoja logika przekierowania po zapisie)
         return reverse('msza_lista')
-    
+
 
 
 class MszaEdycjaView(RolaWymaganaMixin, UpdateView):
@@ -115,6 +133,20 @@ class MszaEdycjaView(RolaWymaganaMixin, UpdateView):
     form_class = MszaForm
     template_name = "msze/msza_formularz.html"
     success_url = reverse_lazy("msza_lista")
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+
+        zapisz_log(
+            self.request,
+            "EDYCJA_MSZY",
+            self.object,
+            opis=f"Zmieniono mszę: {self.object.data} {self.object.godzina} w {self.object.miejsce}"
+        )
+
+        messages.success(self.request, "Zapisano zmiany przy mszy.")
+        return response
+
 
 
 class MszaSzczegolyView(LoginRequiredMixin, DetailView):
@@ -131,12 +163,22 @@ class MszaSzczegolyView(LoginRequiredMixin, DetailView):
 class MszaUsunView(RolaWymaganaMixin, DeleteView):
     dozwolone_role = [Rola.ADMIN, Rola.KSIAZD]
     model = Msza
-    template_name = "msze/msza_usun.html"   # patrz pkt 3
+    template_name = "msze/msza_usun.html"
     success_url = reverse_lazy("msza_lista")
 
     def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        zapisz_log(
+            request,
+            "USUNIECIE_MSZY",
+            self.object,
+            opis=f"Usunięto mszę: {self.object.data} {self.object.godzina} w {self.object.miejsce}"
+        )
+
         messages.success(request, "Msza została usunięta.")
         return super().delete(request, *args, **kwargs)
+
 
 class MszaListaDrukView(MszaListaView):
     template_name = "msze/druki/msza_lista_druk.html"
@@ -148,6 +190,22 @@ class MszaListaDrukView(MszaListaView):
         # WAŻNE: Dodajemy prefetch_related("intencje"), 
         # aby pobrać treści intencji w jednym zapytaniu SQL (optymalizacja)
         return qs.prefetch_related("intencje")
+
+class MszaListaPDFView(MszaListaView):
+    """
+    Generuje PDF z listy mszy, zachowując aktywne filtry (data, status).
+    Dziedziczy po MszaListaView, więc korzysta z tego samego get_queryset.
+    """
+    def render_to_response(self, context, **response_kwargs):
+        # Dodajemy bieżącą datę do stopki
+        context['today'] = timezone.now()
+        
+        # Budujemy nazwę pliku, np. Wykaz_Mszy_2023-11-01.pdf
+        filename = f"Wykaz_Mszy_{timezone.localdate()}.pdf"
+        
+        return render_to_pdf('msze/druki/msza_lista_pdf.html', context, filename)
+
+
 
 
 class IntencjaNowaView(RolaWymaganaMixin, FormView):
@@ -163,6 +221,14 @@ class IntencjaNowaView(RolaWymaganaMixin, FormView):
         intencja = form.save(commit=False)
         intencja.msza = self.msza
         intencja.save()
+
+        zapisz_log(
+            self.request,
+            "DODANIE_INTENCJI",
+            intencja,
+            opis=f"Dodano intencję do mszy {self.msza.data} {self.msza.godzina}: {intencja.tresc[:80]}"
+        )
+
         messages.success(self.request, "Dodano intencję do tej mszy.")
         return redirect(self.msza.get_absolute_url())
 
@@ -170,6 +236,7 @@ class IntencjaNowaView(RolaWymaganaMixin, FormView):
         ctx = super().get_context_data(**kwargs)
         ctx["msza"] = self.msza
         return ctx
+
 
 class IntencjaEdycjaView(RolaWymaganaMixin, UpdateView):
     dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
@@ -179,21 +246,47 @@ class IntencjaEdycjaView(RolaWymaganaMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx["msza"] = self.object.msza          # <-- żeby szablon miał msza.pk także przy edycji
+        ctx["msza"] = self.object.msza
         return ctx
-    
-    def get_success_url(self):
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+
+        zapisz_log(
+            self.request,
+            "EDYCJA_INTENCJI",
+            self.object,
+            opis=f"Zmieniono intencję dla mszy {self.object.msza.data} {self.object.msza.godzina}"
+        )
+
         messages.success(self.request, "Zapisano zmiany intencji.")
+        return response
+
+    def get_success_url(self):
         return self.object.msza.get_absolute_url()
+
 
 class IntencjaUsunView(RolaWymaganaMixin, DeleteView):
     dozwolone_role = [Rola.ADMIN, Rola.KSIAZD]
     model = IntencjaMszy
     template_name = "msze/intencja_usun.html"
 
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        zapisz_log(
+            request,
+            "USUNIECIE_INTENCJI",
+            self.object,
+            opis=f"Usunięto intencję dla mszy {self.object.msza.data} {self.object.msza.godzina}"
+        )
+
+        messages.success(request, "Intencja została usunięta.")
+        return super().delete(request, *args, **kwargs)
+
     def get_success_url(self):
-        messages.success(self.request, "Intencja została usunięta.")
         return self.object.msza.get_absolute_url()
+
 
 
 class KalendarzMszyView(LoginRequiredMixin, TemplateView):

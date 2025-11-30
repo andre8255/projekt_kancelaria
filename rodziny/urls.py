@@ -15,11 +15,11 @@ urlpatterns = [
     path("rodziny/czlonkowie/<int:pk>/usun/",views.CzlonkostwoUsunView.as_view(),name="rodzina_czlonek_usun",),
     
     # --- NOWA ŚCIEŻKA WYDRUKU ---
-    path("<int:pk>/druk/", views.RodzinaDrukView.as_view(), name="rodzina_druk"), 
-    path("<int:pk>/pdf/", views.RodzinaPDFView.as_view(), name="rodzina_pdf"),
+    path("rodziny/<int:pk>/druk/", views.RodzinaDrukView.as_view(), name="rodzina_druk"), 
+    path("rodziny/<int:pk>/pdf/", views.RodzinaPDFView.as_view(), name="rodzina_pdf"),
     
-    path("<int:rodzina_pk>/dodaj-czlonka/", views.DodajCzlonkaView.as_view(), name="rodzina_dodaj_czlonka"),
-    path("<int:rodzina_pk>/czlonek/<int:czlonek_pk>/usun/", views.UsunCzlonkaZRodzinyView.as_view(), name="rodzina_usun_czlonka"),
+    path("rodziny/<int:rodzina_pk>/dodaj-czlonka/", views.DodajCzlonkaView.as_view(), name="rodzina_dodaj_czlonka"),
+    path("rodziny/<int:rodzina_pk>/czlonek/<int:czlonek_pk>/usun/", views.UsunCzlonkaZRodzinyView.as_view(), name="rodzina_usun_czlonka"),
 
     # WIZYTY DUSZPASTERSKIE
     path("<int:rodzina_pk>/wizyty/nowa/", views.WizytaNowaView.as_view(), name="wizyta_nowa"),

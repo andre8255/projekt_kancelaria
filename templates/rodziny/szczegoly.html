@@ -9,13 +9,13 @@
 
   <div class="ms-3 d-flex flex-wrap gap-2">
     <a href="{% url 'rodzina_pdf' rodzina.pk %}" target="_blank" class="btn btn-outline-secondary btn-sm">
-      📄 Pobierz Kartotekę (PDF)
+      📄 Pobierz Kartotekę Rodziny (PDF)
     </a>
-
+<!--
     <a href="{% url 'rodzina_druk' rodzina.pk %}" target="_blank" class="btn btn-outline-secondary btn-sm">
       🖨️ Drukuj kartotekę
     </a>
-
+-->
 
     <a href="{% url 'rodzina_edytuj' rodzina.pk %}" class="btn btn-outline-secondary btn-sm">
      ✏️ Edytuj
@@ -223,12 +223,12 @@
                       <div class="btn-group btn-group-sm" role="group">
                         <a href="{% url 'osoba_szczegoly' w.osoba.pk %}"
                            class="btn btn-outline-secondary">
-                          Szczegóły osoby
+                          <i class="bi bi-eye"></i> Szczegóły osoby
                         </a>
 
                         <a href="{% url 'rodzina_czlonek_usun' w.relacja.pk %}"
                            class="btn btn-outline-danger">
-                          Usuń z rodziny
+                         <i class="bi bi-trash"></i> Usuń z rodziny
                         </a>
                       </div>
                     </td>

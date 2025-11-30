@@ -1,60 +1,207 @@
-{% extends "base_pdf.html" %}
-{% block title %}Zaświadczenie I Komunii Św.{% endblock %}
-{% block content %}
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Zaświadczenie I Komunii Św.</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
 
-    <div class="text-center" style="margin-bottom: 0.5cm; font-size: 10pt;">
-     {{ parafia_nazwa }} -
-     {{ parafia_miejscowosc }}
+        body {
+            font-family: "Times New Roman", serif;
+            font-size: 12pt;
+            color: #000;
+            line-height: 1.5;
+        }
+
+        .doc {
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* --- NAGŁÓWEK PARAFII --- */
+        .parish-header {
+            text-align: center;
+            margin-bottom: 0.2cm;
+            font-weight: bold;
+            font-size: 12pt;
+            text-transform: uppercase;
+        }
+        .parish-subheader {
+            text-align: center;
+            font-weight: normal;
+            font-size: 10pt;
+            margin-bottom: 1.5cm;
+        }
+
+        /* --- TYTUŁ DOKUMENTU --- */
+        .title-block {
+            text-align: center;
+            margin-bottom: 1.5cm;
+        }
+        .title-block h1 {
+            font-size: 22pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin: 0;
+            letter-spacing: 1px;
+        }
+        .title-block h2 {
+            font-size: 14pt;
+            font-weight: normal;
+            margin-top: 10px;
+            font-style: italic;
+        }
+
+        /* --- TREŚĆ (TABELA) --- */
+        /* Tabela zapewnia idealne równe linie kropkowane */
+        .content-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1cm;
+        }
+
+        .content-table td {
+            padding: 8px 0;
+            vertical-align: bottom;
+        }
+
+        .label-cell {
+            white-space: nowrap;
+            font-weight: bold;
+            padding-right: 10px;
+            width: 1%; /* Zajmuje tyle ile tekst potrzebuje */
+        }
+
+        .value-cell {
+            border-bottom: 1px dotted #000; /* Kropkowana linia */
+            text-align: center;
+            font-weight: bold;
+            font-size: 13pt;
+        }
+
+        .spacer-row td {
+            padding: 15px 0; /* Odstęp między sekcjami */
+            text-align: center;
+            font-style: italic;
+        }
+
+        /* --- STOPKA --- */
+        .footer-table {
+            width: 100%;
+            margin-top: 3cm;
+        }
+        .footer-table td {
+            vertical-align: top;
+        }
+        .signature-line {
+            border-top: 1px dotted #000;
+            width: 80%;
+            margin-left: auto;
+            margin-top: 1.5cm;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="doc">
+
+    <div class="parish-header">
+        {{ parafia.nazwa }}
+    </div>
+    <div class="parish-subheader">
+       
     </div>
 
-    <h1>Zaświadczenie</h1>
-    <h2>o przyjęciu Pierwszej Komunii Świętej</h2>
+    <div class="title-block">
+        <h1>ZAŚWIADCZENIE</h1>
+        <h2>o przyjęciu Pierwszej Komunii Świętej</h2>
+    </div>
 
-    <div style="margin: 1cm 0;">Niniejszym zaświadcza się, że:</div>
+    <p style="text-align: center; margin-bottom: 1cm; font-style: italic;">
+        Niniejszym zaświadcza się, że:
+    </p>
 
-    <table class="dane-table">
+    <table class="content-table">
         <tr>
-            <td class="label">Imię i Nazwisko:</td>
-            <td class="value bold">{{ komunia.osoba.imie_pierwsze }} {{ komunia.osoba.nazwisko }}</td>
+            <td class="label-cell">Imię i Nazwisko:</td>
+            <td class="value-cell">
+                {{ komunia.osoba.imie_pierwsze }} {{ komunia.osoba.nazwisko }}
+            </td>
         </tr>
+
         <tr>
-            <td class="label">Data urodzenia:</td>
-            <td class="value">{{ komunia.osoba.data_urodzenia|date:"d.m.Y" }}</td>
+            <td class="label-cell">Data urodzenia:</td>
+            <td class="value-cell">
+                {% if komunia.osoba.data_urodzenia %}
+                    {{ komunia.osoba.data_urodzenia }}
+                {% elif chrzest and chrzest.data_urodzenia %}
+                    {{ chrzest.data_urodzenia }}
+                {% else %}
+                    —
+                {% endif %}
+            </td>
         </tr>
+
         <tr>
-            <td class="label">Rodzice:</td>
-            <td class="value">
-                {{ komunia.osoba.imie_ojca|default:"..." }} i {{ komunia.osoba.imie_matki|default:"..." }}
+            <td class="label-cell">Imiona rodziców:</td>
+            <td class="value-cell">
+                {% if chrzest %}
+                    {{ chrzest.ojciec|default:"..." }} i {{ chrzest.matka|default:"..." }}
+                {% else %}
+                    {{ komunia.osoba.imie_ojca|default:"..." }} i {{ komunia.osoba.imie_matki|default:"..." }}
+                {% endif %}
+            </td>
+        </tr>
+
+        <tr class="spacer-row">
+            <td colspan="2">
+                przyjął(a) Pierwszą Komunię Świętą
+            </td>
+        </tr>
+
+        <tr>
+            <td class="label-cell">Rok:</td>
+            <td class="value-cell">
+                {{ komunia.rok }}
+            </td>
+        </tr>
+
+        <tr>
+            <td class="label-cell">W parafii:</td>
+            <td class="value-cell">
+                {% if komunia.parafia %}
+                    {{ komunia.parafia.nazwa }}
+                    {% if komunia.parafia.miejscowosc %} w {{ komunia.parafia.miejscowosc }}{% endif %}
+                {% else %}
+                    {{ parafia.nazwa }} (tutejszej)
+                {% endif %}
             </td>
         </tr>
     </table>
 
-    <div style="margin: 1cm 0; text-align: center;">
-        przyjął(a) Pierwszą Komunię Świętą
-    </div>
-
-    <table class="dane-table">
+    <table class="footer-table">
         <tr>
-            <td class="label">Rok:</td>
-            <td class="value bold">{{ komunia.rok }}</td>
-        </tr>
-        <tr>
-            <td class="label">W parafii:</td>
-            <td class="value">
-                {% if komunia.parafia %}{{ komunia.parafia }}{% else %}Tutejszej{% endif %}
+            <td style="width: 50%;">
+                <br><br>
+                {{ parafia.miejscowosc }}, dnia {{ today|date:"d.m.Y" }}
+            </td>
+            
+            <td style="width: 50%; text-align: center;">
+                <div style="text-align: right; margin-right: 1cm;">
+                    {% if parafia.logo %}
+                        {% endif %}
+                </div>
+                
+                <div class="signature-line"></div>
+                <small>(podpis i pieczęć)</small>
             </td>
         </tr>
     </table>
 
-    {% if chrzest %}
-    <div style="margin-top: 1cm; font-size: 10pt;">
-      <!--  <em>Chrzest św.: rok {{ chrzest.rok }}, nr aktu {{ chrzest.akt_nr }}, parafia: {{ chrzest.parafia|default:"Tutejsza" }}</em>-->
-    </div>
-    {% endif %}
-
-    <div class="footer">
-        <p>Miejscowość, dnia: {{ today|date:"d.m.Y" }}</p>
-        <br>
-        <p>........................................................</p>
-    </div>
-{% endblock %}
+</div>
+</body>
+</html>

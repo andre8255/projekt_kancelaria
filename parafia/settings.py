@@ -24,7 +24,7 @@ INSTALLED_APPS = [
     "msze.apps.MszeConfig",
     "sakramenty.apps.SakramentyConfig",
     "slowniki",
-
+    "konfiguracja",
 
 
 ]
@@ -52,6 +52,8 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+
+                "konfiguracja.context_processors.dane_parafii",
             ],
         },
     },
@@ -92,9 +94,3 @@ from django.contrib.messages import constants as messages
 MESSAGE_TAGS = { messages.ERROR: "danger" }
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-
-# DANE PARAFII DO WYDRUKÓW
-PARAFIA_NAZWA = "RZYMSKOKATOLICKA PARAFIA PW. ŚW. LEONARDA OPATA"
-PARAFIA_MIEJSCOWOSC = "MYKANÓW"
-PARAFIA_ADRES = "ul. Cicha 1, 42-233 Mykanów"

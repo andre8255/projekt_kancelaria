@@ -8,8 +8,6 @@
     <a href="{% url 'malzenstwo_pdf' malzenstwo.pk %}" target="_blank" class="btn btn-outline-secondary btn-sm">
       📄 Pobierz PDF (Zaświadczenie)
     </a>
-    <a href="{% url 'malzenstwo_druk' malzenstwo.pk %}" class="btn btn-outline-secondary btn-sm">
-      🖨️Drukuj</a>
     <a href="{% url 'malzenstwo_edytuj' malzenstwo.pk %}" class="btn btn-outline-secondary btn-sm">✏️ Edytuj</a>
     <a href="{% url 'malzenstwo_usun' malzenstwo.pk %}" class="btn btn-outline-danger btn-sm">🗑️ Usuń</a>
     <a href="{% url 'malzenstwo_lista' %}" class="btn btn-outline-secondary btn-sm">⬅ Powrót</a>
@@ -75,6 +73,13 @@
             <p class="mb-1"><strong>Miejsce:</strong> {{ malzenstwo.malzonek_a.miejsce_urodzenia|default:"—" }}</p>
             <p class="mb-0"><strong>Świadek:</strong> {{ malzenstwo.swiadek_a|default:"—" }}</p>
           </div>
+
+          <div class="card-footer bg-transparent border-top-0 pt-0 pb-3">
+             {# POPRAWKA: Dodano .pk #}
+            <a href="{% url 'osoba_szczegoly' malzenstwo.malzonek_a.pk %}" class="btn btn-sm btn-outline-success">
+              Przejdź do profilu osoby ➞
+            </a>
+          </div>
         </div>
       </div>
 
@@ -101,6 +106,13 @@
             <p class="mb-1"><strong>Miejsce:</strong> {{ malzenstwo.malzonek_b.miejsce_urodzenia|default:"—" }}</p>
             <p class="mb-0"><strong>Świadek:</strong> {{ malzenstwo.swiadek_b|default:"—" }}</p>
           </div>
+
+          <div class="card-footer bg-transparent border-top-0 pt-0 pb-3">
+             {# POPRAWKA: Dodano .pk #}
+            <a href="{% url 'osoba_szczegoly' malzenstwo.malzonek_b.pk %}" class="btn btn-sm btn-outline-success">
+              Przejdź do profilu osoby ➞
+            </a>
+          </div>
         </div>
       </div>
 
@@ -109,10 +121,12 @@
     {# --- UWAGI I ZAŁĄCZNIKI --- #}
     <div class="row">
         <div class="col-12">
+            {% if malzenstwo.uwagi_wew %}
             <div class="mb-3 p-3 bg-light rounded border">
                 <strong>Uwagi wewnętrzne: </strong><br>
-                {{ malzenstwo.uwagi_wew|default:"(brak uwag)" }}
+                {{ malzenstwo.uwagi_wew }}
             </div>
+            {% endif %}
 
             <div class="card shadow-sm border-0">
                 <div class="card-header fw-semibold">

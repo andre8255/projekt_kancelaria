@@ -1,83 +1,303 @@
-{% extends "base_pdf.html" %}
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Świadectwo Chrztu</title>
+    <style>
+        /* Ustawienia strony dla PDF (WeasyPrint) */
+        @page {
+            size: A4;
+            margin: 1.5cm; /* 15mm */
+            @bottom-center {
+                content: "Strona " counter(page) " z " counter(pages);
+                font-family: "Times New Roman", serif;
+                font-size: 9pt;
+                color: #888;
+            }
+        }
 
-{% block title %}Świadectwo Chrztu - {{ chrzest.ochrzczony.nazwisko }}{% endblock %}
+        body {
+            font-family: "Times New Roman", serif;
+            font-size: 11pt;
+            color: #000; /* WeasyPrint lepiej drukuje czarny/ciemny szary */
+            line-height: 1.3;
+        }
 
-{% block content %}
+        .doc {
+            max-width: 100%; /* W PDF używamy całej szerokości strony */
+            margin: 0 auto;
+        }
 
-    <div class="text-center" style="margin-bottom: 0.5cm; font-size: 10pt;">
-     {{ parafia_nazwa }} -
-     {{ parafia_miejscowosc }}
+        h1 {
+            text-align: center;
+            margin: 0.2cm 0 0.1cm;
+            font-size: 18pt;
+            font-weight: bold;
+            color: #063267;
+            text-transform: uppercase;
+        }
+
+        .subtitle {
+            text-align: center;
+            margin-bottom: 0.8cm;
+            font-style: italic;
+            color: #444;
+        }
+
+        .bookref {
+            text-align: right;
+            margin-bottom: 0.2cm;
+            margin-right: 0.5cm;
+        }
+
+        /* Pieczęć nagłówkowa - symulacja */
+        .seal {
+            float: left;
+            width: 6cm;
+            height: 2cm;
+            border: 1px dashed #ccc;
+            color: #999;
+            text-align: center;
+            display: flex;
+            align-items: center; /* Centrowanie pionowe flex */
+            justify-content: center;
+            font-size: 9pt;
+            margin-right: 0.5cm;
+        }
+
+        /* Tabele - kluczowe dla układu w PDF */
+        table.data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0.2cm;
+        }
+
+        table.data-table td {
+            vertical-align: top;
+            padding: 6px 4px;
+        }
+
+        /* Etykiety */
+        .field-label {
+            font-weight: bold;
+            white-space: nowrap;
+            color: #063267;
+            width: 30%; /* Stała szerokość lewej kolumny */
+        }
+        .field-label::after { content: ": "; }
+
+        /* Dane wpisywane (Wartości) */
+        .user-data {
+            font-weight: bold;
+            color: #000;
+            font-size: 11.5pt;
+        }
+
+        .tiny {
+            font-size: 8pt;
+            color: #666;
+            font-style: italic;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #eee; /* Linia oddzielająca wiersze */
+            padding-bottom: 4px;
+        }
+
+        /* Układ wyznania (Flexbox w WeasyPrint działa, ale tabele są bezpieczniejsze) */
+        .row-split {
+            display: flex;
+            justify-content: space-between;
+        }
+        .right-align {
+            text-align: right;
+        }
+
+        /* Stopka */
+        .footer-block {
+            margin-top: 1.5cm;
+            width: 100%;
+        }
+        
+        /* Tabela do stopki, żeby się nie rozjeżdżała */
+        .footer-table {
+            width: 100%;
+            margin-top: 1cm;
+        }
+        .footer-table td {
+            vertical-align: top;
+        }
+        
+        .signature-line {
+            margin-top: 1.5cm;
+            border-top: 1px dotted #000;
+            width: 80%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .la {
+            font-size: 9pt;
+            color: #555;
+            font-style: italic;
+        }
+
+        /* Nagłówek parafii z bazy danych */
+        .parish-header {
+            text-align: center;
+            margin-bottom: 1cm;
+            font-size: 12pt;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="doc">
+
+    <div class="parish-header">
+        {{ parafia.nazwa }}<br>
     </div>
 
-    <h1>Świadectwo Chrztu</h1>
-    <h2>Nr aktu: {{ chrzest.rok }}/{{ chrzest.akt_nr }}</h2>
-
-    <div style="margin: 1cm 0;">
-        Niniejszym zaświadcza się, że:
+    <div style="overflow: hidden; margin-bottom: 10px;">
+        <div class="seal">
+            {% if parafia.logo %}
+                <img src="{{ parafia.logo.path }}" style="max-height: 1.8cm; max-width: 5.5cm;">
+            {% else %}
+                (Pieczęć Parafii)<br>Sigillum
+            {% endif %}
+        </div>
+        
+        <h1>ŚWIADECTWO CHRZTU</h1>
+        <div class="subtitle">Testimonium baptismi / Certificate of Baptism</div>
     </div>
 
-    <table class="dane-table">
+    <div class="bookref">
+        <span style="font-weight: bold;">L.dz. (Nr aktu):</span> 
+        <span class="user-data">{{ chrzest.rok }}/{{ chrzest.akt_nr }}</span>
+    </div>
+    
+    <div class="tiny" style="text-align: right; margin-bottom: 15px;">
+        Annus et numerus libri baptisatorum
+    </div>
+
+    <table class="data-table">
         <tr>
-            <td class="label">Nazwisko i Imię:</td>
-            <td class="value bold">{{ chrzest.ochrzczony.nazwisko }} {{ chrzest.ochrzczony.imie_pierwsze }}</td>
+            <td class="field-label">1. Imię i nazwisko</td>
+            <td><span class="user-data">{{ chrzest.ochrzczony.nazwisko }} {{ chrzest.ochrzczony.imie_pierwsze }}</span></td>
         </tr>
+        <tr><td colspan="2" class="tiny">Nomen, cognomen / First and last name</td></tr>
+
         <tr>
-            <td class="label">Data urodzenia:</td>
-            <td class="value">{{ chrzest.ochrzczony.data_urodzenia|date:"d.m.Y" }}</td>
-        </tr>
-        <tr>
-            <td class="label">Miejsce urodzenia:</td>
-            <td class="value">{{ chrzest.ochrzczony.miejsce_urodzenia|default:"—" }}</td>
-        </tr>
-        <tr>
-            <td class="label">Ojciec:</td>
-            <td class="value">{{ chrzest.ojciec|default:"—" }}</td>
-        </tr>
-        <tr>
-            <td class="label">Matka (z domu):</td>
-            <td class="value">
-                {{ chrzest.matka|default:"—" }} 
-                {% if chrzest.nazwisko_matki_rodowe %} z domu {{ chrzest.nazwisko_matki_rodowe }}{% endif %}
+            <td class="field-label">2. Imię i nazwisko ojca</td>
+            <td>
+                <div class="row-split">
+                    <span><span class="user-data">{{ chrzest.ojciec }}</span></span>
+                    <span class="right-align">
+                        Wyznanie: <span class="user-data">{% if chrzest.ojciec_wyznanie %}{{ chrzest.ojciec_wyznanie }}{% else %}—{% endif %}</span>
+                    </span>
+                </div>
             </td>
         </tr>
-    </table>
+        <tr><td colspan="2" class="tiny">Nomen patris / Father's name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Confessio / Religion</td></tr>
 
-    <div style="margin: 1cm 0; text-align: center;">
-        przyjął(a) Sakrament Chrztu Świętego
-    </div>
-
-    <table class="dane-table">
         <tr>
-            <td class="label">Data chrztu:</td>
-            <td class="value bold">
-                {% if chrzest.data_chrztu %}
-                    {{ chrzest.data_chrztu|date:"d.m.Y" }} r.
+            <td class="field-label">3. Imię i nazwisko matki</td>
+            <td>
+                <div class="row-split">
+                    <span>
+                        <span class="user-data">{{ chrzest.matka }}</span>
+                        {% if chrzest.nazwisko_matki_rodowe %} <br><small>(z domu <strong>{{ chrzest.nazwisko_matki_rodowe }})</strong></small>{% endif %}
+                    </span>
+                    <span class="right-align">
+                        Wyznanie: <span class="user-data">{% if chrzest.matka_wyznanie %}{{ chrzest.matka_wyznanie }}{% else %}—{% endif %}</span>
+                    </span>
+                </div>
+            </td>
+        </tr>
+        <tr><td colspan="2" class="tiny">Nomen matris / Mother's name &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Confessio / Religion</td></tr>
+
+        <tr>
+            <td class="field-label">4. Data i miejsce ur.</td>
+            <td>
+                <span class="user-data">
+                    {% if chrzest.data_urodzenia %}{{ chrzest.data_urodzenia }}{% elif chrzest.rok_urodzenia %}{{ chrzest.rok_urodzenia }}{% endif %}
+                    {% if chrzest.miejsce_urodzenia %}, {{ chrzest.miejsce_urodzenia }}{% endif %}
+                </span>
+            </td>
+        </tr>
+        <tr><td colspan="2" class="tiny">Dies et locus nativitatis / Date and place of birth</td></tr>
+
+        <tr>
+            <td class="field-label">5. Data i miejsce chrztu</td>
+            <td>
+                <span class="user-data">
+                    {% if chrzest.data_chrztu %}{{ chrzest.data_chrztu }}{% elif chrzest.rok_chrztu %}{{ chrzest.rok_chrztu }}{% endif %}
+                    {% if chrzest.miejsce_chrztu %}, {{ chrzest.miejsce_chrztu }}{% endif %}
+                    {% if chrzest.parafia %}<br>w parafii: {{ chrzest.parafia.nazwa }}{% endif %}
+                </span>
+            </td>
+        </tr>
+        <tr><td colspan="2" class="tiny">Dies et locus baptismi / Date and place of baptism</td></tr>
+
+        <tr>
+            <td class="field-label">6. Bierzmowanie</td>
+            <td>
+                <span class="user-data">
+                {% if bierzmowanie %}
+                    {{ bierzmowanie.data_bierzmowania|default:bierzmowanie.rok }}
+                    {% if bierzmowanie.parafia %}, {{ bierzmowanie.parafia.nazwa }}
+                    {% elif bierzmowanie.parafia_nazwa_reczna %}, {{ bierzmowanie.parafia_nazwa_reczna }}{% endif %}
                 {% else %}
-                    {{ chrzest.rok }} r.
+                    (brak adnotacji)
                 {% endif %}
+                </span>
+            </td>
+        </tr>
+        <tr><td colspan="2" class="tiny">Confirmatio / Confirmation</td></tr>
+
+        <tr>
+            <td class="field-label">7. Uwagi / Cel wydania</td>
+            <td>
+                <span class="user-data">
+                    {% if cel_wydania == 'uwagi_wew' %}
+                        {{ chrzest.uwagi_wew|linebreaksbr }}
+                    {% elif cel_wydania %}
+                        Do celów: {{ cel_wydania }}
+                    {% else %}
+                        ---
+                    {% endif %}
+                </span>
+            </td>
+        </tr>
+        <tr><td colspan="2" class="tiny">Adnotationes / Notes</td></tr>
+    </table>
+
+    <table class="footer-table">
+        <tr>
+            <td style="width: 40%;">
+                <br>
+                <b>Miejsce i data:</b><br>
+                <span class="user-data">
+                    {{ parafia.miejscowosc }}, {{ today|date:"d.m.Y" }}
+                </span>
+                <div class="la" style="margin-top: 5px;">Locus et dies</div>
+            </td>
+            <td style="width: 60%; text-align: center;">
+                <div style="margin-bottom: 5px;">Potwierdzam zgodność z księgą chrztów</div>
+                <div class="la">Concordat cum libro baptisatorum</div>
+                
+                <div class="signature-line"></div>
+                <div>Proboszcz / Wikariusz</div>
+                <div class="la">Parochus / Vicarius</div>
             </td>
         </tr>
     </table>
 
-   <div style="margin-top: 1cm; border-top: 1px solid #000; padding-top: 10px;">
-        <strong>Cel wydania / Uwagi:</strong><br>
-        
-        {% if cel_wydania == "uwagi_wew" %}
-             {{ chrzest.uwagi_wew|default:"(brak uwag w księdze)" }}
-        
-        {% elif cel_wydania %}
-             {{ cel_wydania }}
-        
-        {% else %}
-             Do celów kościelnych.
-        {% endif %}
-    </div>
-
-    <div class="footer">
-        <p>Miejscowość, dnia: {{ today|date:"d.m.Y" }}</p>
-        <br>
-        <p>.....................................................................<br>
-        <small>(podpis i pieczęć proboszcza)</small></p>
-    </div>
-
-{% endblock %}
+</div>
+</body>
+</html>

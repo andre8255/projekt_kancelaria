@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Wykaz Małżeństw</title>
+    <style>
+        @page {
+            size: A4 landscape; /* Poziomo */
+            margin: 1.5cm;
+            @bottom-center {
+                content: "Strona " counter(page) " z " counter(pages);
+                font-size: 9pt;
+                color: #888;
+            }
+        }
+
+        body {
+            font-family: "Times New Roman", serif;
+            font-size: 10pt;
+            color: #000;
+            line-height: 1.3;
+        }
+
+        /* --- NAGŁÓWEK --- */
+        .parish-header {
+            text-align: center;
+            margin-bottom: 0.5cm;
+            font-size: 10pt;
+            color: #444;
+        }
+        .parish-name {
+            font-weight: bold;
+            font-size: 12pt;
+            text-transform: uppercase;
+            color: #000;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 0.5cm;
+            color: #063267;
+            font-weight: 700;
+            font-size: 16pt;
+            text-transform: uppercase;
+        }
+
+        .filters-info {
+            text-align: center;
+            font-style: italic;
+            margin-bottom: 0.5cm;
+            color: #555;
+        }
+
+        /* --- TABELA --- */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid #999;
+        }
+
+        th, td {
+            border: 1px solid #999;
+            padding: 6px 8px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background: #f4f4f4;
+            color: #000;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #fdfdfd;
+        }
+
+        /* Szerokości kolumn */
+        .col-lp { width: 5%; text-align: center; }
+        .col-akt { width: 10%; text-align: center; }
+        .col-osoby { width: 30%; }
+        .col-data { width: 12%; text-align: center; }
+        .col-parafia { width: 25%; }
+        .col-swiadek { width: 18%; }
+
+    </style>
+</head>
+<body>
+
+    <div class="parish-header">
+        <div class="parish-name">{{ parafia.nazwa }}</div>
+        {{ parafia.adres }} | {{ parafia.miejscowosc }}
+    </div>
+
+    <h1>Wykaz Małżeństw</h1>
+
+    {% if request.GET.q or request.GET.rok %}
+    <div class="filters-info">
+        Filtry: 
+        {% if request.GET.q %} Fraza: "{{ request.GET.q }}" {% endif %}
+        {% if request.GET.rok %} Rok: {{ request.GET.rok }} {% endif %}
+    </div>
+    {% endif %}
+
+    {% if malzenstwa %}
+    <table>
+        <thead>
+            <tr>
+                <th class="col-lp">Lp.</th>
+                <th class="col-akt">Rok / akt</th>
+                <th class="col-osoby">Małżonkowie</th>
+                <th class="col-data">Data ślubu</th>
+                <th class="col-parafia">Parafia ślubu</th>
+                <th class="col-swiadek">Świadek urzędowy</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for m in malzenstwa %}
+            <tr>
+                <td class="col-lp">{{ forloop.counter }}</td>
+                <td class="col-akt">{{ m.rok|default:"—" }}/{{ m.akt_nr|default:"—" }}</td>
+                <td class="col-osoby">
+                    <b>{{ m.malzonek_a.nazwisko }}</b> {{ m.malzonek_a.imie_pierwsze }}
+                    <br>
+                    <b>{{ m.malzonek_b.nazwisko }}</b> {{ m.malzonek_b.imie_pierwsze }}
+                </td>
+                <td class="col-data">{{ m.data_slubu|date:"d.m.Y"|default:"—" }}</td>
+                <td class="col-parafia">
+                    {% if m.parafia %}
+                        {{ m.parafia.nazwa }}
+                        {% if m.parafia.miejscowosc %}<br><span style="font-size:9pt; color:#555;">{{ m.parafia.miejscowosc }}</span>{% endif %}
+                    {% elif m.parafia_opis_reczny %}
+                        {{ m.parafia_opis_reczny }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+                <td class="col-swiadek">
+                    {% if m.swiadek_urzedowy %}
+                        {{ m.swiadek_urzedowy }}
+                    {% elif m.swiadek_urzedowy_opis_reczny %}
+                        {{ m.swiadek_urzedowy_opis_reczny }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="text-align: center; margin-top: 2cm;">Brak wpisów pasujących do kryteriów.</p>
+    {% endif %}
+
+    <div style="margin-top: 1cm; font-size: 8pt; color: #888; text-align: right;">
+        Wygenerowano: {{ today|date:"d.m.Y H:i" }}
+    </div>
+
+</body>
+</html>

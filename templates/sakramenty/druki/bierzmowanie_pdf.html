@@ -1,68 +1,252 @@
-{% extends "base_pdf.html" %}
-{% block title %}Świadectwo Bierzmowania{% endblock %}
-{% block content %}
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Świadectwo Bierzmowania</title>
+    <style>
+        @page { 
+            size: A4; 
+            margin: 1.5cm; 
+        }
 
-    <div class="text-center" style="margin-bottom: 0.5cm; font-size: 10pt;">
-     {{ parafia_nazwa }} -
-     {{ parafia_miejscowosc }}
+        body {
+            font-family: "Times New Roman", serif;
+            font-size: 11pt;
+            color: #063267; /* Twój kolor */
+            line-height: 1.3;
+        }
+
+        .doc {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        /* --- NAGŁÓWEK PARAFII (PROFESJONALIZACJA) --- */
+        .parish-header {
+            text-align: center;
+            margin-bottom: 0.2cm;
+            font-weight: bold;
+            font-size: 12pt;
+            color: #000;
+            text-transform: uppercase;
+        }
+        .parish-subheader {
+            text-align: center;
+            font-weight: normal;
+            font-size: 10pt;
+            margin-bottom: 0.8cm;
+            color: #000;
+        }
+
+        /* --- TWOJE STYLE --- */
+        h1 { text-align: center; margin: 0.2cm 0 0.1cm; font-size: 1.6em; }
+        
+        .bookref { 
+            text-align: right; 
+            margin-bottom: 0.5cm; 
+        }
+
+        .seal {
+            float: left;
+            width: 5cm; 
+            height: 1.7cm;
+            border: 1px dashed #acabab;
+            color: #c3c4c5;
+            text-align: center;
+            /* Flexbox dla wyśrodkowania */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            margin-right: 0.8cm;
+            font-size: 10pt;
+        }
+
+        .user-data { 
+            font-weight: 705; 
+            color: #000; /* Dane czarne dla kontrastu */
+        }
+        
+        .field-label { 
+            font-weight: 700; 
+            white-space: nowrap; 
+        }
+        .field-label::after { content: ": "; }
+        
+        /* --- TABELA --- */
+        table.data-table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 0.5cm; 
+        }
+        
+        table.data-table td { 
+            vertical-align: top; 
+            padding: 8px 4px; 
+            border-bottom: 1px dotted #ccc; /* Delikatne linie oddzielające */
+        }
+        /* Usuń linię dla ostatniego wiersza */
+        table.data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* --- STOPKA --- */
+        .footer-table {
+            width: 100%;
+            margin-top: 2cm;
+            border: none;
+        }
+        .footer-table td {
+            vertical-align: top;
+            border: none;
+        }
+        
+        .signature {
+            height: 1.5cm;
+            border-bottom: 1px dotted #000;
+            margin-bottom: 2px;
+            width: 80%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .la { font-size: 10pt; color: #555; font-style: italic; }
+
+    </style>
+</head>
+<body>
+
+<div class="doc">
+    <div class="parish-header">
+        {{ parafia.nazwa }}
+    </div>
+    <div class="parish-subheader">
+        
     </div>
 
-    <h1>Świadectwo Bierzmowania</h1>
-    <h2>Nr aktu: {{ bierzmowanie.rok }}/{{ bierzmowanie.akt_nr }}</h2>
+    <div style="overflow: hidden; margin-bottom: 10px;">
+        <div class="seal">
+            {% if parafia.logo %}
+                <img src="file://{{ parafia.logo.path }}" style="max-width: 4.8cm; max-height: 1.6cm;">
+            {% else %}
+                Pieczęć parafii
+            {% endif %}
+        </div>
+        <h1>ŚWIADECTWO BIERZMOWANIA</h1>
+        <div style="text-align: center; font-style: italic; font-size: 10pt;">Testimonium Confirmationis</div>
+    </div>
 
-    <table class="dane-table">
+    <div class="bookref">
+        <span class="field-label">Rok i nr w księdze</span>
+        <span class="user-data">{{ bierzmowanie.rok }}/{{ bierzmowanie.akt_nr }}</span>
+    </div>
+    
+    <table class="data-table">
         <tr>
-            <td class="label">Nazwisko i Imię:</td>
-            <td class="value bold">{{ bierzmowanie.osoba.nazwisko }} {{ bierzmowanie.osoba.imie_pierwsze }}</td>
+            <td class="field-label" style="width:35%;">Imię i nazwisko</td>
+            <td><span class="user-data">{{ bierzmowanie.osoba.imie_pierwsze }} {{ bierzmowanie.osoba.nazwisko }}</span></td>
         </tr>
+
         <tr>
-            <td class="label">Data i miejsce ur.:</td>
-            <td class="value">
-                {{ bierzmowanie.osoba.data_urodzenia|date:"d.m.Y" }}, {{ bierzmowanie.osoba.miejsce_urodzenia|default:"—" }}
+            <td class="field-label">Imię z bierzmowania</td>
+            <td><span class="user-data">{{ bierzmowanie.imie_bierzmowania|default:"—" }}</span></td>
+        </tr>
+
+        <tr>
+            <td class="field-label">Data i miejsce urodzenia</td>
+            <td>
+                <span class="user-data">
+                    {% if chrzest %}
+                        {% if chrzest.data_urodzenia %}{{ chrzest.data_urodzenia }}{% elif chrzest.rok_urodzenia %}{{ chrzest.rok_urodzenia }}{% endif %}
+                        {% if chrzest.miejsce_urodzenia %}, {{ chrzest.miejsce_urodzenia }}{% endif %}
+                    {% else %}
+                        {{ bierzmowanie.osoba.data_urodzenia|default:"—" }}
+                        {% if bierzmowanie.osoba.miejsce_urodzenia %}, {{ bierzmowanie.osoba.miejsce_urodzenia }}{% endif %}
+                    {% endif %}
+                </span>
             </td>
         </tr>
+
         <tr>
-            <td class="label">Rodzice:</td>
-            <td class="value">{{ bierzmowanie.osoba.imie_ojca }} i {{ bierzmowanie.osoba.imie_matki }}</td>
+            <td class="field-label">Data chrztu</td>
+            <td>
+                <span class="user-data">
+                    {% if chrzest %}
+                        {% if chrzest.data_chrztu %}{{ chrzest.data_chrztu }}{% elif chrzest.rok_chrztu %}Rok {{ chrzest.rok_chrztu }}{% else %}—{% endif %}
+                        (Akt nr: {{ chrzest.rok }}/{{ chrzest.akt_nr }})
+                    {% else %}
+                        —
+                    {% endif %}
+                </span>
+            </td>
+        </tr>
+
+        <tr>
+            <td class="field-label">Parafia chrztu</td>
+            <td>
+                <span class="user-data">
+                    {% if chrzest and chrzest.parafia %}
+                        {{ chrzest.parafia.nazwa }} <br><small>{{ chrzest.parafia.miejscowosc }}</small>
+                    {% elif chrzest and chrzest.miejsce_chrztu %}
+                        {{ chrzest.miejsce_chrztu }} (brak w słowniku parafii)
+                    {% else %}
+                        —
+                    {% endif %}
+                </span>
+            </td>
+        </tr>
+
+        <tr>
+            <td class="field-label">Data i miejsce bierzmowania</td>
+            <td>
+                <span class="user-data">
+                    {% if bierzmowanie.data_bierzmowania %}{{ bierzmowanie.data_bierzmowania }}{% else %}Rok: {{ bierzmowanie.rok }}{% endif %}
+                    {% if bierzmowanie.parafia %}
+                        <br>w parafii: {{ bierzmowanie.parafia.nazwa }}
+                    {% elif bierzmowanie.parafia_nazwa_reczna %}
+                        <br>{{ bierzmowanie.parafia_nazwa_reczna }}
+                    {% endif %}
+                </span>
+            </td>
+        </tr>
+
+        <tr>
+            <td class="field-label">Szafarz</td>
+            <td>
+                <span class="user-data">
+                    {% if bierzmowanie.szafarz %}
+                        {{ bierzmowanie.szafarz }}
+                    {% elif bierzmowanie.szafarz_opis_reczny %}
+                        {{ bierzmowanie.szafarz_opis_reczny }}
+                    {% else %}—{% endif %}
+                </span>
+            </td>
+        </tr>
+
+        <tr>
+            <td class="field-label">Świadek</td>
+            <td><span class="user-data">{{ bierzmowanie.swiadek|default:"—" }}</span></td>
         </tr>
     </table>
 
-    <div style="margin: 0.5cm 0; text-align: center; font-weight: bold;">
-        PRZYJĄŁ(ĘŁA) SAKRAMENT BIERZMOWANIA
-    </div>
-
-    <table class="dane-table">
+    <table class="footer-table">
         <tr>
-            <td class="label">Data:</td>
-            <td class="value bold">{{ bierzmowanie.data_bierzmowania|date:"d.m.Y" }}</td>
-        </tr>
-        <tr>
-            <td class="label">Miejsce:</td>
-            <td class="value">{{ bierzmowanie.miejsce_bierzmowania|default:"Kościół Parafialny" }}</td>
-        </tr>
-        <tr>
-            <td class="label">Imię z bierzmowania:</td>
-            <td class="value bold">{{ bierzmowanie.imie_bierzmowania|default:"—" }}</td>
-        </tr>
-        <tr>
-            <td class="label">Szafarz:</td>
-            <td class="value">
-                {% if bierzmowanie.szafarz %}
-                    {{ bierzmowanie.szafarz }}
-                {% else %}
-                    {{ bierzmowanie.szafarz_opis_reczny|default:"—" }}
-                {% endif %}
+            <td style="width: 40%;">
+                <br>
+                <span style="font-weight: 700;">Miejsce i data:</span><br>
+                <span class="user-data">
+                    {{ parafia.miejscowosc }}, {{ today|date:"d.m.Y" }}
+                </span>
+                <div class="la">Locus et dies</div>
             </td>
-        </tr>
-        <tr>
-            <td class="label">Świadek:</td>
-            <td class="value">{{ bierzmowanie.swiadek|default:"—" }}</td>
+            <td style="width: 60%; text-align: center;">
+                <div class="signature"></div>
+                Podpis Proboszcza
+                <div class="la">Parochus</div>
+            </td>
         </tr>
     </table>
 
-    <div class="footer"><br>
-        <p>Miejscowość, dnia: {{ today|date:"d.m.Y" }}</p>
-        <br>
-        <p>........................................................<small>(Proboszcz)</small></p>
-    </div>
-{% endblock %}
+</div>
+</body>
+</html>

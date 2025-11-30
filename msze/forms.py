@@ -18,7 +18,7 @@ class BootstrapFormMixin:
                 widget.attrs["placeholder"] = field.label
 
 class MszaForm(BootstrapFormMixin, forms.ModelForm):
-    # Opcjonalnie: Sortowanie listy duchownych
+    # ... pole celebrans bez zmian ...
     celebrans = forms.ModelChoiceField(
         queryset=Duchowny.objects.filter(aktywny=True).order_by("imie_nazwisko"),
         required=False,
@@ -31,9 +31,10 @@ class MszaForm(BootstrapFormMixin, forms.ModelForm):
         fields = [
             "data",
             "godzina",
+            "typ",            
             "miejsce",
-            "celebrans",       # <--- Wybór z listy
-            "celebrans_opis",  # <--- Opis ręczny
+            "celebrans",
+            "celebrans_opis",
             "uwagi",
         ]
         widgets = {
@@ -41,7 +42,8 @@ class MszaForm(BootstrapFormMixin, forms.ModelForm):
             "godzina": forms.TimeInput(attrs={"type": "time"}, format="%Y-%m-%d"),
             "uwagi": forms.Textarea(attrs={"rows":3}),
         }
-        
+    
+    # ... reszta metod (__init__, clean, clean_data) bez zmian ...
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["data"].input_formats = ["%Y-%m-%d", "%d.%m.%Y", "%d-%m-%Y"]
@@ -52,11 +54,9 @@ class MszaForm(BootstrapFormMixin, forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        # Logika czyszczenia pól:
         celebrans = cleaned_data.get("celebrans")
         opis = cleaned_data.get("celebrans_opis")
 
-        # Jeśli wybrano księdza z listy, usuwamy wpis ręczny (żeby nie było dubli)
         if celebrans and opis:
             cleaned_data["celebrans_opis"] = ""
         

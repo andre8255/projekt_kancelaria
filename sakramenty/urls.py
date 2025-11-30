@@ -68,10 +68,16 @@ urlpatterns = [
 
     # --- PDFy ---
     path("chrzest/<int:pk>/pdf/", views.ChrzestPDFView.as_view(), name="chrzest_pdf"),
+    path("chrzty/pdf/", views.ChrzestListaPDFView.as_view(), name="chrzest_lista_pdf"),
     path("komunia/<int:pk>/pdf/", views.KomuniaPDFView.as_view(), name="komunia_pdf"),
+    path("komunie/pdf/", views.KomuniaListaPDFView.as_view(), name="komunia_lista_pdf"),
     path("bierzmowanie/<int:pk>/pdf/", views.BierzmowaniePDFView.as_view(), name="bierzmowanie_pdf"),
+    path("bierzmowania/pdf/", views.BierzmowanieListaPDFView.as_view(), name="bierzmowanie_lista_pdf"),
     path("malzenstwo/<int:pk>/pdf/", views.MalzenstwoPDFView.as_view(), name="malzenstwo_pdf"),
+    path("malzenstwa/pdf/", views.MalzenstwoListaPDFView.as_view(), name="malzenstwo_lista_pdf"),
     path("namaszczenie/<int:pk>/pdf/", views.NamaszczeniePDFView.as_view(), name="namaszczenie_pdf"),
+    path("namaszczenia/pdf/", views.NamaszczenieListaPDFView.as_view(), name="namaszczenie_lista_pdf"),
     path("zgon/<int:pk>/pdf/", views.ZgonPDFView.as_view(), name="zgon_pdf"),
+    path("zgony/pdf/", views.ZgonListaPDFView.as_view(), name="zgon_lista_pdf"),
 ]
 

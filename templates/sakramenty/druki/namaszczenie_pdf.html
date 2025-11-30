@@ -1,81 +1,182 @@
-{% extends "base_pdf.html" %}
-{% block title %}Zaświadczenie - Namaszczenie Chorych{% endblock %}
-{% block content %}
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Pamiątka Odwiedzin Chorych</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
 
-    <div class="text-center" style="margin-bottom: 0.5cm; font-size: 10pt;">
-     {{ parafia_nazwa }} -
-     {{ parafia_miejscowosc }}
+        body {
+            font-family: "Times New Roman", serif;
+            font-size: 14pt; /* Duża, czytelna czcionka dla osób starszych */
+            color: #063267;  /* Twój kolor przewodni */
+            line-height: 1.5;
+        }
+
+        .doc {
+            width: 100%;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        /* --- NAGŁÓWEK PARAFII --- */
+        .parish-header {
+            margin-bottom: 0.5cm;
+            font-weight: bold;
+            font-size: 12pt;
+            color: #000;
+            text-transform: uppercase;
+        }
+        .parish-subheader {
+            font-weight: normal;
+            font-size: 10pt;
+            margin-bottom: 1cm;
+            color: #000;
+        }
+
+        /* --- TYTUŁ --- */
+        h1 {
+            margin-top: 0;
+            margin-bottom: 0.5cm;
+            font-size: 22pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .for-who {
+            font-size: 12pt;
+            margin-bottom: 0.2cm;
+            font-style: italic;
+            color: #555;
+        }
+
+        /* --- DANE OSOBY (LINIA KROPKOWANA) --- */
+        .person-name {
+            font-size: 20pt;
+            font-weight: bold;
+            color: #000;
+            border-bottom: 1px dotted #000;
+            padding-bottom: 5px;
+            margin-bottom: 1.5cm;
+            display: block;
+            width: 80%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* --- SEKCJA SAKRAMENTÓW --- */
+        .sacraments-title {
+            font-weight: bold;
+            font-size: 14pt;
+            margin-bottom: 0.8cm;
+            text-transform: uppercase;
+        }
+
+        .sacrament-item {
+            font-size: 16pt;
+            margin-bottom: 0.5cm;
+            text-align: left;
+            margin-left: 25%; /* Wcięcie, żeby lista była na środku */
+            color: #000;
+            font-weight: bold;
+        }
+
+        /* Kwadraciki checkboxów (symulacja czcionką) */
+        .checkbox {
+            display: inline-block;
+            width: 20px;
+            margin-right: 10px;
+            font-family: "Arial", sans-serif; /* Arial ma ładne znaki unicode */
+        }
+
+        /* --- STOPKA --- */
+        .footer-table {
+            width: 100%;
+            margin-top: 3cm;
+            border: none;
+        }
+        .footer-table td {
+            vertical-align: bottom;
+            text-align: center;
+        }
+        
+        .signature-line {
+            border-top: 1px dotted #000;
+            width: 80%;
+            margin: 0 auto 5px auto;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="doc">
+
+    {% if parafia.logo %}
+        <div style="margin-bottom: 10px;">
+            <img src="file://{{ parafia.logo.path }}" style="height: 2cm;">
+        </div>
+    {% endif %}
+
+    <div class="parish-header">
+        {{ parafia.nazwa }}
+    </div>
+    <div class="parish-subheader">
+    
     </div>
 
-    <h1>Zaświadczenie</h1>
-    <h2>o udzieleniu posługi sakramentalnej chorym</h2>
+    <br>
 
-    <div style="margin: 1cm 0;">
-        Niniejszym zaświadcza się, że:
+    <h1>Pamiątka<br>Odwiedzin Chorych</h1>
+    
+    <div class="for-who">udzielonych dla:</div>
+    
+    <div class="person-name">
+        {{ namaszczenie.osoba.imie_pierwsze }} {{ namaszczenie.osoba.nazwisko }}
     </div>
 
-    <table class="dane-table">
+    <div class="sacraments-title">PRZYJĘTE SAKRAMENTY ŚWIĘTE:</div>
+    
+    <div class="sacrament-item">
+        <span class="checkbox">
+            {% if namaszczenie.spowiedz %}☑{% else %}☐{% endif %}
+        </span>
+        SPOWIEDŹ ŚWIĘTA
+    </div>
+    
+    <div class="sacrament-item">
+        <span class="checkbox">
+            {% if namaszczenie.komunia %}☑{% else %}☐{% endif %}
+        </span>
+        KOMUNIA ŚWIĘTA
+    </div>
+    
+    <div class="sacrament-item">
+        <span class="checkbox">
+            {% if namaszczenie.namaszczenie %}☑{% else %}☐{% endif %}
+        </span>
+        NAMASZCZENIE CHORYCH
+    </div>
+    
+    <table class="footer-table">
         <tr>
-            <td class="label">Imię i Nazwisko:</td>
-            <td class="value bold">{{ namaszczenie.osoba.imie_pierwsze }} {{ namaszczenie.osoba.nazwisko }}</td>
-        </tr>
-        <tr>
-            <td class="label">Data urodzenia:</td>
-            <td class="value">{{ namaszczenie.osoba.data_urodzenia|date:"d.m.Y" }}</td>
-        </tr>
-        <tr>
-            <td class="label">Adres:</td>
-            <td class="value">
-                {{ namaszczenie.osoba.miejscowosc|default:"" }} {{ namaszczenie.osoba.ulica|default:"" }} {{ namaszczenie.osoba.nr_domu|default:"" }}
+            <td style="width: 50%;">
+                Data:<br>
+                <span style="font-weight: bold; font-size: 14pt;">
+                    {{ namaszczenie.data|date:"d.m.Y"|default:"........................" }} r.
+                </span>
+            </td>
+            <td style="width: 50%;">
+                <div class="signature-line"></div>
+                <small>Podpis Kapłana</small>
             </td>
         </tr>
     </table>
 
-    <div style="margin: 0.5cm 0; text-align: center; font-weight: bold;">
-        PRZYJĄŁ(ĘŁA) SAKRAMENTY ŚWIĘTE
-    </div>
-
-    <table class="dane-table">
-        <tr>
-            <td class="label">Data:</td>
-            <td class="value bold">{{ namaszczenie.data|date:"d.m.Y" }}</td>
-        </tr>
-        <tr>
-            <td class="label">Miejsce:</td>
-            <td class="value">{{ namaszczenie.miejsce|default:"Dom chorego" }}</td>
-        </tr>
-        <tr>
-            <td class="label">Szafarz:</td>
-            <td class="value">
-                {% if namaszczenie.szafarz %}
-                    {{ namaszczenie.szafarz }}
-                {% else %}
-                    —
-                {% endif %}
-            </td>
-        </tr>
-    </table>
-
-    <div style="margin-top: 1cm; padding: 10px; border: 1px solid #000;">
-        <strong>Udzielono następujących sakramentów:</strong><br><br>
-        
-        <div style="margin-bottom: 5px;">
-            [{% if namaszczenie.spowiedz %} <strong>X</strong> {% else %} &nbsp;&nbsp; {% endif %}] Spowiedź Święta
-        </div>
-        
-        <div style="margin-bottom: 5px;">
-            [{% if namaszczenie.komunia %} <strong>X</strong> {% else %} &nbsp;&nbsp; {% endif %}] Komunia Święta (Wiatyk)
-        </div>
-        
-        <div>
-            [{% if namaszczenie.namaszczenie %} <strong>X</strong> {% else %} &nbsp;&nbsp; {% endif %}] Namaszczenie Olejem Chorych
-        </div>
-    </div>
-
-    <div class="footer">
-        <p>Miejscowość, dnia: {{ today|date:"d.m.Y" }}</p>
-        <br>
-        <p>........................................................<br><small>(Podpis kapłana)</small></p>
-    </div>
-
-{% endblock %}
+</div>
+</body>
+</html>

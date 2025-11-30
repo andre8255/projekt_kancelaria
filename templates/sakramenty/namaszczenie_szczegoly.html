@@ -9,12 +9,9 @@
   </div>
 
   <div class="d-flex flex-wrap gap-2 ms-auto">
-    {# Tylko nowy PDF, stary druk HTML pomijamy #}
     <a href="{% url 'namaszczenie_pdf' namaszczenie.pk %}" target="_blank" class="btn btn-outline-secondary btn-sm">
       📄 Pobierz PDF (Zaświadczenie)
     </a>
- <a href="{% url 'namaszczenie_druk' namaszczenie.pk %}" class="btn btn-outline-secondary btn-sm">
-      🖨️Drukuj</a>
     <a href="{% url 'namaszczenie_edytuj' namaszczenie.pk %}" class="btn btn-outline-secondary btn-sm">✏️ Edytuj</a>
     <a href="{% url 'namaszczenie_usun' namaszczenie.pk %}" class="btn btn-outline-danger btn-sm">🗑️ Usuń</a>
     <a href="{% url 'namaszczenie_lista' %}" class="btn btn-outline-secondary btn-sm">⬅ Powrót</a>
