@@ -52,23 +52,28 @@
            Jeśli zmarłego brak na liście – dodaj go w nowej karcie, zapisz i odśwież tutaj.
         </div>
       </div>
+      <!--
+      <div class="col-md-2">
+        <label class="form-label small fw-semibold text-muted">{{ form.rok.label }}</label>
+        {{ form.rok }}
+        {% if form.rok.errors %}<div class="text-danger small">{{ form.rok.errors }}</div>{% endif %}
+      </div>
+      -->
+      <div class="col-md-4">
+        <label class="form-label small fw-semibold text-muted">{{ form.akt_nr.label }}</label>
+        {{ form.akt_nr }}
+        {% if form.akt_nr.errors %}<div class="text-danger small">{{ form.akt_nr.errors }}</div>{% endif %}
+        <div class="form-text small text-muted">
+           Numer aktu zgonu w danym roku, jeśli nie podasz, wypełni się automatycznie.
+        </div>
+      </div>
     </div>
 
     <hr class="my-3">
 
     {# --- WIERSZ 1: Rok, Nr Aktu, Data Zgonu --- #}
     <div class="row g-3">
-      <div class="col-md-2">
-        <label class="form-label small fw-semibold text-muted">{{ form.rok.label }}</label>
-        {{ form.rok }}
-        {% if form.rok.errors %}<div class="text-danger small">{{ form.rok.errors }}</div>{% endif %}
-      </div>
-
-      <div class="col-md-2">
-        <label class="form-label small fw-semibold text-muted">{{ form.akt_nr.label }}</label>
-        {{ form.akt_nr }}
-        {% if form.akt_nr.errors %}<div class="text-danger small">{{ form.akt_nr.errors }}</div>{% endif %}
-      </div>
+      
 
       <div class="col-md-4">
         <label class="form-label small fw-semibold text-muted">{{ form.data_zgonu.label }}</label>
@@ -76,7 +81,7 @@
             {{ form.data_zgonu }}
             <button class="btn btn-outline-secondary" type="button" 
                     onclick="ustawDzis('{{ form.data_zgonu.id_for_label }}')" title="Dzisiaj">
-              🪄
+              <i class="bi bi-magic"></i>
             </button>
         </div>
         {% if form.data_zgonu.errors %}<div class="text-danger small">{{ form.data_zgonu.errors }}</div>{% endif %}
@@ -99,13 +104,13 @@
             {{ form.data_pogrzebu }}
             <button class="btn btn-outline-secondary" type="button" 
                     onclick="ustawDzis('{{ form.data_pogrzebu.id_for_label }}')" title="Dzisiaj">
-              🪄
+              <i class="bi bi-magic"></i>
             </button>
         </div>
         {% if form.data_pogrzebu.errors %}<div class="text-danger small">{{ form.data_pogrzebu.errors }}</div>{% endif %}
       </div>
 
-      <div class="col-md-8">
+      <div class="col-md-4">
         <label class="form-label small fw-semibold text-muted">{{ form.cmentarz.label }}</label>
         {{ form.cmentarz }}
         {% if form.cmentarz.errors %}<div class="text-danger small">{{ form.cmentarz.errors }}</div>{% endif %}

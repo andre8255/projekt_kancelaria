@@ -35,9 +35,10 @@ def ustal_numer_aktu(model_class, rok, podany_nr, instance_pk=None):
         return False, "Brak roku - nie można zweryfikować numeru aktu."
 
     if podany_nr:
-        # A) RĘCZNY
-        if not str(podany_nr).isdigit():
-             return False, "Numer aktu może składać się tylko z cyfr."
+        # A) RĘCZNY: Sprawdzamy czy numer nie jest zajęty
+        # Opcjonalnie: sprawdzamy czy to cyfra (jeśli wymagasz tylko cyfr)
+        # if not str(podany_nr).isdigit():
+        #      return False, "Numer aktu może składać się tylko z cyfr."
         
         qs = model_class.objects.filter(rok=rok, akt_nr=podany_nr)
         if instance_pk:
@@ -48,7 +49,7 @@ def ustal_numer_aktu(model_class, rok, podany_nr, instance_pk=None):
         
         return True, podany_nr
     else:
-        # B) AUTOMAT
+        # B) AUTOMAT: Szukamy najwyższego numeru i dodajemy 1
         istniejace = model_class.objects.filter(rok=rok).values_list('akt_nr', flat=True)
         max_nr = 0
         for numer_str in istniejace:
@@ -60,7 +61,7 @@ def ustal_numer_aktu(model_class, rok, podany_nr, instance_pk=None):
 
 
 # =============================================================================
-# === CHRZEST
+# === CHRZEST FORMULARZ ===
 # =============================================================================
 class ChrzestForm(BootstrapFormMixin, forms.ModelForm):
     class Meta:
@@ -68,91 +69,97 @@ class ChrzestForm(BootstrapFormMixin, forms.ModelForm):
         fields = [
             "rok", "akt_nr", "ochrzczony",
             "data_urodzenia", "rok_urodzenia", "miejsce_urodzenia",
-            "data_chrztu", "rok_chrztu", "miejsce_chrztu","parafia",
+            "data_chrztu", "rok_chrztu", "miejsce_chrztu", "parafia",
             "ojciec", "ojciec_wyznanie",
             "matka", "nazwisko_matki_rodowe", "matka_wyznanie",
             "uwagi_wew", "skan_aktu",
         ]
         widgets = {
             "data_urodzenia": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
-            "data_chrztu":    forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
-            "uwagi_wew": forms.Textarea(attrs={"rows":3}),
+            "data_chrztu": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
+            "uwagi_wew": forms.Textarea(attrs={"rows": 3}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        
+        # Ukrywamy pole osoby, jeśli jest już ustawiona (np. przy dodawaniu z profilu)
         if self.initial.get("ochrzczony") and not self.instance.pk:
             self.fields["ochrzczony"].widget = forms.HiddenInput()
 
+        # Formaty dat
         self.fields["data_urodzenia"].input_formats = ["%Y-%m-%d", "%d.%m.%Y", "%d-%m-%Y"]
-        self.fields["data_chrztu"].input_formats    = ["%Y-%m-%d", "%d.%m.%Y", "%d-%m-%Y"]
+        self.fields["data_chrztu"].input_formats = ["%Y-%m-%d", "%d.%m.%Y", "%d-%m-%Y"]
         
+        # Pola "Rok" i "Nr aktu" nie są wymagane w HTML (bo automat je wypełni)
         self.fields["rok"].required = False
         self.fields["rok"].widget.attrs.pop("required", None)
+        self.fields["rok"].widget.attrs["placeholder"] = "Auto"
         
         self.fields["akt_nr"].required = False
         self.fields["akt_nr"].widget.attrs.pop("required", None)
-        self.fields["akt_nr"].widget.attrs["placeholder"] = "Puste = automat"
+        self.fields["akt_nr"].widget.attrs["placeholder"] = "Auto"
 
         if "rok_chrztu" in self.fields:
             self.fields["rok_chrztu"].required = False
-            self.fields["rok_chrztu"].widget.attrs.pop("required", None)
 
     def clean(self):
-        cleaned = super().clean()
+        cleaned_data = super().clean()
         today = timezone.localdate()
 
-        # 1. Duplikat osoby
-        osoba = cleaned.get("ochrzczony")
+        # 1. Walidacja duplikatu osoby
+        osoba = cleaned_data.get("ochrzczony")
         if osoba:
             qs = Chrzest.objects.filter(ochrzczony=osoba)
             if self.instance.pk:
                 qs = qs.exclude(pk=self.instance.pk)
             if qs.exists():
-                raise forms.ValidationError("Ta osoba ma już wpis chrztu.")
+                self.add_error("ochrzczony", "Ta osoba ma już wpis chrztu.")
 
-        # 2. Rok i Data
-        data_chrztu = cleaned.get("data_chrztu")
-        rok_ksiegi = cleaned.get("rok")
-        
-        # --- WALIDACJA SPÓJNOŚCI ROKU ---
-        if rok_ksiegi and data_chrztu:
-            # Sprawdzamy, czy rok księgi zgadza się z rokiem z daty chrztu
-            if int(rok_ksiegi) != data_chrztu.year:
-                self.add_error(
-                    "rok", 
-                    f"Rok księgi ({rok_ksiegi}) musi być zgodny z rokiem daty chrztu ({data_chrztu.year})."
-                )
+        # 2. Automatyczne ustalanie ROKU KSIĘGI
+        rok_ksiegi = cleaned_data.get("rok")
+        data_chrztu = cleaned_data.get("data_chrztu")
+        rok_chrztu = cleaned_data.get("rok_chrztu")
 
-        # Auto-uzupełnianie roku (jeśli brak wpisu)
+        # Zmienna pomocnicza na ostateczny rok
         finalny_rok = rok_ksiegi
-        if not finalny_rok and data_chrztu:
-            finalny_rok = data_chrztu.year
-            cleaned["rok"] = finalny_rok
-        
-        # 3. Numeracja (Unikalność w roku + Automat)
-        akt_nr = cleaned.get("akt_nr")
-        
-        # Sprawdzamy numerację tylko jeśli rok jest poprawny (lub pusty, bo wtedy automat zadziała)
-        if finalny_rok and not self.has_error('rok'):
-            sukces, wynik = ustal_numer_aktu(Chrzest, finalny_rok, akt_nr, self.instance.pk)
-            if sukces:
-                cleaned["akt_nr"] = wynik
+
+        if not finalny_rok:
+            if data_chrztu:
+                finalny_rok = data_chrztu.year
+                cleaned_data["rok"] = finalny_rok
+            elif rok_chrztu:
+                finalny_rok = rok_chrztu
+                cleaned_data["rok"] = finalny_rok
             else:
-                self.add_error("akt_nr", wynik)
+                self.add_error("rok", "Musisz podać Datę chrztu, Rok chrztu lub wpisać Rok księgi ręcznie.")
+                # Przerywamy, bo bez roku nie ustalimy numeru
+                return cleaned_data
+
+        # 3. Walidacja / Automat NUMERU AKTU
+        # Korzystamy z funkcji pomocniczej zdefiniowanej wyżej
+        akt_nr = cleaned_data.get("akt_nr")
+        
+        # Wywołanie: (Model, rok, nr_reczny, id_do_wykluczenia)
+        sukces, wynik = ustal_numer_aktu(Chrzest, finalny_rok, akt_nr, self.instance.pk)
+        
+        if sukces:
+            # Jeśli sukces, 'wynik' to poprawny numer (ręczny lub automatyczny)
+            cleaned_data["akt_nr"] = wynik
         else:
-            if not akt_nr:
-                 self.add_error("rok", "Podaj datę chrztu lub rok, aby nadać numer.")
+            # Jeśli błąd, 'wynik' to treść komunikatu błędu
+            self.add_error("akt_nr", wynik)
 
         # 4. Walidacja dat
-        data_urodzenia = cleaned.get("data_urodzenia")
+        data_urodzenia = cleaned_data.get("data_urodzenia")
         if data_chrztu:
             if data_chrztu > today:
                 self.add_error("data_chrztu", "Data chrztu nie może być z przyszłości.")
+            
             if data_urodzenia and data_chrztu < data_urodzenia:
                 self.add_error("data_chrztu", "Data chrztu nie może być wcześniejsza niż data urodzenia.")
-        
-        return cleaned
+
+        return cleaned_data
 
 
 # =============================================================================
@@ -216,7 +223,7 @@ class BierzmowanieForm(BootstrapFormMixin, forms.ModelForm):
         widgets = {
             "osoba": forms.Select(attrs={"class": "form-control"}),
             "rok": forms.TextInput(attrs={"class": "form-control", "placeholder": "Rok"}),
-            "akt_nr": forms.TextInput(attrs={"class": "form-control", "placeholder": "Puste = automat"}),
+            "akt_nr": forms.TextInput(attrs={"class": "form-control", "placeholder": "Auto"}),
             "data_bierzmowania": forms.DateInput(attrs={"class": "form-control", "type": "date"}, format="%Y-%m-%d"),
             "uwagi_wew": forms.Textarea(attrs={"class": "form-control", "rows": 2}),
         }
@@ -303,7 +310,7 @@ class MalzenstwoForm(BootstrapFormMixin, forms.ModelForm):
         fields = ["malzonek_a", "malzonek_b", "rok", "akt_nr", "data_slubu", "parafia", "parafia_opis_reczny", "swiadek_urzedowy", "swiadek_urzedowy_opis_reczny", "swiadek_a", "swiadek_b", "uwagi_wew", "skan_aktu"]
         widgets = {
             "rok": forms.TextInput(attrs={"placeholder": "Rok"}),
-            "akt_nr": forms.TextInput(attrs={"placeholder": "Puste = automat"}),
+            "akt_nr": forms.TextInput(attrs={"placeholder": "Auto"}),
             "data_slubu": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
             "uwagi_wew": forms.Textarea(attrs={"rows": 3}),
         }
@@ -350,6 +357,31 @@ class MalzenstwoForm(BootstrapFormMixin, forms.ModelForm):
 # === NAMASZCZENIE CHORYCH
 # =============================================================================
 class NamaszczenieChorychForm(BootstrapFormMixin, forms.ModelForm):
+    MIEJSCE_CHOICES = [
+        ("Dom chorego", "Dom chorego"),
+        ("Szpital", "Szpital"),
+        ("Kościół", "Kościół"),
+        ("Inne", "Inne"),
+    ]
+
+    miejsce = forms.ChoiceField(
+    choices=MIEJSCE_CHOICES,
+    label="Miejsce posługi",
+    widget=forms.Select(attrs={"class": "form-select"}),
+    )
+
+    class Meta:
+        model = NamaszczenieChorych
+        fields = [
+            "osoba",
+            "data",
+            "miejsce",
+            "szafarz",
+            "spowiedz",
+            "komunia",
+            "namaszczenie",
+            "uwagi_wew",
+        ]
     class Meta:
         model = NamaszczenieChorych
         fields = ["osoba", "data", "miejsce", "szafarz", "spowiedz", "komunia", "namaszczenie", "uwagi_wew"]
@@ -392,7 +424,7 @@ class ZgonForm(BootstrapFormMixin, forms.ModelForm):
             "data_zgonu": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
             "data_pogrzebu": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
             "uwagi_wew": forms.Textarea(attrs={"rows":3}),
-            "akt_nr": forms.TextInput(attrs={"placeholder": "Puste = automat"}),
+            "akt_nr": forms.TextInput(attrs={"placeholder": "Auto"}),
         }
 
     def __init__(self, *args, **kwargs):

@@ -72,17 +72,27 @@
 </div>
 
     {# --- WIERSZ: data / miejsce / szafarz --- #}
-    <div class="row g-3">
+<div class="row g-3">
 
-      <div class="col-md-4">
-        <label class="form-label small fw-semibold text-muted">
-          {{ form.data.label }}
-        </label>
-        {{ form.data }}
-        {% if form.data.errors %}
-          <div class="text-danger small">{{ form.data.errors }}</div>
-        {% endif %}
-      </div>
+  <div class="col-md-4">
+  <label class="form-label small fw-semibold text-muted mb-1">
+    {{ form.data.label }}
+  </label>
+
+  <div class="input-group">
+    {{ form.data }}
+    <button type="button"
+            class="btn btn-outline-secondary"
+            onclick="ustawDzis('id_data')"
+            title="Ustaw dzisiejszą datę">
+      <i class="bi bi-magic"></i>
+    </button>
+  </div>
+
+  {% if form.data.errors %}
+    <div class="text-danger small">{{ form.data.errors }}</div>
+  {% endif %}
+</div>
 
       <div class="col-md-4">
         <label class="form-label small fw-semibold text-muted">
@@ -116,8 +126,8 @@
   {% endif %}
 
   <div class="form-text small text-muted">
-    Jeśli szafarza nie ma na liście, dodaj go w Słownikach → Duchowni.<br>
-    Możesz też kliknąć „+ Nowy duchowny”, zapisać, wrócić tutaj i odświeżyć.
+    Jeśli szafarza nie ma na liście, dodaj go w Słownikach → Duchowni lub
+    kliknij „+ Nowy duchowny”.
   </div>
 </div>
     </div>

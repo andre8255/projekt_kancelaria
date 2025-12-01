@@ -13,7 +13,7 @@ class Chrzest(models.Model):
     # Identyfikacja w księdze
     rok = models.PositiveIntegerField("Rok", help_text="Rok księgi chrztów (np. 2025)")
     akt_nr = models.CharField(
-        "Nr aktu", max_length=20, help_text="Numer aktu chrztu w danym roku"
+        "Nr aktu", max_length=20, help_text="Numer aktu chrztu w danym roku, jeśli nie podasz, wypełni się automatycznie."
     )
 
     # Osoba
@@ -192,7 +192,7 @@ class Bierzmowanie(models.Model):
         "Nr aktu bierzmowania",
         max_length=20,
         blank=True,
-        help_text="Numer aktu w księdze bierzmowania",
+        help_text="Numer aktu chrztu w danym roku, jeśli nie podasz, wypełni się automatycznie."
     )
 
     # Dane sakramentu
@@ -302,7 +302,10 @@ class Malzenstwo(models.Model):
         blank=True,
         help_text="Numer aktu w księdze małżeństw.",
     )
-    data_slubu = models.DateField("Data ślubu (pełna)", null=True, blank=True)
+    data_slubu = models.DateField("Data ślubu (pełna)", 
+        null=True,
+        blank=True,
+        help_text="Pełna data (dzień-miesiąc-rok)",)
 
     # Miejsce i świadkowie
     parafia = models.ForeignKey(
@@ -372,9 +375,18 @@ class Malzenstwo(models.Model):
 # =============================================================================
 
 class NamaszczenieChorych(models.Model):
-    """
-    Posługa chorym (Spowiedź, Komunia, Namaszczenie)
-    """
+    MIEJSCE_DOM = "DOM"
+    MIEJSCE_SZPITAL = "SZPITAL"
+    MIEJSCE_KOSCIOL = "KOSCIOL"
+    MIEJSCE_INNE = "INNE"
+
+    MIEJSCE_CHOICES = [
+        (MIEJSCE_DOM, "Dom chorego"),
+        (MIEJSCE_SZPITAL, "Szpital"),
+        (MIEJSCE_KOSCIOL, "Kościół"),
+        (MIEJSCE_INNE, "Inne"),
+    ]
+
     osoba = models.ForeignKey(
         Osoba,
         on_delete=models.CASCADE,

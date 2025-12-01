@@ -70,11 +70,12 @@
         Jeśli osoby nie ma na liście, kliknij „Nowa osoba”, dodaj ją w nowej karcie,
         zapisz, potem wróć tutaj.
       </div>
+
+  
+{# ---ROK / AKT /#}
     </div>
-</div>
-    {# ================== ROK / AKT / DATA ================== #}
-    <div class="row g-3 mb-3">
-      <div class="col-md-4">
+<!--
+    <div class="col-md-4">
         <label class="form-label small fw-semibold text-muted">
           {{ form.rok.label }}
         </label>
@@ -83,7 +84,7 @@
           <div class="text-danger small">{{ form.rok.errors }}</div>
         {% endif %}
       </div>
-
+-->
       <div class="col-md-4">
         <label class="form-label small fw-semibold text-muted">
           {{ form.akt_nr.label }}
@@ -92,7 +93,16 @@
         {% if form.akt_nr.errors %}
           <div class="text-danger small">{{ form.akt_nr.errors }}</div>
         {% endif %}
+        <div class="form-text small">
+          Numer aktu bierzmowania w danym roku, jeśli nie podasz, wypełni się automatycznie.
+        </div>
       </div>
+
+</div>
+    {# ==================  DATA / MIEJSCE================== #}
+    <div class="row g-3 mb-3">
+
+      
 
       <div class="col-md-4">
         <label class="form-label small fw-semibold text-muted">
@@ -106,7 +116,22 @@
           <div class="form-text small">{{ form.data_bierzmowania.help_text }}</div>
         {% endif %}
       </div>
+   
+
+
+    <div class="col-md-4">
+      <label class="form-label small fw-semibold text-muted">
+        {{ form.miejsce_bierzmowania.label }}
+      </label>
+      {{ form.miejsce_bierzmowania }}
+      {% if form.miejsce_bierzmowania.errors %}
+        <div class="text-danger small">{{ form.miejsce_bierzmowania.errors }}</div>
+      {% endif %}
+      <div class="form-text small text-muted">
+        Miejsce bierzmowania.
+      </div>
     </div>
+  </div>
 
     <div class="row g-3 mb-3">
     {# ================== IMIĘ Z BIERZMOWANIA ================== #}
@@ -137,19 +162,7 @@
       </div>
     </div>
 
-  <div class="col-md-4">
-      <label class="form-label small fw-semibold text-muted">
-        {{ form.miejsce_bierzmowania.label }}
-      </label>
-      {{ form.miejsce_bierzmowania }}
-      {% if form.miejsce_bierzmowania.errors %}
-        <div class="text-danger small">{{ form.miejsce_bierzmowania.errors }}</div>
-      {% endif %}
-      <div class="form-text small text-muted">
-        Miejsce bierzmowania.
-      </div>
-    </div>
-  </div>
+  
 
 
 

@@ -77,24 +77,28 @@
     </div>
 
     {# --- ROK + NR AKTU --- #}
+    <!--
     <div class="col-md-2">
         <label class="form-label small fw-semibold text-muted">{{ form.rok.label }}</label>
         {{ form.rok }}
         {% if form.rok.errors %}<div class="text-danger small">{{ form.rok.errors }}</div>{% endif %}
         {% if form.rok.help_text %}<div class="form-text small">{{ form.rok.help_text }}</div>{% endif %}
-    </div>
-    <div class="col-md-2">
+    </div> -->
+    <div class="col-md-4">
         <label class="form-label small fw-semibold text-muted">{{ form.akt_nr.label }}</label>
         {{ form.akt_nr }}
         {% if form.akt_nr.errors %}<div class="text-danger small">{{ form.akt_nr.errors }}</div>{% endif %}
         {% if form.akt_nr.help_text %}<div class="form-text small">{{ form.akt_nr.help_text }}</div>{% endif %}
+    
+      </div>
     </div>
-    </div>
-
+<!--
     <hr class="my-3">
 
     {# --- DANE O URODZENIU --- #}
     <div class="row g-3 mb-3">
+      
+      {# 1. Data urodzenia (Już było, bez zmian) #}
       <div class="col-md-4">
         <label class="form-label small fw-semibold text-muted">{{ form.data_urodzenia.label }}</label>
         {% if osoba and osoba.data_urodzenia %}
@@ -109,15 +113,26 @@
         {% endif %}
       </div>
 
+      {# 2. Miejsce urodzenia (ZMIANA TUTAJ) #}
       <div class="col-md-4">
         <label class="form-label small fw-semibold text-muted">{{ form.miejsce_urodzenia.label }}</label>
-        {{ form.miejsce_urodzenia }}
+        
+        {# --- NOWA LOGIKA: Sprawdzamy czy osoba ma wpisane miejsce urodzenia --- #}
+        {% if osoba and osoba.miejsce_urodzenia %}
+          <input class="form-control" value="{{ osoba.miejsce_urodzenia }}" readonly>
+          <input type="hidden" name="{{ form.miejsce_urodzenia.html_name }}" value="{{ osoba.miejsce_urodzenia }}">
+          <div class="form-text small">Pobrano z danych osoby.</div>
+        {% else %}
+          {{ form.miejsce_urodzenia }}
+        {% endif %}
+        {# ---------------------------------------------------------------------- #}
+
         {% if form.miejsce_urodzenia.errors %}
           <div class="text-danger small">{{ form.miejsce_urodzenia.errors }}</div>
         {% endif %}
       </div>
     </div>
-
+-->
     <hr class="my-3">
 
     {# --- DANE O CHRZCIE --- #}
@@ -154,10 +169,13 @@
 
     {% if form.rok_chrztu %}
       <div class="row g-3 mb-3">
-        <div class="col-md-2">
+        <div class="col-md-4">
           <label class="form-label small fw-semibold text-muted">{{ form.rok_chrztu.label }}</label>
           {{ form.rok_chrztu }}
           {% if form.rok_chrztu.errors %}<div class="text-danger small">{{ form.rok_chrztu.errors }}</div>{% endif %}
+        </div>
+        <div class="form-text small text-muted">
+           Wpisz rok, jeśli nie znasz pełnej daty chrztu.
         </div>
       </div>
     {% endif %}

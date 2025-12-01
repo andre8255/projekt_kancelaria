@@ -127,6 +127,7 @@
 
     {# --- ROK / NR AKTU / DATA ŚLUBU w jednym rzędzie --- #}
     <div class="row g-3">
+      <!--
       <div class="col-md-4">
         <label class="form-label small fw-semibold text-muted">{{ form.rok.label }}</label>
         {{ form.rok }}
@@ -134,6 +135,16 @@
           <div class="text-danger small">{{ form.rok.errors }}</div>
         {% endif %}
       </div>
+-->
+
+    <div class="col-md-4">
+        <label class="form-label small fw-semibold text-muted">{{ form.data_slubu.label }}</label>
+        {{ form.data_slubu }}
+        {% if form.data_slubu.errors %}
+          <div class="text-danger small">{{ form.data_slubu.errors }}</div>
+        {% endif %}
+      </div>
+  
 
       <div class="col-md-4">
         <label class="form-label small fw-semibold text-muted">{{ form.akt_nr.label }}</label>
@@ -141,16 +152,10 @@
         {% if form.akt_nr.errors %}
           <div class="text-danger small">{{ form.akt_nr.errors }}</div>
         {% endif %}
+        <div class="form-text small text-muted">
+           Numer aktu ślubu w danym roku, jeśli nie podasz, wypełni się automatycznie.
+        </div>
       </div>
-
-      <div class="col-md-4">
-        <label class="form-label small fw-semibold text-muted">{{ form.data_slubu.label }}</label>
-        {{ form.data_slubu }}
-        {% if form.data_slubu.errors %}
-          <div class="text-danger small">{{ form.data_slubu.errors }}</div>
-        {% endif %}
-      </div>
-    </div>
 
     <hr class="my-3">
 <div class="row g-3 mb-3">
