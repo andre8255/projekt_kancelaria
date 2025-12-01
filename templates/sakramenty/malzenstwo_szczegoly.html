@@ -10,7 +10,14 @@
     </a>
     <a href="{% url 'malzenstwo_edytuj' malzenstwo.pk %}" class="btn btn-outline-secondary btn-sm">✏️ Edytuj</a>
     <a href="{% url 'malzenstwo_usun' malzenstwo.pk %}" class="btn btn-outline-danger btn-sm">🗑️ Usuń</a>
-    <a href="{% url 'malzenstwo_lista' %}" class="btn btn-outline-secondary btn-sm">⬅ Powrót</a>
+    {# --- INTELIGENTNY POWRÓT --- #}
+    {# 1. Definiujemy adres awaryjny (domyślna lista chrztów) #}
+    {% url 'malzenstwo_lista' as lista_url %}
+    
+    {# 2. Wstawiamy referer (poprzednią stronę) lub adres awaryjny #}
+    <a href="{{ request.META.HTTP_REFERER|default:lista_url }}" class="btn btn-outline-secondary btn-sm">
+      ⬅ Powrót
+    </a>
   </div>
 </div>
 
@@ -18,8 +25,7 @@
   <div class="card-body">
     
     {# --- DANE OGÓLNE AKTU --- #}
-    <div class="row mb-4">
-      <div class="col-12">
+    <div class="row mb-4"> 
         <h6 class="fw-bold text-muted text-uppercase small mb-3">Dane aktu</h6>
         <p class="mb-1">
             <strong>Rok / Nr aktu:</strong> {{ malzenstwo.rok }}/{{ malzenstwo.akt_nr }}

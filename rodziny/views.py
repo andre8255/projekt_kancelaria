@@ -373,18 +373,15 @@ class DodajCzlonkaView(RolaWymaganaMixin, FormView):
         self.rodzina = get_object_or_404(Rodzina, pk=kwargs["rodzina_pk"])
         return super().dispatch(request, *args, **kwargs)
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["rodzina"] = self.rodzina
+        return kwargs
+
     def form_valid(self, form):
         czlonek = form.save(commit=False)
         czlonek.rodzina = self.rodzina
         czlonek.save()
-
-        zapisz_log(
-            self.request,
-            "DODANIE_CZLONKA_RODZINY",
-            czlonek,
-            opis=f"Przypisano osobę {czlonek.osoba} do rodziny {self.rodzina.nazwa}"
-        )
-
         messages.success(self.request, "Osoba została przypisana do rodziny.")
         return redirect(self.rodzina.get_absolute_url())
 
@@ -392,6 +389,8 @@ class DodajCzlonkaView(RolaWymaganaMixin, FormView):
         ctx = super().get_context_data(**kwargs)
         ctx["rodzina"] = self.rodzina
         return ctx
+
+
 
     
 class UsunCzlonkaZRodzinyView(RolaWymaganaMixin, View):

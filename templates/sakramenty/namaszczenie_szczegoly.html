@@ -14,7 +14,13 @@
     </a>
     <a href="{% url 'namaszczenie_edytuj' namaszczenie.pk %}" class="btn btn-outline-secondary btn-sm">✏️ Edytuj</a>
     <a href="{% url 'namaszczenie_usun' namaszczenie.pk %}" class="btn btn-outline-danger btn-sm">🗑️ Usuń</a>
-    <a href="{% url 'namaszczenie_lista' %}" class="btn btn-outline-secondary btn-sm">⬅ Powrót</a>
+    {# --- INTELIGENTNY POWRÓT --- #}
+    {# 1. Definiujemy adres awaryjny (domyślna lista chrztów) #}
+    {% url 'namaszczenie_lista' as lista_url %}
+    
+    {# 2. Wstawiamy referer (poprzednią stronę) lub adres awaryjny #}
+    <a href="{{ request.META.HTTP_REFERER|default:lista_url }}" class="btn btn-outline-secondary btn-sm">
+      ⬅ Powrót</a>
   </div>
 </div>
 

@@ -1,5 +1,7 @@
 from django.db import models
+from django.utils import timezone
 from django.contrib.auth.models import User
+from datetime import time
 
 class Rola(models.TextChoices):
     ADMIN = "ADMIN", "Administrator"
@@ -52,3 +54,70 @@ class LogAkcji(models.Model):
     def __str__(self):
         return f"[{self.kiedy}] {self.akcja} ({self.model}#{self.obiekt_id})"
 
+class BackupUstawienia(models.Model):
+    CZESTOTLIWOSC_NEVER = "never"
+    CZESTOTLIWOSC_DAILY = "daily"
+    CZESTOTLIWOSC_WEEKLY = "weekly"
+    CZESTOTLIWOSC_MONTHLY = "monthly"
+
+    CZESTOTLIWOSC_CHOICES = [
+        (CZESTOTLIWOSC_NEVER, "Tylko ręcznie"),
+        (CZESTOTLIWOSC_DAILY, "Codziennie"),
+        (CZESTOTLIWOSC_WEEKLY, "Raz w tygodniu"),
+        (CZESTOTLIWOSC_MONTHLY, "Raz w miesiącu"),
+    ]
+
+    DNI_TYGODNIA_CHOICES = [
+        ("mon", "Poniedziałek"),
+        ("tue", "Wtorek"),
+        ("wed", "Środa"),
+        ("thu", "Czwartek"),
+        ("fri", "Piątek"),
+        ("sat", "Sobota"),
+        ("sun", "Niedziela"),
+    ]
+
+    czestotliwosc = models.CharField(
+        "Częstotliwość backupu",
+        max_length=20,
+        choices=CZESTOTLIWOSC_CHOICES,
+        default=CZESTOTLIWOSC_DAILY,
+    )
+
+    dzien_tygodnia = models.CharField(
+        "Dzień tygodnia (dla backupu tygodniowego)",
+        max_length=3,
+        choices=DNI_TYGODNIA_CHOICES,
+        default="mon",
+        help_text="Używane, gdy częstotliwość ustawiona jest na 'Raz w tygodniu'."
+    )
+
+    godzina = models.TimeField(
+        "Godzina uruchamiania",
+        default=time(2, 0),  # 02:00
+        help_text="Godzina, o której ma być wykonywany backup."
+    )
+
+    ostatni_backup = models.DateTimeField(
+        "Ostatnio wykonany backup",
+        null=True,
+        blank=True,
+        help_text="Uzupełniane automatycznie przez mechanizm backupu."
+    )
+
+    włączony = models.BooleanField(
+        "Włącz automatyczne backupy",
+        default=True,
+    )
+
+    class Meta:
+        verbose_name = "Ustawienia backupu"
+        verbose_name_plural = "Ustawienia backupu"
+
+    def __str__(self):
+        return "Ustawienia backupu"
+
+    @classmethod
+    def get_solo(cls):
+        obj, created = cls.objects.get_or_create(pk=1)
+        return obj

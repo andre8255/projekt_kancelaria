@@ -1,0 +1,65 @@
+{% extends "base_panel.html" %}
+
+{% block content %}
+<div class="container py-4">
+  <h3 class="mb-3">
+    <i class="bi bi-hdd-network"></i> Harmonogram backupu bazy danych
+  </h3>
+
+  <p class="text-muted small mb-4">
+    Ustaw, jak często system ma wykonywać automatyczną kopię zapasową bazy danych.
+    Sama realizacja backupu odbywa się przez zewnętrzny harmonogram (np. CRON / Harmonogram zadań),
+    który odczytuje te ustawienia z bazy.
+  </p>
+
+  <form method="post" class="card p-3 shadow-sm border-0">
+    {% csrf_token %}
+    <div class="mb-3 form-check">
+      {{ form.włączony }}
+      <label class="form-check-label" for="{{ form.włączony.id_for_label }}">
+        {{ form.włączony.label }}
+      </label>
+      {% if form.włączony.help_text %}
+        <div class="form-text small">{{ form.włączony.help_text }}</div>
+      {% endif %}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label" for="{{ form.czestotliwosc.id_for_label }}">
+        {{ form.czestotliwosc.label }}
+      </label>
+      {{ form.czestotliwosc }}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label" for="{{ form.dzien_tygodnia.id_for_label }}">
+        {{ form.dzien_tygodnia.label }}
+      </label>
+      {{ form.dzien_tygodnia }}
+      <div class="form-text small">
+        Pole używane, gdy częstotliwość to <strong>„Raz w tygodniu”</strong>.
+      </div>
+    </div>
+
+
+    <div class="mb-3">
+      <label class="form-label" for="{{ form.godzina.id_for_label }}">
+        {{ form.godzina.label }}
+      </label>
+      {{ form.godzina }}
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+      <i class="bi bi-save"></i> Zapisz ustawienia
+    </button>
+
+
+    <button type="submit"
+            name="backup_teraz"
+            value="1"
+            class="btn btn-outline-secondary">
+      <i class="bi bi-hdd-stack"></i> Wykonaj backup teraz
+    </button>
+  </form>
+</div>
+{% endblock %}

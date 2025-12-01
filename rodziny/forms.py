@@ -91,6 +91,33 @@ class DodajCzlonkaForm(BootstrapFormMixin, forms.ModelForm):
             "uwagi": forms.Textarea(attrs={"rows": 2}),
         }
 
+    def __init__(self, *args, **kwargs):
+        # rodzina podana z widoku (patrz: get_form_kwargs w DodajCzlonkaView)
+        self.rodzina = kwargs.pop("rodzina", None)
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        osoba = cleaned_data.get("osoba")
+
+        # Jeśli mamy rodzinę i osobę – sprawdzamy duplikat
+        if self.rodzina and osoba:
+            qs = CzlonkostwoRodziny.objects.filter(
+                rodzina=self.rodzina,
+                osoba=osoba,
+            )
+            # jeśli formularz byłby używany też do edycji, pomijamy bieżący rekord
+            if self.instance.pk:
+                qs = qs.exclude(pk=self.instance.pk)
+
+            if qs.exists():
+                # błąd „globalny” formularza – wyświetli się w {{ form.non_field_errors }}
+                raise forms.ValidationError(
+                    "Ta osoba jest już przypisana do tej rodziny."
+                )
+
+        return cleaned_data
+
 class WizytaForm(BootstrapFormMixin, forms.ModelForm):
     class Meta:
         model = WizytaDuszpasterska

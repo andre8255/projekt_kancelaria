@@ -8,11 +8,7 @@
   </div>
 </div>
 
-{# --- ZMIANA NA WERSJĘ LOKALNĄ (OFFLINE) --- #}
-
- <link href="{% static 'vendor/fullcalendar/index.global.min.css' %}" rel="stylesheet"> 
-
-{# Główny plik JS FullCalendar #}
+<link href="{% static 'vendor/fullcalendar/index.global.min.css' %}" rel="stylesheet">
 <script src="{% static 'vendor/fullcalendar/index.global.min.js' %}"></script>
 
 <script>
@@ -20,54 +16,56 @@ document.addEventListener("DOMContentLoaded", function() {
   const el = document.getElementById("kalendarz");
 
   const kalendarz = new FullCalendar.Calendar(el, {
-    // Motyw Bootstrap 5
     themeSystem: 'bootstrap5',
-
-    // Widok responsywny
     initialView: window.innerWidth < 768 ? 'listWeek' : 'timeGridWeek',
-
-    // Własne przyciski
-    customButtons: {
-      dodajMsze: {
-        text: '+ Dodaj mszę',
-        click: function() {
-          window.location.href = "{% url 'msza_nowa' %}";
-        }
-      },
-      listaMszy: {
-        text: 'Lista mszy',
-        click: function() {
-          window.location.href = "{% url 'msza_lista' %}";
-        }
-      }
+    locale: 'pl',
+    nowIndicator: true,
+    
+    // Formatowanie godziny (np. 07:00)
+    eventTimeFormat: {
+      hour: '2-digit',
+      minute: '2-digit',
+      meridiem: false,
+      hour12: false
     },
 
-    // Pasek narzędzi
+    // Nagłówek i przyciski
     headerToolbar: {
       left: 'prev,next today',
       center: 'title',
-      right: 'dodajMsze,listaMszy dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+      right: 'dodajMsze,listaMszy dayGridMonth,timeGridWeek,timeGridDay'
     },
-    
+    customButtons: {
+      dodajMsze: {
+        text: '+ Dodaj mszę',
+        click: function() { window.location.href = "{% url 'msza_nowa' %}"; }
+      },
+      listaMszy: {
+        text: 'Lista',
+        click: function() { window.location.href = "{% url 'msza_lista' %}"; }
+      }
+    },
     buttonText: {
-      today: 'Dziś', month: 'Miesiąc', week:  'Tydzień', day: 'Dzień', list: 'Lista'
+      today: 'Dziś', month: 'Miesiąc', week: 'Tydzień', day: 'Dzień', list: 'Lista'
     },
-    
-    height: 'auto', 
-    
-    // --- Reszta Twoich ustawień ---
-    slotMinTime: "06:00:00",
-    slotMaxTime: "22:00:00",
-    allDaySlot: false,
-    firstDay: 1,
-    locale: 'pl',
-    nowIndicator: true,
 
+    // Pobieranie danych
     events: {
       url: "{% url 'msza_kalendarz_dane' %}",
       method: "GET",
     },
 
+    // --- NOWOŚĆ: Kliknięcie w puste miejsce (dodawanie mszy) ---
+    dateClick: function(info) {
+      // Używamy encodeURIComponent, aby znak '+' w dacie (strefa czasowa) 
+      // został poprawnie przekazany w URL (jako %2B, a nie spacja).
+      var url = "{% url 'msza_nowa' %}" + "?data=" + encodeURIComponent(info.dateStr);
+      
+      window.location.href = url;
+    },
+    // -----------------------------------------------------------
+
+    // Kliknięcie w istniejącą mszę (edycja/szczegóły)
     eventClick: function(info) {
       info.jsEvent.preventDefault();
       if (info.event.url) {
@@ -75,38 +73,21 @@ document.addEventListener("DOMContentLoaded", function() {
       }
     },
 
+    // Kłódki (zajęte/wolne)
     eventDidMount: function(info) {
       const titleEl = info.el.querySelector('.fc-event-title');
       if (!titleEl) return; 
-
       if (info.event.extendedProps.isBusy) { 
-         titleEl.innerHTML = 
-           '<i class="bi bi-lock-fill me-1" style="font-size: .8em;"></i>' + info.event.title;
+         titleEl.innerHTML = '<i class="bi bi-lock-fill me-1"></i>' + info.event.title;
       } else {
-         titleEl.innerHTML = 
-           '<i class="bi bi-unlock-fill me-1" style="font-size: .8em;"></i>' + info.event.title;
+         titleEl.innerHTML = '<i class="bi bi-unlock-fill me-1"></i>' + info.event.title;
       }
     },
-    
-    // --- ⬇️ NOWO DODANY BLOK KODU ⬇️ ---
-    dateClick: function(info) {
-      // info.dateStr zawiera datę i godzinę klikniętego slotu
-      // np. "2025-11-15T10:30:00+01:00"
-      
-      // Budujemy URL do formularza nowej mszy, dodając datę jako parametr GET
-      // np. /.../msza/nowa/?data=2025-11-15T10:30:00+01:00
-      var url = "{% url 'msza_nowa' %}" + "?data=" + info.dateStr;
-      
-      // Przekierowujemy użytkownika
-      window.location.href = url;
-    }
-    // --- ⬆️ KONIEC NOWEGO BLOKU ⬆️ ---
-
   });
   
   kalendarz.render();
 
-  // Kod do stylowania przycisku (bez zmian)
+  // Stylowanie przycisków (opcjonalne)
   const dodajBtn = el.querySelector('.fc-dodajMsze-button');
   if (dodajBtn) {
     dodajBtn.classList.remove('btn-secondary');

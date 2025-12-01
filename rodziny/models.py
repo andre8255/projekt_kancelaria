@@ -89,6 +89,7 @@ class CzlonkostwoRodziny(models.Model):
         verbose_name = "Członek rodziny"
         verbose_name_plural = "Członkowie rodziny"
         ordering = ["rola", "osoba__nazwisko", "osoba__imie_pierwsze"]
+        unique_together = ("rodzina", "osoba")
 
     def __str__(self):
         return f"{self.osoba} jako {self.get_rola_display()} ({self.get_status_display()})"

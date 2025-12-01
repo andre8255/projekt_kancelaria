@@ -15,7 +15,11 @@ from django.views.generic import ListView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from parafia.utils_pdf import render_to_pdf
 from .models import LogAkcji
+from django.views.generic import UpdateView
 
+from .utils_backup import wykonaj_backup_bazy
+from .models import BackupUstawienia
+from .forms import BackupUstawieniaForm
 
 
 
@@ -89,3 +93,40 @@ class LogAkcjiPDFView(LogAkcjiListaView):
         context["today"] = timezone.localdate()
         filename = f"Historia_operacji_{timezone.localdate()}.pdf"
         return render_to_pdf("konta/log_akcji_pdf.html", context, filename)
+
+class BackupUstawieniaView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = BackupUstawienia
+    form_class = BackupUstawieniaForm
+    template_name = "konta/backup_ustawienia.html"
+    success_url = reverse_lazy("konta:backup_ustawienia")
+
+    def get_object(self, queryset=None):
+        return BackupUstawienia.get_solo()
+
+    def test_func(self):
+        u = self.request.user
+        if not u.is_authenticated:
+            return False
+        return u.is_superuser  # ewentualnie rozbuduj o role
+
+    def form_valid(self, form):
+        messages.success(self.request, "Zapisano ustawienia harmonogramu backupu.")
+        return super().form_valid(form)
+
+    def post(self, request, *args, **kwargs):
+        # Jeśli kliknięto przycisk "Wykonaj backup teraz"
+        if "backup_teraz" in request.POST:
+            try:
+                sciezka = wykonaj_backup_bazy(request, powod="RĘCZNY")
+                nazwa = os.path.basename(sciezka)
+                messages.success(
+                    request,
+                    f"Wykonano ręczną kopię bazy: {nazwa}"
+                )
+            except Exception as e:
+                messages.error(request, f"Nie udało się wykonać backupu: {e}")
+            return redirect(self.success_url)
+
+        # Standardowe zapisanie formularza (zmiana ustawień)
+        return super().post(request, *args, **kwargs)
+

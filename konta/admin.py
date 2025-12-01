@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
 from .models import Profil
-from .models import LogAkcji
+from .models import LogAkcji, BackupUstawienia
 
 # Usuń domyślną rejestrację User, jeśli już istnieje
 admin.site.unregister(User)
@@ -40,3 +40,11 @@ class LogAkcjiAdmin(admin.ModelAdmin):
     def has_change_permission(self, request, obj=None):
         # nie edytujemy logów
         return False
+
+@admin.register(BackupUstawienia)
+class BackupUstawieniaAdmin(admin.ModelAdmin):
+    list_display = ("czestotliwosc", "godzina", "włączony", "ostatni_backup")
+
+    def has_add_permission(self, request):
+        # tylko jeden rekord
+        return not BackupUstawienia.objects.exists()

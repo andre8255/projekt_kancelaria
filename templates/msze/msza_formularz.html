@@ -113,7 +113,15 @@
   <div class="card-footer bg-white border-top-0 pt-0 pb-3">
     <div class="d-flex gap-2">
       <button class="btn btn-primary btn-sm">Zapisz</button>
-      <a href="{% url 'msza_lista' %}" class="btn btn-outline-secondary btn-sm">Anuluj</a>
+
+
+      {% if request.GET.data %}
+         {# Jeśli w adresie jest ?data (czyli kliknięto w kalendarz), wracamy do kalendarza #}
+         <a href="{% url 'msza_kalendarz' %}" class="btn btn-outline-secondary btn-sm">Anuluj</a>
+      {% else %}
+         {# W każdym innym przypadku wracamy do listy #}
+         <a href="{% url 'msza_lista' %}" class="btn btn-outline-secondary btn-sm">Anuluj</a>
+      {% endif %}
     </div>
   </div>
 </form>

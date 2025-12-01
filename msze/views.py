@@ -335,16 +335,13 @@ def kalendarz_mszy_dane(request):
             tresci = list(msza.intencje.values_list("tresc", flat=True))
             tytul = " • ".join(tresci)
         else:
-            # Jeśli to specjalny typ (np. Ślub), pokaż go w tytule zamiast "wolna"
-            if msza.typ != 'POWSZEDNIA':
-                tytul = f"({msza.get_typ_display()}) - Wolny termin"
-            else:
-                tytul = "wolna"
-
+            # Jeśli to specjalny typ (np. Ślub), pokaż go w tytule zamiast "wolna"     
+                tytul = f"{msza.get_typ_display()} - wolna"
+            
         # 2. Kolor (Logika Hybrydowa)
-        # Dla mszy powszedniej: Czerwony (zajęta) lub Zielony (wolna - z Twojej metody)
+        # Dla mszy powszedniej: Pomarańczowy (zajęta) lub Zielony (wolna - z Twojej metody)
         if msza.typ == 'POWSZEDNIA' and has_intencje:
-            kolor = "#dc3545" # Czerwony (Zajęta)
+            kolor = "#fd7e14" # pomarańczowy (Zajęta)
         else:
             # Dla wszystkich innych typów (Ślub, Pogrzeb, lub Wolna Powszednia)
             # bierzemy Twój piękny kolor z modelu
@@ -355,8 +352,12 @@ def kalendarz_mszy_dane(request):
             "start": dt.isoformat(),
             "url": msza.get_absolute_url(),
             "color": kolor,
-            # Opcjonalnie: dodajemy ramkę, jeśli msza jest specjalna ale wolna
-            "borderColor": "#000" if not has_intencje and msza.typ != 'POWSZEDNIA' else kolor
+            "borderColor": "#000" if not has_intencje and msza.typ != 'POWSZEDNIA' else kolor,
+            
+            # DODAJ TO POLE:
+            "extendedProps": {
+                "isBusy": has_intencje  # True jeśli są intencje, False jeśli nie
+            }
         })
 
     return JsonResponse(events, safe=False)

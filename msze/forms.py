@@ -1,7 +1,7 @@
 # msze/forms.py
 from django import forms
 from django.utils import timezone
-from .models import Msza, IntencjaMszy, TypMszy  # <--- Import TypMszy
+from .models import Msza, IntencjaMszy, TypMszy
 from slowniki.models import Duchowny
 
 class BootstrapFormMixin:
@@ -18,10 +18,6 @@ class BootstrapFormMixin:
                 widget.attrs["placeholder"] = field.label
 
 class MszaForm(BootstrapFormMixin, forms.ModelForm):
-<<<<<<< HEAD
-=======
-    # ... pole celebrans bez zmian ...
->>>>>>> a4977c8373d30717df428e9c3bc44163a3cf6a4f
     celebrans = forms.ModelChoiceField(
         queryset=Duchowny.objects.filter(aktywny=True).order_by("imie_nazwisko"),
         required=False,
@@ -34,11 +30,7 @@ class MszaForm(BootstrapFormMixin, forms.ModelForm):
         fields = [
             "data",
             "godzina",
-<<<<<<< HEAD
-            "typ",             # <--- WAŻNE: Musi być w polach formularza
-=======
-            "typ",            
->>>>>>> a4977c8373d30717df428e9c3bc44163a3cf6a4f
+            "typ",
             "miejsce",
             "celebrans",
             "celebrans_opis",
@@ -49,8 +41,7 @@ class MszaForm(BootstrapFormMixin, forms.ModelForm):
             "godzina": forms.TimeInput(attrs={"type": "time"}, format="%Y-%m-%d"),
             "uwagi": forms.Textarea(attrs={"rows":3}),
         }
-    
-    # ... reszta metod (__init__, clean, clean_data) bez zmian ...
+        
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["data"].input_formats = ["%Y-%m-%d", "%d.%m.%Y", "%d-%m-%Y"]
@@ -61,20 +52,14 @@ class MszaForm(BootstrapFormMixin, forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-<<<<<<< HEAD
         
-        # 1. Logika celebransa (bez zmian)
+        # 1. Logika celebransa
         celebrans = cleaned_data.get("celebrans")
         opis = cleaned_data.get("celebrans_opis")
-=======
-        celebrans = cleaned_data.get("celebrans")
-        opis = cleaned_data.get("celebrans_opis")
-
->>>>>>> a4977c8373d30717df428e9c3bc44163a3cf6a4f
         if celebrans and opis:
             cleaned_data["celebrans_opis"] = ""
 
-        # 2. WALIDACJA MSZY NIEDZIELNEJ (NOWE)
+        # 2. WALIDACJA MSZY NIEDZIELNEJ
         typ = cleaned_data.get("typ")
         data = cleaned_data.get("data")
 
@@ -82,13 +67,10 @@ class MszaForm(BootstrapFormMixin, forms.ModelForm):
         if typ == TypMszy.NIEDZIELNA and data:
             # Python: 0=Poniedziałek, ..., 6=Niedziela
             if data.weekday() != 6:
-                # Dodajemy błąd do konkretnego pola 'data'
                 self.add_error(
                     "data", 
                     "Wybrano typ 'Niedzielna', ale ta data nie przypada w niedzielę."
                 )
-                # Opcjonalnie można też dodać błąd do pola 'typ', jeśli wolisz:
-                # self.add_error("typ", "Zmień typ mszy lub popraw datę (to nie jest niedziela).")
         
         return cleaned_data
 
