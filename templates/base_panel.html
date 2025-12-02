@@ -420,7 +420,7 @@
         placeholder: "Wpisz nazwę wyznania..."
       });
     });
-
+    // Duchowni
     document.querySelectorAll("select.js-tom-duchowny").forEach(function (el) {
       new TomSelect(el, {
         create: false,
@@ -429,6 +429,16 @@
         placeholder: "Wpisz nazwisko duchownego..."
       });
     });
+    //sektory cmentarza
+    document.querySelectorAll("select.js-tom-sektor").forEach(function (el) {
+      new TomSelect(el, {
+        create: false,
+        maxOptions: 500,
+        sortField: { field: "text", direction: "asc" },
+        placeholder: "Wybierz sektor..."
+      });
+    });
+
   });
 
 

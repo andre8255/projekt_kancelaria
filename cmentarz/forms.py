@@ -57,6 +57,14 @@ class GrobForm(BootstrapFormMixin, forms.ModelForm):
         
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # jeśli BootstrapFormMixin dopisuje "form-control", ta klasa dojdzie do js-osoba-select
+        if "dysponent" in self.fields:
+            w = self.fields["dysponent"].widget
+            css = w.attrs.get("class", "")
+            w.attrs["class"] = (css + " js-osoba-select").strip()
         # to pole, na którym chcesz mieć „live search”
         if "osoba" in self.fields:
             css = self.fields["osoba"].widget.attrs.get("class", "")
