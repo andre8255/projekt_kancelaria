@@ -95,3 +95,4 @@ from django.contrib.messages import constants as messages
 MESSAGE_TAGS = { messages.ERROR: "danger" }
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+handler403 = "parafia.views.permission_denied_view"

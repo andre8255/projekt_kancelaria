@@ -246,7 +246,7 @@
   </div>
 </div>
 
-<div class="row g-4">
+<div class="row g-4 mt-3">
   {# Najbliższe msze #}
   <div class="col-lg-6">
     <div class="card shadow-sm border-0 h-100">
@@ -267,7 +267,9 @@
                       <span class="badge bg-success-subtle text-success ms-1">wolna</span>
                     {% endif %}
                   </span>
-                  <a class="btn btn-sm btn-outline-secondary" href="{% url 'msza_szczegoly' m.pk %}">Szczegóły</a>
+                  <a class="btn btn-sm btn-outline-secondary" href="{% url 'msza_szczegoly' m.pk %}">
+                    Szczegóły
+                  </a>
                 </li>
               {% endif %}
               {% endwith %}
@@ -280,66 +282,82 @@
     </div>
   </div>
 
-{% if cmentarz_alert.lacznie %}
-  <div class="alert alert-warning small d-flex align-items-center" role="alert">
-    <i class="bi bi-exclamation-triangle-fill me-2"></i>
-    <div>
-      Uwaga: {{ cmentarz_alert.po_terminie }} grobów po terminie dzierżawy,
-      {{ cmentarz_alert.do_6_miesiecy }} wygasa w ciągu 6 miesięcy.
-      <a href="{% url 'cmentarz:grob_lista' %}?status=po_terminie" class="alert-link">
-        Zobacz na liście cmentarza.
-      </a>
-    </div>
-  </div>
-{% endif %}
-
-
-
-
-  {# Ostatnie wpisy #}
+  {# CMENTARZ: groby po terminie i z wygasającą dzierżawą #}
   <div class="col-lg-6">
     <div class="card shadow-sm border-0 mb-4">
-      <div class="card-header fw-semibold">Ostatnie chrzty</div>
+      <div class="card-header fw-semibold">
+        Groby po terminie opłaty
+      </div>
       <div class="card-body small">
-        {% if ostatnie_chrzty %}
+        {% if groby_po_terminie %}
           <ul class="list-group list-group-flush">
-            {% for c in ostatnie_chrzty %}
+            {% for g in groby_po_terminie %}
               <li class="list-group-item d-flex justify-content-between">
-                <span>{{ c.rok }}/{{ c.akt_nr }} — {{ c.ochrzczony }}</span>
-                <a class="btn btn-sm btn-outline-secondary" href="{% url 'chrzest_szczegoly' c.pk %}">Pokaż</a>
+                <span>
+                  Sektor {{ g.sektor }}, rząd {{ g.rzad }}, nr {{ g.numer }}<br>
+                  <span class="text-danger small">
+                    Ważny do: {{ g.wazny_do|date:"Y-m-d" }}
+                  </span>
+                  {% if g.dysponent %}
+                    <br>
+                    <span class="text-muted small">
+                      Opiekun: {{ g.dysponent }}
+                    </span>
+                  {% endif %}
+                </span>
+                <a class="btn btn-sm btn-outline-secondary"
+                   href="{% url 'cmentarz:grob_szczegoly' g.pk %}">
+                  Pokaż
+                </a>
               </li>
             {% endfor %}
           </ul>
         {% else %}
-          <div class="text-muted">Brak wpisów.</div>
+          <div class="text-muted">
+            Brak grobów po terminie opłaty.
+          </div>
         {% endif %}
       </div>
     </div>
 
     <div class="card shadow-sm border-0">
-      <div class="card-header fw-semibold">Ostatnie małżeństwa</div>
+      <div class="card-header fw-semibold">
+        Groby z wygasającą dzierżawą (do 6 miesięcy)
+      </div>
       <div class="card-body small">
-        {% if ostatnie_sluby %}
+        {% if groby_6_miesiecy %}
           <ul class="list-group list-group-flush">
-            {% for s in ostatnie_sluby %}
+            {% for g in groby_6_miesiecy %}
               <li class="list-group-item d-flex justify-content-between">
                 <span>
-                  {{ s.rok }}/{{ s.akt_nr|default:"—" }} —
-                  {{ s.malzonek_a.nazwisko_rodowe }} {{ s.malzonek_a.imie_pierwsze }}
-                  &amp;
-                  {{ s.malzonek_b.nazwisko_rodowe }} {{ s.malzonek_b.imie_pierwsze }}
+                  Sektor {{ g.sektor }}, rząd {{ g.rzad }}, nr {{ g.numer }}<br>
+                  <span class="text-muted small">
+                    Ważny do: {{ g.wazny_do|date:"Y-m-d" }}
+                  </span>
+                  {% if g.dysponent %}
+                    <br>
+                    <span class="text-muted small">
+                      Opiekun: {{ g.dysponent }}
+                    </span>
+                  {% endif %}
                 </span>
-                <a class="btn btn-sm btn-outline-secondary" href="{% url 'malzenstwo_szczegoly' s.pk %}">Pokaż</a>
+                <a class="btn btn-sm btn-outline-secondary"
+                   href="{% url 'cmentarz:grob_szczegoly' g.pk %}">
+                  Pokaż
+                </a>
               </li>
             {% endfor %}
           </ul>
         {% else %}
-          <div class="text-muted">Brak wpisów.</div>
+          <div class="text-muted">
+            Brak grobów z wygasającą dzierżawą.
+          </div>
         {% endif %}
       </div>
     </div>
   </div>
 </div>
+
 
 {# --- KARTA BACKUPU --- #}
 <div class="row mt-4">

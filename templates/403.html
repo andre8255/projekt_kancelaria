@@ -1,0 +1,29 @@
+{% extends "base_panel.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-center mt-5">
+  <div class="card shadow-sm border-0" style="max-width: 500px; width: 100%;">
+    <div class="card-body text-center">
+      <div class="mb-3">
+        <i class="bi bi-shield-lock-fill" style="font-size: 3rem; color: #dc3545;"></i>
+      </div>
+
+      <h1 class="h5 mb-2">Brak uprawnień</h1>
+      <p class="text-muted small mb-4">
+        Nie masz uprawnień do dostępu do tej sekcji systemu.<br>
+        Jeśli uważasz, że to błąd – skontaktuj się z administratorem parafii.
+      </p>
+
+      <div class="d-flex justify-content-center gap-2">
+        <button type="button" class="btn btn-outline-secondary btn-sm"
+                onclick="window.history.back()">
+          ⬅ Powrót
+        </button>
+        <a href="{% url 'panel_start' %}" class="btn btn-primary btn-sm">
+          🏠 Panel główny
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

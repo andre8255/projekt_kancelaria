@@ -1,3 +1,4 @@
+# konta/forms.py
 from django import forms
 from .models import BackupUstawienia
 
@@ -5,9 +6,9 @@ from .models import BackupUstawienia
 class BackupUstawieniaForm(forms.ModelForm):
     class Meta:
         model = BackupUstawienia
-        fields = ["włączony", "czestotliwosc", "dzien_tygodnia", "godzina"]
+        fields = ["wlaczony", "czestotliwosc", "dzien_tygodnia", "godzina"]
         labels = {
-            "włączony": "Włącz automatyczne backupy",
+            "wlaczony": "Włącz automatyczne backupy",
             "czestotliwosc": "Częstotliwość",
             "dzien_tygodnia": "Dzień tygodnia (dla backupu tygodniowego)",
             "godzina": "Godzina uruchamiania",
@@ -15,4 +16,3 @@ class BackupUstawieniaForm(forms.ModelForm):
         widgets = {
             "godzina": forms.TimeInput(attrs={"type": "time"}),
         }
-

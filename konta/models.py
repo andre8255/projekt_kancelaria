@@ -1,3 +1,4 @@
+#konta/models/py
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
@@ -55,59 +56,49 @@ class LogAkcji(models.Model):
         return f"[{self.kiedy}] {self.akcja} ({self.model}#{self.obiekt_id})"
 
 class BackupUstawienia(models.Model):
-    CZESTOTLIWOSC_NEVER = "never"
-    CZESTOTLIWOSC_DAILY = "daily"
-    CZESTOTLIWOSC_WEEKLY = "weekly"
-    CZESTOTLIWOSC_MONTHLY = "monthly"
+    CZEST_DZIENNIE = "dziennie"
+    CZEST_TYGODNIOWO = "tygodniowo"
+    CZEST_MIESIECZNIE = "miesiecznie"
 
     CZESTOTLIWOSC_CHOICES = [
-        (CZESTOTLIWOSC_NEVER, "Tylko ręcznie"),
-        (CZESTOTLIWOSC_DAILY, "Codziennie"),
-        (CZESTOTLIWOSC_WEEKLY, "Raz w tygodniu"),
-        (CZESTOTLIWOSC_MONTHLY, "Raz w miesiącu"),
+        (CZEST_DZIENNIE, "Raz dziennie"),
+        (CZEST_TYGODNIOWO, "Raz w tygodniu"),
+        (CZEST_MIESIECZNIE, "Raz w miesiącu"),
     ]
 
-    DNI_TYGODNIA_CHOICES = [
-        ("mon", "Poniedziałek"),
-        ("tue", "Wtorek"),
-        ("wed", "Środa"),
-        ("thu", "Czwartek"),
-        ("fri", "Piątek"),
-        ("sat", "Sobota"),
-        ("sun", "Niedziela"),
+    # NOWE: choices dla dnia tygodnia
+    DZIEN_TYGODNIA_CHOICES = [
+        (0, "Poniedziałek"),
+        (1, "Wtorek"),
+        (2, "Środa"),
+        (3, "Czwartek"),
+        (4, "Piątek"),
+        (5, "Sobota"),
+        (6, "Niedziela"),
     ]
 
-    czestotliwosc = models.CharField(
-        "Częstotliwość backupu",
-        max_length=20,
-        choices=CZESTOTLIWOSC_CHOICES,
-        default=CZESTOTLIWOSC_DAILY,
+    wlaczony = models.BooleanField(
+        default=False,
+        verbose_name="Włącz automatyczne backupy",
     )
 
-    dzien_tygodnia = models.CharField(
-        "Dzień tygodnia (dla backupu tygodniowego)",
-        max_length=3,
-        choices=DNI_TYGODNIA_CHOICES,
-        default="mon",
-        help_text="Używane, gdy częstotliwość ustawiona jest na 'Raz w tygodniu'."
+    czestotliwosc = models.CharField(
+        max_length=20,
+        choices=CZESTOTLIWOSC_CHOICES,
+        default=CZEST_DZIENNIE,
+        verbose_name="Częstotliwość",
+    )
+
+    dzien_tygodnia = models.IntegerField(
+        choices=DZIEN_TYGODNIA_CHOICES,   # ← TU JEST MAGIA
+        null=True,
+        blank=True,
+        verbose_name="Dzień tygodnia (dla backupu tygodniowego)",
     )
 
     godzina = models.TimeField(
-        "Godzina uruchamiania",
-        default=time(2, 0),  # 02:00
-        help_text="Godzina, o której ma być wykonywany backup."
-    )
-
-    ostatni_backup = models.DateTimeField(
-        "Ostatnio wykonany backup",
-        null=True,
-        blank=True,
-        help_text="Uzupełniane automatycznie przez mechanizm backupu."
-    )
-
-    włączony = models.BooleanField(
-        "Włącz automatyczne backupy",
-        default=True,
+        default=time(2, 0),
+        verbose_name="Godzina uruchamiania",
     )
 
     class Meta:
@@ -119,5 +110,9 @@ class BackupUstawienia(models.Model):
 
     @classmethod
     def get_solo(cls):
-        obj, created = cls.objects.get_or_create(pk=1)
+        """
+        Zwraca jedyny rekord z ustawieniami backupu.
+        Jeśli go nie ma – tworzy z domyślnymi wartościami.
+        """
+        obj, _ = cls.objects.get_or_create(pk=1)
         return obj

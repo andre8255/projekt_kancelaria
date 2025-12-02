@@ -84,11 +84,29 @@ class PanelStartView(LoginRequiredMixin, TemplateView):
             .prefetch_related("intencje")[:8]
         )
 
-        # --- OSTATNIE WPISY ---
-        ctx["ostatnie_chrzty"] = Chrzest.objects.select_related("ochrzczony").order_by("-id")[:5]
-        ctx["ostatnie_sluby"] = (
-            Malzenstwo.objects.select_related("malzonek_a", "malzonek_b").order_by("-id")[:5]
-        )
+        # === ALERTY CMENTARZA ===
+        today = timezone.localdate()
+        six_months = today + timedelta(days=180)
+
+        groby_po_terminie = Grob.objects.filter(
+            wazny_do__isnull=False,
+            wazny_do__lt=today,
+        ).order_by("wazny_do")
+
+        groby_6_miesiecy = Grob.objects.filter(
+            wazny_do__isnull=False,
+            wazny_do__gte=today,
+            wazny_do__lte=six_months,
+        ).order_by("wazny_do")
+
+        ctx["groby_po_terminie"] = groby_po_terminie[:5]
+        ctx["groby_6_miesiecy"] = groby_6_miesiecy[:5]
+
+        ctx["cmentarz_alert"] = {
+            "po_terminie": groby_po_terminie.count(),
+            "do_6_miesiecy": groby_6_miesiecy.count(),
+            "lacznie": groby_po_terminie.count() + groby_6_miesiecy.count(),
+        }
 
         # ===== MINI KALENDARZ =====
         # 1. Parametry

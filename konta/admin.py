@@ -43,8 +43,5 @@ class LogAkcjiAdmin(admin.ModelAdmin):
 
 @admin.register(BackupUstawienia)
 class BackupUstawieniaAdmin(admin.ModelAdmin):
-    list_display = ("czestotliwosc", "godzina", "włączony", "ostatni_backup")
-
-    def has_add_permission(self, request):
-        # tylko jeden rekord
-        return not BackupUstawienia.objects.exists()
+    list_display = ("id", "wlaczony", "czestotliwosc", "dzien_tygodnia", "godzina")
+    list_filter = ("wlaczony", "czestotliwosc", "dzien_tygodnia")
