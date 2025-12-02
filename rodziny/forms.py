@@ -37,6 +37,8 @@ class RodzinaForm(BootstrapFormMixin, forms.ModelForm):
             "uwagi",
         ]
         widgets = {
+            "telefon_kontaktowy": forms.TextInput(attrs={"placeholder": "Numer telefonu"}),
+            "email_kontaktowy": forms.TextInput(attrs={"placeholder": "Adres e-mail"}),
             "uwagi": forms.Textarea(attrs={"rows": 3}),
         }
 
@@ -119,22 +121,26 @@ class DodajCzlonkaForm(BootstrapFormMixin, forms.ModelForm):
         return cleaned_data
 
 class WizytaForm(BootstrapFormMixin, forms.ModelForm):
+    ksiadz = forms.ModelChoiceField(
+        queryset=Duchowny.objects.filter(aktywny=True).order_by("imie_nazwisko"),
+        required=False,
+        label="Ksiądz odwiedzający",
+        widget=forms.Select(attrs={"class": "js-tom-duchowny"}),
+    )
+
     class Meta:
         model = WizytaDuszpasterska
-        fields = ["rok", "data_wizyty", "ksiadz", "status", "ofiara", "notatka"]
+        # ⭐ bez pola "ofiara"
+        fields = ["rok", "data_wizyty", "ksiadz", "status", "notatka"]
         widgets = {
-            # --- POPRAWKA: Dodano format='%Y-%m-%d' ---
-            "data_wizyty": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
+            "data_wizyty": forms.DateInput(attrs={"type": "date"}),
             "notatka": forms.Textarea(attrs={"rows": 3}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
-        # Domyślny rok = obecny rok
-        if not self.instance.pk and not self.initial.get('rok'):
-            from django.utils import timezone
-            self.fields['rok'].initial = timezone.now().year
-
-        self.fields["ksiadz"].queryset = Duchowny.objects.filter(aktywny=True).order_by("imie_nazwisko")
-        self.fields["ksiadz"].empty_label = "--- wybierz księdza ---"
+        # jeśli BootstrapFormMixin dodaje klasy, ta klasa zostanie zachowana + "form-control"
+        if "ksiadz" in self.fields:
+            w = self.fields["ksiadz"].widget
+            css = w.attrs.get("class", "")
+            w.attrs["class"] = (css + " js-tom-duchowny").strip()

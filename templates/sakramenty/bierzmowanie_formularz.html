@@ -68,7 +68,7 @@
         {% else %}
             {{ form.osoba }}
             <div class="form-text small text-muted">
-              Jeśli osoby nie ma na liście, kliknij „Nowa osoba”, dodaj ją w nowej karcie, zapisz, a potem odśwież tę stronę.
+              Jeśli osoby nie ma na liście, kliknij „+ Nowa osoba”.
             </div>
         {% endif %}
         
@@ -76,17 +76,7 @@
           <div class="text-danger small">{{ form.osoba.errors }}</div>
         {% endif %}
       </div>
-<!--
-    <div class="col-md-4">
-        <label class="form-label small fw-semibold text-muted">
-          {{ form.rok.label }}
-        </label>
-        {{ form.rok }}
-        {% if form.rok.errors %}
-          <div class="text-danger small">{{ form.rok.errors }}</div>
-        {% endif %}
-      </div>
--->
+      
       <div class="col-md-4">
         <label class="form-label small fw-semibold text-muted">
           {{ form.akt_nr.label }}
@@ -115,7 +105,7 @@
           <div class="text-danger small">{{ form.data_bierzmowania.errors }}</div>
         {% endif %}
         {% if form.data_bierzmowania.help_text %}
-          <div class="form-text small">{{ form.data_bierzmowania.help_text }}</div>
+          
         {% endif %}
       </div>
    
@@ -129,9 +119,7 @@
       {% if form.miejsce_bierzmowania.errors %}
         <div class="text-danger small">{{ form.miejsce_bierzmowania.errors }}</div>
       {% endif %}
-      <div class="form-text small text-muted">
-        Miejsce bierzmowania.
-      </div>
+     
     </div>
   </div>
 
@@ -145,9 +133,7 @@
       {% if form.imie_bierzmowania.errors %}
         <div class="text-danger small">{{ form.imie_bierzmowania.errors }}</div>
       {% endif %}
-      <div class="form-text small text-muted">
-        Imię przyjęte w czasie bierzmowania.
-      </div>
+    
     </div>
 
     {# ================== ŚWIADEK ================== #}
@@ -159,9 +145,7 @@
       {% if form.swiadek.errors %}
         <div class="text-danger small">{{ form.swiadek.errors }}</div>
       {% endif %}
-      <div class="form-text small text-muted">
-        Imię i nazwisko świadka bierzmowania.
-      </div>
+      
     </div>
 
   
@@ -190,10 +174,7 @@
         <div class="text-danger small">{{ form.parafia.errors }}</div>
       {% endif %}
 
-      <div class="form-text small text-muted mb-2">
-        Wybierz z listy parafii. Jeśli nie ma — dodaj nową parafię powyżej w nowej karcie,
-        zapisz ją, a potem odśwież tę stronę.
-      </div>
+    
   </div>
 
     {# ================== SZAFARZ ================== #}
@@ -217,9 +198,7 @@
         <div class="text-danger small">{{ form.szafarz.errors }}</div>
       {% endif %}
 
-      <div class="form-text small text-muted mb-2">
-        Wybierz z listy duchownego (np. biskupa / delegata).
-      </div>
+     
     </div>  
  </div> 
 

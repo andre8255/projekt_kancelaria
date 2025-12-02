@@ -400,7 +400,38 @@
         placeholder: "Wybierz osobę..."
       });
     });
+
+  // Parafie
+    document.querySelectorAll("select.js-tom-parafia").forEach(function (el) {
+      new TomSelect(el, {
+        create: false,
+        maxOptions: 1000,
+        sortField: {field: "text", direction: "asc"},
+        placeholder: "Wpisz nazwę parafii..."
+      });
+    });
+
+    // --- Wyznania (Ojciec / Matka) ---
+    document.querySelectorAll("select.js-tom-wyznanie").forEach(function (el) {
+      new TomSelect(el, {
+        create: false,
+        maxOptions: 1000,
+        sortField: {field: "text", direction: "asc"},
+        placeholder: "Wpisz nazwę wyznania..."
+      });
+    });
+
+    document.querySelectorAll("select.js-tom-duchowny").forEach(function (el) {
+      new TomSelect(el, {
+        create: false,
+        maxOptions: 1000,
+        sortField: { field: "text", direction: "asc" },
+        placeholder: "Wpisz nazwisko duchownego..."
+      });
+    });
   });
+
+
 </script>
 </body>
 </html>

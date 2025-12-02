@@ -23,12 +23,12 @@
     {% if osoba %}
       <a href="{% url 'osoba_szczegoly' osoba.pk %}" 
       class="btn btn-outline-secondary btn-sm">
-        Powrót
+       ⬅ Powrót
         </a>
      {% else %}
       <a href="{% url 'slownik_duchowny_lista' %}" 
       class="btn btn-outline-secondary btn-sm">
-        Powrót
+       ⬅ Powrót
       </a>
     {% endif %}
   </div>
@@ -58,23 +58,46 @@
           {% if form.imie_nazwisko.errors %}<div class="text-danger small">{{ form.imie_nazwisko.errors }}</div>{% endif %}
         </div>
       </div>
-    </div>
 
-    <div class="col-md-4">
-    <div class="mb-3">
-      <label class="form-label small fw-semibold text-muted">{{ form.parafia.label }}</label>
-      {{ form.parafia }}
-      {% if form.parafia.errors %}<div class="text-danger small">{{ form.parafia.errors }}</div>{% endif %}
-    </div>
-
-    <div class="form-check form-switch mb-3">
+    <div class="col-md-2 d-flex align-items-center">
+    <div class="form-check form-switch mb-0">
       {{ form.aktywny }}
       <label class="form-check-label small fw-semibold text-muted ms-2">
         Aktywny
       </label>
-      {% if form.aktywny.errors %}<div class="text-danger small">{{ form.aktywny.errors }}</div>{% endif %}
+      {% if form.aktywny.errors %}
+        <div class="text-danger small">{{ form.aktywny.errors }}</div>
+      {% endif %}
     </div>
-</div>
+  </div>
+
+    <div class="col-md-4">
+    <div class="d-flex justify-content-between align-items-start">
+      <label class="form-label small fw-semibold text-muted mb-0">
+        {{ form.parafia.label }}
+      </label>
+      <a href="{% url 'slownik_parafia_nowa' %}"
+         target="_blank"
+         class="btn btn-outline-primary btn-sm ms-2">
+        + Nowa parafia
+      </a>
+    </div>
+
+    {{ form.parafia }}
+
+    {% if form.parafia.errors %}
+      <div class="text-danger small">{{ form.parafia.errors }}</div>
+    {% else %}
+      <div class="form-text small text-muted">
+        Jeśli parafii nie ma na liście, kliknij „+ Nowa parafia”.
+      
+      </div>
+    {% endif %}
+  </div>
+
+  
+
+  </div>
     <div class="mb-3">
       <label class="form-label small fw-semibold text-muted">{{ form.uwagi.label }}</label>
       {{ form.uwagi }}

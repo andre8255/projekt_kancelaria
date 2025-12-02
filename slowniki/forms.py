@@ -74,12 +74,36 @@ class ParafiaForm(BootstrapFormMixin, forms.ModelForm):
         return cleaned_data
 
 class DuchownyForm(BootstrapFormMixin, forms.ModelForm):
+    TYTUL_CHOICES = [
+        ("", "— wybierz tytuł —"),
+        ("ks.", "ks."),
+        ("bisk.", "bisk."),
+        ("prob.", "prob."),
+        ("wik.", "wik."),
+        ("dziek.", "dziek."),
+        ("abp", "abp."),
+        ("kard.", "kard."),
+        ("pap.", "pap."),
+    ]
+
+    tytul = forms.ChoiceField(
+        choices=TYTUL_CHOICES,
+        required=False,
+        label="Tytuł",
+        widget=forms.Select(attrs={"class": "form-select"}),
+    )
+
     class Meta:
         model = Duchowny
         fields = ["tytul", "imie_nazwisko", "parafia", "aktywny", "uwagi"]
-        widgets = {
-            "uwagi": forms.Textarea(attrs={"rows": 3}),
-        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # parafia – pod Tom Select
+        if "parafia" in self.fields:
+            css = self.fields["parafia"].widget.attrs.get("class", "")
+            self.fields["parafia"].widget.attrs["class"] = (css + " js-tom-parafia").strip()
 
 class WyznanieForm(BootstrapFormMixin, forms.ModelForm):
     class Meta:

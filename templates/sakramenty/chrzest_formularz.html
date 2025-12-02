@@ -28,7 +28,7 @@
       {% else %}
         <a href="{% url 'chrzest_lista' %}" 
         class="btn btn-outline-secondary btn-sm">
-        Powrót
+      ⬅ Powrót
       </a>
       {% endif %}
   </div>
@@ -71,19 +71,13 @@
         <div class="text-danger small">{{ form.ochrzczony.errors }}</div>
       {% elif not osoba %}
         <div class="form-text small">
-          Jeśli osoby nie ma na liście – kliknij „+ Nowa osoba”, dodaj i odśwież tę stronę.
+          Jeśli osoby nie ma na liście, kliknij „+ Nowa osoba”.
         </div>
       {% endif %}
     </div>
 
-    {# --- ROK + NR AKTU --- #}
-    <!--
-    <div class="col-md-2">
-        <label class="form-label small fw-semibold text-muted">{{ form.rok.label }}</label>
-        {{ form.rok }}
-        {% if form.rok.errors %}<div class="text-danger small">{{ form.rok.errors }}</div>{% endif %}
-        {% if form.rok.help_text %}<div class="form-text small">{{ form.rok.help_text }}</div>{% endif %}
-    </div> -->
+    {# ---NR AKTU --- #}
+ 
     <div class="col-md-4">
         <label class="form-label small fw-semibold text-muted">{{ form.akt_nr.label }}</label>
         {{ form.akt_nr }}
@@ -92,47 +86,7 @@
     
       </div>
     </div>
-<!--
-    <hr class="my-3">
-
-    {# --- DANE O URODZENIU --- #}
-    <div class="row g-3 mb-3">
-      
-      {# 1. Data urodzenia (Już było, bez zmian) #}
-      <div class="col-md-4">
-        <label class="form-label small fw-semibold text-muted">{{ form.data_urodzenia.label }}</label>
-        {% if osoba and osoba.data_urodzenia %}
-          <input class="form-control" value="{{ osoba.data_urodzenia }}" readonly>
-          <input type="hidden" name="{{ form.data_urodzenia.html_name }}" value="{{ osoba.data_urodzenia|date:'Y-m-d' }}">
-          <div class="form-text small">Pobrano z danych osoby.</div>
-        {% else %}
-          {{ form.data_urodzenia }}
-        {% endif %}
-        {% if form.data_urodzenia.errors %}
-          <div class="text-danger small">{{ form.data_urodzenia.errors }}</div>
-        {% endif %}
-      </div>
-
-      {# 2. Miejsce urodzenia (ZMIANA TUTAJ) #}
-      <div class="col-md-4">
-        <label class="form-label small fw-semibold text-muted">{{ form.miejsce_urodzenia.label }}</label>
-        
-        {# --- NOWA LOGIKA: Sprawdzamy czy osoba ma wpisane miejsce urodzenia --- #}
-        {% if osoba and osoba.miejsce_urodzenia %}
-          <input class="form-control" value="{{ osoba.miejsce_urodzenia }}" readonly>
-          <input type="hidden" name="{{ form.miejsce_urodzenia.html_name }}" value="{{ osoba.miejsce_urodzenia }}">
-          <div class="form-text small">Pobrano z danych osoby.</div>
-        {% else %}
-          {{ form.miejsce_urodzenia }}
-        {% endif %}
-        {# ---------------------------------------------------------------------- #}
-
-        {% if form.miejsce_urodzenia.errors %}
-          <div class="text-danger small">{{ form.miejsce_urodzenia.errors }}</div>
-        {% endif %}
-      </div>
-    </div>
--->
+ 
     <hr class="my-3">
 
     {# --- DANE O CHRZCIE --- #}
@@ -141,7 +95,7 @@
         <label class="form-label small fw-semibold text-muted">{{ form.data_chrztu.label }}</label>
         {{ form.data_chrztu }}
         {% if form.data_chrztu.errors %}<div class="text-danger small">{{ form.data_chrztu.errors }}</div>{% endif %}
-        {% if form.data_chrztu.help_text %}<div class="form-text small">{{ form.data_chrztu.help_text }}</div>{% endif %}
+      
       </div>
       <div class="col-md-4">
         <label class="form-label small fw-semibold text-muted">{{ form.miejsce_chrztu.label }}</label>
@@ -184,33 +138,17 @@
 
     {# --- RODZICE --- #}
     <div class="row g-3 mb-3">
-      <!--
-      <div class="col-md-4">
-        <label class="form-label small fw-semibold text-muted">{{ form.ojciec.label }}</label>
-        {{ form.ojciec }}
-        {% if form.ojciec.errors %}<div class="text-danger small">{{ form.ojciec.errors }}</div>{% endif %}
-      </div>
-      -->
+
       <div class="col-md-4">
         <label class="form-label small fw-semibold text-muted">{{ form.ojciec_wyznanie.label }}</label>
         {{ form.ojciec_wyznanie }}
       </div>
-  <!--  </div>
 
-    <div class="row g-3 mb-3">
-      <div class="col-md-4">
-        <label class="form-label small fw-semibold text-muted">{{ form.matka.label }}</label>
-        {{ form.matka }}
-      </div>
-      <div class="col-md-4">
-        <label class="form-label small fw-semibold text-muted">{{ form.nazwisko_matki_rodowe.label }}</label>
-        {{ form.nazwisko_matki_rodowe }}
-      </div>-->
       <div class="col-md-4">
         <label class="form-label small fw-semibold text-muted">{{ form.matka_wyznanie.label }}</label>
         {{ form.matka_wyznanie }}
       </div>
- <!--   </div>-->
+ 
 
     {# --- UWAGI I SKAN --- #}
     <div class="mb-3">

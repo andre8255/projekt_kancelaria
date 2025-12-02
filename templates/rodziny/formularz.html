@@ -18,7 +18,7 @@
 
   <div class="d-flex gap-2">
     <a href="{% url 'rodzina_lista' %}" class="btn btn-outline-secondary btn-sm">
-     Powrót
+     ⬅ Powrót
     </a>
    
   </div>
@@ -143,7 +143,7 @@
           {% if form.telefon_kontaktowy.errors %}
             <div class="text-danger small">{{ form.telefon_kontaktowy.errors }}</div>
           {% else %}
-            <div class="form-text small">Numer telefonu kontaktowego.</div>
+            
           {% endif %}
         </div>
 
@@ -155,7 +155,7 @@
           {% if form.email_kontaktowy.errors %}
             <div class="text-danger small">{{ form.email_kontaktowy.errors }}</div>
           {% else %}
-            <div class="form-text small">Adres e-mail do korespondencji.</div>
+          
           {% endif %}
         </div>
       </div>

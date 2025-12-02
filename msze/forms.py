@@ -39,8 +39,9 @@ class MszaForm(BootstrapFormMixin, forms.ModelForm):
             "uwagi",
         ]
         widgets = {
+            
             "data": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
-            # TU MIAŁEŚ LITERÓWKĘ W FORMACIE – poprawiam na %H:%M
+           
             "godzina": forms.TimeInput(attrs={"type": "time"}, format="%H:%M"),
             "uwagi": forms.Textarea(attrs={"rows": 3}),
         }
@@ -52,6 +53,12 @@ class MszaForm(BootstrapFormMixin, forms.ModelForm):
 
         today_str = timezone.localdate().strftime('%Y-%m-%d')
         self.fields['data'].widget.attrs['min'] = today_str
+
+        if "celebrans" in self.fields:
+            widget = self.fields["celebrans"].widget
+            css = widget.attrs.get("class", "")
+            widget.attrs["class"] = (css + " js-tom-duchowny").strip()
+            widget.attrs.setdefault("placeholder", "Wpisz nazwisko duchownego...")
 
     def clean(self):
         cleaned_data = super().clean()
@@ -92,7 +99,7 @@ class IntencjaForm(BootstrapFormMixin, forms.ModelForm):
         fields = ["tresc", "zamawiajacy", "status_oplaty", "uwagi"]
         widgets = {
             "tresc": forms.Textarea(attrs={"rows": 3}),
-            "zamawiajacy": forms.TextInput(),
+             "zamawiajacy": forms.TextInput(attrs={"placeholder": "Imię i nazwisko"}),
             "status_oplaty": forms.Select(),
             "uwagi": forms.Textarea(attrs={"rows": 2}),
         }

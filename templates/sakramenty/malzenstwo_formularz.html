@@ -31,7 +31,7 @@
       {% else %}
         <a href="{% url 'malzenstwo_lista' %}"  
         class="btn btn-outline-secondary btn-sm">
-          Powrót
+          ⬅ Powrót
         </a>
       {% endif %}
   </div>
@@ -73,7 +73,7 @@
     <div class="text-danger small">{{ form.malzonek_a.errors }}</div>
   {% endif %}
   <div class="form-text small text-muted">
-    Jeśli osoby nie ma na liście, dodaj ją w nowej karcie, zapisz, wróć i odśwież.
+    Jeśli osoby nie ma na liście, kliknij „+ Nowa osoba”.
   </div>
 
   <div class="mt-3">
@@ -103,39 +103,43 @@
         </a>
       </div>
 
-      {{ form.malzonek_b }}
-      {% if form.malzonek_b.errors %} <div class="text-danger small">{{ form.malzonek_b.errors }}</div>
+      {{ form.malzonek_b }}   {# <- Tom Select (js-tom-osoba) #}
+    {% if form.malzonek_b.errors %}
+      <div class="text-danger small">{{ form.malzonek_b.errors }}</div>
+    {% endif %}
+    <div class="form-text small text-muted">
+      Jeśli osoby nie ma na liście, kliknij „+ Nowa osoba”.
+    </div>
+
+    <div class="mt-3">
+      <label class="form-label small fw-semibold text-muted">
+        {{ form.swiadek_b.label|default:"Świadek (Małżonek B)" }}
+      </label>
+      {{ form.swiadek_b }}
+      {% if form.swiadek_b.errors %}
+        <div class="text-danger small">{{ form.swiadek_b.errors }}</div>
       {% endif %}
-      <div class="form-text small text-muted">
-        Jeśli osoby nie ma na liście, dodaj ją w nowej karcie, zapisz, wróć i odśwież.
       </div>
 
-      <div class="mt-3">
-        <label class="form-label small fw-semibold text-muted">
-          {{ form.swiadek_b.label|default:"Świadek (Małżonek B)" }}
-        </label>
-        {{ form.swiadek_b }}
-        {% if form.swiadek_b.errors %}
-          <div class="text-danger small">{{ form.swiadek_b.errors }}</div>
-        {% endif %}
-      </div>
 
+      
 </div> 
+ <div class="col-md-4">
+        <label class="form-label small fw-semibold text-muted">{{ form.akt_nr.label }}</label>
+        {{ form.akt_nr }}
+        {% if form.akt_nr.errors %}
+          <div class="text-danger small">{{ form.akt_nr.errors }}</div>
+        {% endif %}
+        <div class="form-text small text-muted">
+           Numer aktu ślubu w danym roku, jeśli nie podasz, wypełni się automatycznie.
+        </div>
+      </div>
     </div>
 
     <hr class="my-3">
 
     {# --- ROK / NR AKTU / DATA ŚLUBU w jednym rzędzie --- #}
     <div class="row g-3">
-      <!--
-      <div class="col-md-4">
-        <label class="form-label small fw-semibold text-muted">{{ form.rok.label }}</label>
-        {{ form.rok }}
-        {% if form.rok.errors %}
-          <div class="text-danger small">{{ form.rok.errors }}</div>
-        {% endif %}
-      </div>
--->
 
     <div class="col-md-4">
         <label class="form-label small fw-semibold text-muted">{{ form.data_slubu.label }}</label>
@@ -146,19 +150,7 @@
       </div>
   
 
-      <div class="col-md-4">
-        <label class="form-label small fw-semibold text-muted">{{ form.akt_nr.label }}</label>
-        {{ form.akt_nr }}
-        {% if form.akt_nr.errors %}
-          <div class="text-danger small">{{ form.akt_nr.errors }}</div>
-        {% endif %}
-        <div class="form-text small text-muted">
-           Numer aktu ślubu w danym roku, jeśli nie podasz, wypełni się automatycznie.
-        </div>
-      </div>
-
-    <hr class="my-3">
-<div class="row g-3 mb-3">
+     
     {# --- PARAFIA ŚLUBU --- #}
 <div class="col-md-4">
   <div class="d-flex justify-content-between align-items-start">
@@ -244,4 +236,35 @@
   </div>
 </form>
 
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    if (!window.TomSelect) {
+      console.warn("TomSelect nie jest załadowany");
+      return;
+    }
+
+    // Małżonek A
+    var elA = document.getElementById("id_malzonek_a");
+    if (elA && !elA.tomselect) {
+      new TomSelect(elA, {
+        create: false,
+        maxOptions: 1000,
+        sortField: { field: "text", direction: "asc" },
+        placeholder: "Wpisz nazwisko lub imię małżonka A..."
+      });
+    }
+
+    // Małżonek B
+    var elB = document.getElementById("id_malzonek_b");
+    if (elB && !elB.tomselect) {
+      new TomSelect(elB, {
+        create: false,
+        maxOptions: 1000,
+        sortField: { field: "text", direction: "asc" },
+        placeholder: "Wpisz nazwisko lub imię małżonka B..."
+      });
+    }
+  });
+</script>
 {% endblock %}

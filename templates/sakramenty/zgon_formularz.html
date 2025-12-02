@@ -20,9 +20,9 @@
 
   <div class="d-flex flex-wrap gap-2 ms-auto">
     {% if osoba %}
-      <a href="{% url 'osoba_szczegoly' osoba.pk %}" class="btn btn-outline-secondary btn-sm">Powrót</a>
+      <a href="{% url 'osoba_szczegoly' osoba.pk %}" class="btn btn-outline-secondary btn-sm"> ⬅ Powrót</a>
     {% else %}
-      <a href="{% url 'zgon_lista' %}" class="btn btn-outline-secondary btn-sm">Powrót</a>
+      <a href="{% url 'zgon_lista' %}" class="btn btn-outline-secondary btn-sm"> ⬅ Powrót</a>
     {% endif %}
   </div>
 </div>
@@ -59,7 +59,7 @@
         {% else %}
             {{ form.osoba }}
             <div class="form-text small text-muted">
-              Jeśli osoby nie ma na liście, kliknij „Nowa osoba”, dodaj ją w nowej karcie, zapisz, a potem odśwież tę stronę.
+              Jeśli osoby nie ma na liście, kliknij „+ Nowa osoba”.
             </div>
         {% endif %}
         

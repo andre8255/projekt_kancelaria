@@ -17,23 +17,22 @@
         Uzupełnij wpis namaszczenia chorego: <strong>{{ osoba.nazwisko }} {{ osoba.imie_pierwsze }}</strong>
       </div>
     {% endif %}
-</div>
+  </div>
 
   <div class="d-flex flex-wrap gap-2 ms-auto">
-      {% if osoba %}
-        <a href="{% url 'osoba_szczegoly' osoba.pk %}"
-           class="btn btn-outline-secondary btn-sm">
-          Powrót
-        </a>
-      {% else %}
-        <a href="{% url 'namaszczenie_lista' %}"
-          class="btn btn-outline-secondary btn-sm">
-          Powrót
-        </a>
+    {% if osoba %}
+      <a href="{% url 'osoba_szczegoly' osoba.pk %}"
+         class="btn btn-outline-secondary btn-sm">
+         ⬅ Powrót
+      </a>
+    {% else %}
+      <a href="{% url 'namaszczenie_lista' %}"
+         class="btn btn-outline-secondary btn-sm">
+       ⬅ Powrót
+      </a>
     {% endif %}
   </div>
 </div>
-
 
 <form method="post" class="card shadow-sm">
   {% csrf_token %}
@@ -44,7 +43,7 @@
       <div class="alert alert-danger small">{{ form.non_field_errors }}</div>
     {% endif %}
     
-{# ================== OSOBA ================== #}
+    {# ================== OSOBA ================== #}
     <div class="row g-3 mb-3">
       <div class="col-md-4">
         <div class="d-flex justify-content-between align-items-start">
@@ -52,7 +51,6 @@
             {{ form.osoba.label }}
           </label>
           
-          {# Przycisk "Nowa osoba" tylko gdy wybieramy z listy #}
           {% if not osoba %}
             <a href="{% url 'osoba_nowa' %}" target="_blank" class="btn btn-outline-primary btn-sm ms-2">
               + Nowa osoba
@@ -66,7 +64,7 @@
         {% else %}
             {{ form.osoba }}
             <div class="form-text small text-muted">
-              Jeśli osoby nie ma na liście, kliknij „Nowa osoba”, dodaj ją w nowej karcie, zapisz, a potem odśwież tę stronę.
+              Jeśli osoby nie ma na liście, kliknij „+ Nowa osoba”.
             </div>
         {% endif %}
         
@@ -74,29 +72,30 @@
           <div class="text-danger small">{{ form.osoba.errors }}</div>
         {% endif %}
       </div>
+    </div>
 
     {# --- WIERSZ: data / miejsce / szafarz --- #}
-<div class="row g-3">
+    <div class="row g-3 mb-3">
 
-  <div class="col-md-4">
-  <label class="form-label small fw-semibold text-muted mb-1">
-    {{ form.data.label }}
-  </label>
+      <div class="col-md-4">
+        <label class="form-label small fw-semibold text-muted mb-1">
+          {{ form.data.label }}
+        </label>
 
-  <div class="input-group">
-    {{ form.data }}
-    <button type="button"
-            class="btn btn-outline-secondary"
-            onclick="ustawDzis('id_data')"
-            title="Ustaw dzisiejszą datę">
-      <i class="bi bi-magic"></i>
-    </button>
-  </div>
+        <div class="input-group">
+          {{ form.data }}
+          <button type="button"
+                  class="btn btn-outline-secondary"
+                  onclick="ustawDzis('id_data')"
+                  title="Ustaw dzisiejszą datę">
+            <i class="bi bi-magic"></i>
+          </button>
+        </div>
 
-  {% if form.data.errors %}
-    <div class="text-danger small">{{ form.data.errors }}</div>
-  {% endif %}
-</div>
+        {% if form.data.errors %}
+          <div class="text-danger small">{{ form.data.errors }}</div>
+        {% endif %}
+      </div>
 
       <div class="col-md-4">
         <label class="form-label small fw-semibold text-muted">
@@ -112,28 +111,25 @@
       </div>
 
       <div class="col-md-4">
-  <div class="d-flex justify-content-between align-items-start">
-    <label class="form-label small fw-semibold text-muted mb-0">
-      {{ form.szafarz.label }}
-    </label>
+        <div class="d-flex justify-content-between align-items-start">
+          <label class="form-label small fw-semibold text-muted mb-0">
+            {{ form.szafarz.label }}
+          </label>
 
-    <a href="{% url 'slownik_duchowny_nowy' %}"
-       target="_blank"
-       class="btn btn-outline-primary btn-sm ms-2">
-      + Nowy duchowny
-    </a>
-  </div>
+          <a href="{% url 'slownik_duchowny_nowy' %}"
+             target="_blank"
+             class="btn btn-outline-primary btn-sm ms-2">
+            + Nowy duchowny
+          </a>
+        </div>
 
-  {{ form.szafarz }}
-  {% if form.szafarz.errors %}
-    <div class="text-danger small">{{ form.szafarz.errors }}</div>
-  {% endif %}
+        {{ form.szafarz }}
+        {% if form.szafarz.errors %}
+          <div class="text-danger small">{{ form.szafarz.errors }}</div>
+        {% endif %}
 
-  <div class="form-text small text-muted">
-    Jeśli szafarza nie ma na liście, dodaj go w Słownikach → Duchowni lub
-    kliknij „+ Nowy duchowny”.
-  </div>
-</div>
+  
+      </div>
     </div>
 
     <hr class="my-3">
@@ -198,19 +194,51 @@
       Zapisz
     </button>
 
-      {% if osoba %}
-        <a href="{% url 'osoba_szczegoly' osoba.pk %}" 
-        class="btn btn-outline-secondary btn-sm">
+    {% if osoba %}
+      <a href="{% url 'osoba_szczegoly' osoba.pk %}" 
+         class="btn btn-outline-secondary btn-sm">
         Anuluj
       </a>
-      {% else %}
-        <a href="{% url 'namaszczenie_lista' %}" 
-        class="btn btn-outline-secondary btn-sm">
+    {% else %}
+      <a href="{% url 'namaszczenie_lista' %}" 
+         class="btn btn-outline-secondary btn-sm">
         Anuluj
       </a>
-      {% endif %}
+    {% endif %}
     
   </div>
 </form>
 
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    if (!window.TomSelect) {
+      return;
+    }
+
+    // SZAFARZ – po ID
+    var szafarzEl = document.getElementById("id_szafarz");
+    if (szafarzEl && !szafarzEl.tomselect) {
+      new TomSelect(szafarzEl, {
+        create: false,
+        sortField: { field: "text", direction: "asc" },
+        allowEmptyOption: true,
+        placeholder: "Wpisz nazwisko lub imię szafarza..."
+      });
+    }
+
+    // OSOBA – jeśli chcesz też wyszukiwalną
+    var osobaEl = document.getElementById("id_osoba");
+    if (osobaEl && !osobaEl.tomselect) {
+      new TomSelect(osobaEl, {
+        create: false,
+        sortField: { field: "text", direction: "asc" },
+        allowEmptyOption: true,
+        placeholder: "Wpisz nazwisko lub imię osoby..."
+      });
+    }
+  });
+</script>
 {% endblock %}

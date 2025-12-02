@@ -61,6 +61,12 @@ class OsobaForm(BootstrapFormMixin, forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        if "wyznanie" in self.fields:
+            widget = self.fields["wyznanie"].widget
+            css = widget.attrs.get("class", "")
+            widget.attrs["class"] = (css + " js-tom-wyznanie").strip()
+            widget.attrs.setdefault("placeholder", "Wpisz nazwę wyznania...")
+            
         self.fields["wyznanie"].label = "Wyznanie"
         self.fields["wyznanie"].queryset = Wyznanie.objects.all().order_by("nazwa")
         self.fields["wyznanie"].required = False
