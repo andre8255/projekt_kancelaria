@@ -25,6 +25,22 @@ class DateInput(forms.DateInput):
     input_type = "date"
 
 # =============================================================================
+# === SPECJALNE POLE LISTY (Z DATĄ URODZENIA) ===
+# =============================================================================
+class OsobaChoiceField(forms.ModelChoiceField):
+    def label_from_instance(self, obj):
+        # Etykieta: "Kowalski Jan (ur. 1990-01-01, s. Adama)"
+        opis = f"{obj.nazwisko} {obj.imie_pierwsze}"
+        szczegoly = []
+        
+        if obj.data_urodzenia:
+            szczegoly.append(f"ur. {obj.data_urodzenia}")
+             
+        if szczegoly:
+            opis += f" ({', '.join(szczegoly)})"
+        return opis
+
+# =============================================================================
 # === POMOCNICZA FUNKCJA WALIDACJI NUMERACJI ===
 # =============================================================================
 def ustal_numer_aktu(model_class, rok, podany_nr, instance_pk=None):
@@ -64,6 +80,11 @@ def ustal_numer_aktu(model_class, rok, podany_nr, instance_pk=None):
 # === CHRZEST FORMULARZ ===
 # =============================================================================
 class ChrzestForm(BootstrapFormMixin, forms.ModelForm):
+    ochrzczony = OsobaChoiceField(
+        queryset=Osoba.objects.all().order_by('nazwisko', 'imie_pierwsze'),
+        label="Osoba ochrzczona",
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
     class Meta:
         model = Chrzest
         fields = [
@@ -83,6 +104,11 @@ class ChrzestForm(BootstrapFormMixin, forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
+        if "ochrzczony" in self.fields:
+            css = self.fields["ochrzczony"].widget.attrs.get("class", "")
+            self.fields["ochrzczony"].widget.attrs["class"] = (css + " js-osoba-select").strip()
+
+
         # Ukrywamy pole osoby, jeśli jest już ustawiona (np. przy dodawaniu z profilu)
         if self.initial.get("ochrzczony") and not self.instance.pk:
             self.fields["ochrzczony"].widget = forms.HiddenInput()
@@ -106,7 +132,10 @@ class ChrzestForm(BootstrapFormMixin, forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
         today = timezone.localdate()
+        parafia = cleaned_data.get("parafia")
 
+        if not parafia:
+            self.add_error("parafia", "Musisz wybrać parafię, w której odbył się chrzest.")
         # 1. Walidacja duplikatu osoby
         osoba = cleaned_data.get("ochrzczony")
         if osoba:
@@ -166,6 +195,12 @@ class ChrzestForm(BootstrapFormMixin, forms.ModelForm):
 # === I KOMUNIA ŚWIĘTA (ZMODYFIKOWANA)
 # =============================================================================
 class PierwszaKomuniaForm(BootstrapFormMixin, forms.ModelForm):
+    # ZMIANA: Ulepszone pole wyboru
+    osoba = OsobaChoiceField(
+        queryset=Osoba.objects.all().order_by('nazwisko', 'imie_pierwsze'),
+        label="Osoba",
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
     class Meta:
         model = PierwszaKomunia
         fields = ["osoba", "rok", "parafia", "uwagi_wew"]
@@ -200,6 +235,9 @@ class PierwszaKomuniaForm(BootstrapFormMixin, forms.ModelForm):
 
     def clean(self):
         cleaned = super().clean()
+        parafia = cleaned.get("parafia")
+        if not parafia:
+            self.add_error("parafia", "Musisz wybrać parafię I Komunii.")
         osoba = cleaned.get("osoba")
         if osoba:
             qs = PierwszaKomunia.objects.filter(osoba=osoba)
@@ -208,12 +246,27 @@ class PierwszaKomuniaForm(BootstrapFormMixin, forms.ModelForm):
             if qs.exists():
                 raise forms.ValidationError("Ta osoba ma już wpis I Komunii Świętej.")
         return cleaned
-
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # to pole, na którym chcesz mieć „live search”
+        if "osoba" in self.fields:
+            css = self.fields["osoba"].widget.attrs.get("class", "")
+            self.fields["osoba"].widget.attrs["class"] = (css + " js-osoba-select").strip()
 
 # =============================================================================
 # === BIERZMOWANIE
 # =============================================================================
 class BierzmowanieForm(BootstrapFormMixin, forms.ModelForm):
+    osoba = OsobaChoiceField(
+        queryset=Osoba.objects.all().order_by('nazwisko', 'imie_pierwsze'),
+        label="Kandydat do bierzmowania",
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    
+    szafarz = forms.ModelChoiceField(
+        queryset=Duchowny.objects.filter(aktywny=True).order_by("imie_nazwisko"),
+        required=False, label="Szafarz (Biskup)", empty_label="--- wybierz ---"
+    )
     parafia_nowa = forms.CharField(required=False, label="Albo wpisz nową parafię", widget=forms.TextInput(attrs={"class": "form-control"}))
     szafarz_nowy = forms.CharField(required=False, label="Albo wpisz nowego szafarza", widget=forms.TextInput(attrs={"class": "form-control"}))
 
@@ -231,6 +284,11 @@ class BierzmowanieForm(BootstrapFormMixin, forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
+        if "osoba" in self.fields:
+            css = self.fields["osoba"].widget.attrs.get("class", "")
+            self.fields["osoba"].widget.attrs["class"] = (css + " js-osoba-select").strip()
+
+
         # Rok jako Select
         biezacy_rok = timezone.now().year
         ZAKRES_LAT = range(biezacy_rok - 100, biezacy_rok + 6)
@@ -244,6 +302,16 @@ class BierzmowanieForm(BootstrapFormMixin, forms.ModelForm):
 
     def clean(self):
         cleaned = super().clean()
+
+        # --- WALIDACJA PARAFII (Lista LUB Ręczna) ---
+        parafia = cleaned.get("parafia")
+        parafia_reczna = cleaned.get("parafia_nazwa_reczna")
+        
+        if not parafia and not parafia_reczna:
+             msg = "Wybierz parafię z listy LUB wpisz nazwę ręcznie."
+             self.add_error("parafia", msg)
+             self.add_error("parafia_nazwa_reczna", msg)
+
         today = timezone.localdate()
         osoba = cleaned.get("osoba")
         if osoba:
@@ -299,6 +367,23 @@ class BierzmowanieForm(BootstrapFormMixin, forms.ModelForm):
 # === MAŁŻEŃSTWO
 # =============================================================================
 class MalzenstwoForm(BootstrapFormMixin, forms.ModelForm):
+    # ZMIANA: Ulepszone pola wyboru dla obu małżonków
+    malzonek_a = OsobaChoiceField(
+        queryset=Osoba.objects.all().order_by('nazwisko'),
+        label="Małżonek A (Mąż)",
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    malzonek_b = OsobaChoiceField(
+        queryset=Osoba.objects.all().order_by('nazwisko'),
+        label="Małżonek B (Żona)",
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    
+    swiadek_urzedowy = forms.ModelChoiceField(
+        queryset=Duchowny.objects.filter(aktywny=True),
+        required=False, label="Duchowny asystujący", empty_label="--- wybierz ---"
+    )
+
     malzonek_b = forms.ModelChoiceField(queryset=Osoba.objects.all().order_by("nazwisko", "imie_pierwsze"), label="Współmałżonek")
     parafia = forms.ModelChoiceField(queryset=Parafia.objects.all().order_by("nazwa"), required=False)
     parafia_opis_reczny = forms.CharField(required=False, widget=forms.TextInput())
@@ -328,8 +413,26 @@ class MalzenstwoForm(BootstrapFormMixin, forms.ModelForm):
         self.fields["malzonek_b"].queryset = Osoba.objects.order_by("nazwisko","imie_pierwsze")
         if self.fixed_malzonek_a: self.fields["malzonek_a"].required = False
 
+        if "osoba" in self.fields:
+            css = self.fields["osoba"].widget.attrs.get("class", "")
+            self.fields["osoba"].widget.attrs["class"] = (css + " js-osoba-select").strip()
+
     def clean(self):
         cleaned = super().clean()
+
+        parafia = cleaned.get("parafia")
+        parafia_reczna = cleaned.get("parafia_opis_reczny")
+        
+        if not parafia and not parafia_reczna:
+             msg = "Wybierz parafię ślubu z listy LUB wpisz nazwę ręcznie."
+             self.add_error("parafia", msg)
+             self.add_error("parafia_opis_reczny", msg)
+        
+        mA = cleaned.get("malzonek_a")
+        mB = cleaned.get("malzonek_b")
+        if mA and mB and mA == mB:
+            self.add_error("malzonek_b", "Małżonkowie muszą być różnymi osobami.")
+
         data_slubu = cleaned.get("data_slubu")
         rok = cleaned.get("rok")
         if not rok and data_slubu:
@@ -357,6 +460,18 @@ class MalzenstwoForm(BootstrapFormMixin, forms.ModelForm):
 # === NAMASZCZENIE CHORYCH
 # =============================================================================
 class NamaszczenieChorychForm(BootstrapFormMixin, forms.ModelForm):
+    # ZMIANA: Ulepszone pole wyboru
+    osoba = OsobaChoiceField(
+        queryset=Osoba.objects.all().order_by('nazwisko'),
+        label="Chory / Osoba",
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    
+    szafarz = forms.ModelChoiceField(
+        queryset=Duchowny.objects.filter(aktywny=True),
+        required=False, empty_label="--- wybierz ---"
+    )
+
     MIEJSCE_CHOICES = [
         ("Dom chorego", "Dom chorego"),
         ("Szpital", "Szpital"),
@@ -401,12 +516,25 @@ class NamaszczenieChorychForm(BootstrapFormMixin, forms.ModelForm):
             if osoba and getattr(osoba, 'data_urodzenia', None):
                 if data < osoba.data_urodzenia: self.add_error("data", "Data wcześniejsza niż urodzenie.")
         return cleaned
-
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # to pole, na którym chcesz mieć „live search”
+        if "osoba" in self.fields:
+            css = self.fields["osoba"].widget.attrs.get("class", "")
+            self.fields["osoba"].widget.attrs["class"] = (css + " js-osoba-select").strip()
 
 # =============================================================================
 # === ZGON
 # =============================================================================
 class ZgonForm(BootstrapFormMixin, forms.ModelForm):
+    # ZMIANA: Ulepszone pole wyboru
+    osoba = OsobaChoiceField(
+        queryset=Osoba.objects.all().order_by('nazwisko'),
+        label="Osoba zmarła",
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+
     class Meta:
         model = Zgon
         fields = [
@@ -429,6 +557,10 @@ class ZgonForm(BootstrapFormMixin, forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        if "osoba" in self.fields:
+            css = self.fields["osoba"].widget.attrs.get("class", "")
+            self.fields["osoba"].widget.attrs["class"] = (css + " js-osoba-select").strip()
         self.fields["osoba"].queryset = Osoba.objects.order_by("nazwisko", "imie_pierwsze")
         self.fields["osoba"].label = "Osoba zmarła"
         

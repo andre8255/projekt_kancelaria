@@ -24,12 +24,12 @@
     {% if osoba %}
       <a href="{% url 'osoba_szczegoly' osoba.pk %}" 
       class="btn btn-outline-secondary btn-sm">
-        Powrót
+       ⬅ Powrót
         </a>
      {% else %}
       <a href="{% url 'komunia_lista' %}" 
       class="btn btn-outline-secondary btn-sm">
-        Powrót
+        ⬅ Powrót
       </a>
     {% endif %}
   </div>
@@ -45,35 +45,38 @@
     {% endif %}
 
     {# --- OSOBA --- #}
-
-  <div class="row g-3 mb-3">
-   <div class="col-md-4">
-      <div class="d-flex justify-content-between align-items-start">
-        <label class="form-label small fw-semibold text-muted mb-0">
-          {{ form.osoba.label }}
-        </label>
-
-        <a href="{% url 'osoba_nowa' %}"
-           target="_blank"
-           class="btn btn-outline-primary btn-sm ms-2">
-          + Nowa osoba
-        </a>
-      </div>
-
-      {{ form.osoba }}
-      {% if form.osoba.errors %}
-        <div class="text-danger small">{{ form.osoba.errors }}</div>
-      {% endif %}
-
-      <div class="form-text small text-muted">
-        Jeśli osoby nie ma na liście, kliknij „Nowa osoba”, dodaj ją w nowej karcie, zapisz,
-        potem wróć tutaj i odśwież stronę.
-      </div>
-    </div>
-</div>
-    {# --- ROK (Z RÓŻDŻKĄ) --- #}
     <div class="row g-3 mb-3">
       <div class="col-md-4">
+          <div class="d-flex justify-content-between align-items-center">
+              <label class="form-label fw-bold mb-1">{{ form.osoba.label }}</label>
+              
+              {# Przycisk "Nowa osoba" widoczny tylko gdy wybieramy z listy (nie z profilu) #}
+              {% if not osoba %}
+                <a href="{% url 'osoba_nowa' %}" target="_blank" class="btn btn-outline-primary btn-sm">
+                    + Nowa osoba
+                </a>
+              {% endif %}
+          </div>
+          
+          {% if osoba %}
+              {# PRZYPADEK 1: Wejście z profilu osoby (zablokowane pole) #}
+              <input class="form-control" value="{{ osoba.nazwisko }} {{ osoba.imie_pierwsze }}" readonly>
+              <input type="hidden" name="{{ form.osoba.html_name }}" value="{{ osoba.pk }}">
+          {% else %}
+              {# PRZYPADEK 2: Wejście z listy (wybór z selecta) #}
+              {{ form.osoba }}
+              <div class="form-text">{{ form.osoba.help_text }}</div>
+              {% if not osoba %}
+                  <div class="form-text text-muted small">
+                      Jeśli osoby nie ma na liście, kliknij "+ Nowa osoba", dodaj ją.
+                  </div>
+              {% endif %}
+          {% endif %}
+          
+          {{ form.osoba.errors }}
+      </div>
+
+    <div class="col-md-4">
         <label class="form-label small fw-semibold text-muted">
           {{ form.rok.label }}
         </label>
@@ -93,8 +96,7 @@
         {% endif %}
       </div>
 
-    {# ================== PARAFIA ================== #}
-    <div class="col-md-4">
+<div class="col-md-4">
       <div class="d-flex justify-content-between align-items-start">
         <label class="form-label small fw-semibold text-muted mb-0">
           Parafia I Komunii Św.
@@ -115,10 +117,15 @@
       {% endif %}
 
       <div class="form-text small text-muted mb-2">
-        Wybierz z listy parafii. Jeśli nie ma — dodaj nową parafię powyżej w nowej karcie,
-        zapisz ją, a potem odśwież tę stronę.
+        Wybierz z listy parafii. Jeśli nie ma — dodaj nową parafię.
       </div>
   </div>
+
+</div>
+
+
+
+    
     {# --- UWAGI --- #}
     <div class="mb-3">
       <label class="form-label small fw-semibold text-muted">

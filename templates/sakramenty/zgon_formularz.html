@@ -37,20 +37,35 @@
       <div class="alert alert-danger small">{{ form.non_field_errors }}</div>
     {% endif %}
 
-    {# --- OSOBA ZMARŁA --- #}
+    {# ================== OSOBA ================== #}
     <div class="row g-3 mb-3">
       <div class="col-md-4">
         <div class="d-flex justify-content-between align-items-start">
-          <label class="form-label small fw-semibold text-muted mb-0">{{ form.osoba.label }}</label>
-          <a href="{% url 'osoba_nowa' %}" target="_blank" class="btn btn-outline-primary btn-sm ms-2">+ Nowa osoba</a>
+          <label class="form-label small fw-semibold text-muted mb-0">
+            {{ form.osoba.label }}
+          </label>
+          
+          {# Przycisk "Nowa osoba" tylko gdy wybieramy z listy #}
+          {% if not osoba %}
+            <a href="{% url 'osoba_nowa' %}" target="_blank" class="btn btn-outline-primary btn-sm ms-2">
+              + Nowa osoba
+            </a>
+          {% endif %}
         </div>
-        {{ form.osoba }}
+
+        {% if osoba %}
+            <input class="form-control" value="{{ osoba.nazwisko }} {{ osoba.imie_pierwsze }}" readonly>
+            <input type="hidden" name="{{ form.osoba.html_name }}" value="{{ osoba.pk }}">
+        {% else %}
+            {{ form.osoba }}
+            <div class="form-text small text-muted">
+              Jeśli osoby nie ma na liście, kliknij „Nowa osoba”, dodaj ją w nowej karcie, zapisz, a potem odśwież tę stronę.
+            </div>
+        {% endif %}
+        
         {% if form.osoba.errors %}
           <div class="text-danger small">{{ form.osoba.errors }}</div>
         {% endif %}
-        <div class="form-text small text-muted">
-           Jeśli zmarłego brak na liście – dodaj go w nowej karcie, zapisz i odśwież tutaj.
-        </div>
       </div>
       <!--
       <div class="col-md-2">

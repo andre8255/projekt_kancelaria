@@ -9,6 +9,8 @@
   <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'vendor/bootstrap-icons/bootstrap-icons.min.css' %}">
   <link rel="stylesheet" href="{% static 'css/theme.css' %}">
+  <link rel="stylesheet" href="{% static 'vendor/tom-select/tom-select.bootstrap5.min.css' %}">
+
 
   <style>
       /* Ulepszenia dropdownów */
@@ -128,6 +130,9 @@
             </li>
           </ul>
         </li>
+                
+
+
 
         {# --- MSZE --- #}
         <li class="nav-item dropdown me-2">
@@ -146,6 +151,14 @@
                 </a>
             </li>
           </ul>
+        </li>
+
+
+{# --- CMENTARZ --- #}
+        <li class="nav-item">
+          <a class="nav-link fw-medium" href="{% url 'cmentarz:grob_lista' %}">
+            Cmentarz
+          </a>
         </li>
 
         {# --- SŁOWNIKI --- #}
@@ -374,6 +387,20 @@
       }
     });
   })();
+</script>
+
+<script src="{% static 'vendor/tom-select/tom-select.complete.min.js' %}"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".js-osoba-select").forEach(function (el) {
+      new TomSelect(el, {
+        create: false,
+        sortField: { field: "text", direction: "asc" },
+        maxOptions: 500,       // możesz zmienić jak masz dużo osób
+        placeholder: "Wybierz osobę..."
+      });
+    });
+  });
 </script>
 </body>
 </html>

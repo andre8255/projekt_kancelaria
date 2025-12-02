@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @page { size: A4; margin: 2cm; }
+        body { font-family: "Times New Roman", serif; font-size: 12pt; }
+        .header { text-align: center; margin-bottom: 1cm; }
+        .title { font-size: 18pt; font-weight: bold; text-transform: uppercase; margin-bottom: 0.5cm; }
+        
+        .status-box {
+            border: 2px solid #000;
+            padding: 10px;
+            margin: 20px 0;
+            text-align: center;
+            font-weight: bold;
+        }
+        .expired { border-color: red; color: red; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        td, th { border: 1px solid #ccc; padding: 8px; }
+        th { background: #eee; text-align: left; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <b>{{ parafia.nazwa }}</b><br>
+    </div>
+
+    <div class="title" style="text-align: center;">KARTA GROBU</div>
+
+    <table style="margin-bottom: 20px;">
+        <tr>
+            <th style="width: 30%;">Sektor / Kwatera:</th>
+            <td>{{ grob.sektor.nazwa }}</td>
+        </tr>
+        <tr>
+            <th>Numer grobu:</th>
+            <td>{{ grob.numer }}</td>
+        </tr>
+        <tr>
+            <th>Typ:</th>
+            <td>{{ grob.get_typ_display }}</td>
+        </tr>
+        <tr>
+            <th>Dysponent:</th>
+            <td>{{ grob.dysponent|default:"Nieustalony" }}</td>
+        </tr>
+    </table>
+
+    {% if grob.status_oplaty == 'EXPIRED' %}
+        <div class="status-box expired">
+            UWAGA: WAŻNOŚĆ GROBU WYGASŁA DNIA {{ grob.wazny_do|date:"d.m.Y" }}<br>
+            PROSIMY O PILNY KONTAKT Z KANCELARIĄ.
+        </div>
+    {% else %}
+        <div class="status-box">
+            Opłacony do dnia: {{ grob.wazny_do|date:"d.m.Y" }}
+        </div>
+    {% endif %}
+
+    <h3>Osoby pochowane w tym grobie:</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Imię i Nazwisko</th>
+                <th>Data pochowania</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in grob.pochowani.all %}
+            <tr>
+                <td>{{ p.osoba.imie_pierwsze }} {{ p.osoba.nazwisko }}</td>
+                <td>{{ p.data_pochowania|date:"d.m.Y" }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="2" style="text-align:center">Brak danych o pochówkach</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div style="margin-top: 2cm; font-size: 10pt; text-align: center;">
+        Wygenerowano z systemu kancelaryjnego dnia {{ today|date:"d.m.Y" }}
+    </div>
+</body>
+</html>

@@ -1,0 +1,26 @@
+{% extends "base_panel.html" %}
+
+{% block content %}
+<div class="container mt-5" style="max-width: 500px;">
+    <div class="card border-danger shadow-sm">
+        <div class="card-header bg-danger text-white fw-bold">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> Potwierdź usunięcie
+        </div>
+        <div class="card-body text-center p-4">
+            <h5 class="mb-3">Czy na pewno chcesz usunąć grób?</h5>
+            <p class="lead fw-bold text-dark">Sektor {{ object }}</p>
+            
+            <div class="alert alert-warning small text-start">
+                <i class="bi bi-info-circle"></i>
+                Usunięcie grobu spowoduje również usunięcie informacji o osobach w nim pochowanych (tylko relacji z grobem, kartoteki osobowe pozostaną).
+            </div>
+
+            <form method="post" class="d-flex justify-content-center gap-2 mt-4">
+                {% csrf_token %}
+                <a href="{% url 'cmentarz:grob_szczegoly' object.pk %}" class="btn btn-secondary">Anuluj</a>
+                <button type="submit" class="btn btn-danger">Tak, usuń grób</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

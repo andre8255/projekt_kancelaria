@@ -93,6 +93,7 @@ class Msza(models.Model):
 
 # ... model IntencjaMszy bez zmian ...
 class IntencjaMszy(models.Model):
+
     msza = models.ForeignKey(
         Msza,
         on_delete=models.CASCADE,
@@ -109,16 +110,26 @@ class IntencjaMszy(models.Model):
         blank=True,
         help_text="Np. Rodzina Kowalskich"
     )
-    ofiara = models.CharField(
-        "Ofiara",
-        max_length=120,
-        blank=True,
-        help_text="Kwota / dar (tylko do użytku kancelarii)"
-    )
+
     uwagi = models.TextField(
         "Uwagi wewnętrzne",
         blank=True,
         help_text="Np. 'zarezerwowano telefonicznie'"
+    )
+
+    STATUS_NIEOPLACONA = "NIEOPLACONA"
+    STATUS_OPLACONA = "OPLACONA"
+
+    STATUS_OPLATY_CHOICES = [
+        (STATUS_NIEOPLACONA, "Nieopłacona"),
+        (STATUS_OPLACONA, "Opłacona"),
+    ]
+
+    status_oplaty = models.CharField(
+        "Status opłaty",
+        max_length=12,
+        choices=STATUS_OPLATY_CHOICES,
+        default=STATUS_NIEOPLACONA,
     )
 
     class Meta:

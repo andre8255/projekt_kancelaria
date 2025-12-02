@@ -1,0 +1,38 @@
+{% extends "base_panel.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h4 mb-0">Sektory / Kwatery</h1>
+  <div class="d-flex gap-2">
+      <a href="{% url 'cmentarz:sektor_nowy' %}" class="btn btn-primary btn-sm">+ Nowy Sektor</a>
+      <a href="{% url 'cmentarz:grob_lista' %}" class="btn btn-outline-secondary btn-sm">Wróć do cmentarza</a>
+  </div>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-body p-0">
+    <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+            <tr>
+                <th>Nazwa sektora</th>
+                <th>Opis</th>
+                <th>Liczba grobów</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in sektory %}
+            <tr>
+                <td class="fw-bold">{{ s.nazwa }}</td>
+                <td>{{ s.opis|default:"-" }}</td>
+                <td>
+                    <span class="badge bg-secondary">{{ s.groby.count }}</span>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="3" class="text-center p-4 text-muted">Brak zdefiniowanych sektorów.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

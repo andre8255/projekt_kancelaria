@@ -14,7 +14,7 @@ urlpatterns = [
     path("", root_redirect, name="root"),
     path("admin/", admin.site.urls),
     path("", include("konta.urls")),
-    
+    path("panel/cmentarz/", include(("cmentarz.urls", "cmentarz"), namespace="cmentarz")),
    # path('konta/', include('konta.urls')),
 
     path("panel/", include("osoby.urls")),
@@ -22,6 +22,8 @@ urlpatterns = [
     path("panel/", include("msze.urls")),
     path("panel/", include("sakramenty.urls")),
     path("panel/", include("slowniki.urls")),
+
+    
 ]
 
 if settings.DEBUG:

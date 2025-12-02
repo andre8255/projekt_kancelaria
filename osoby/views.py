@@ -20,6 +20,7 @@ from konta.models import BackupUstawienia
 from konta.utils_backup import czy_backup_jest_nalezny, wykonaj_backup_bazy
 from konta.utils import zapisz_log
 from django.db.models.deletion import ProtectedError
+from cmentarz.models import Grob
 
 # Importy ról
 from konta.mixins import RolaWymaganaMixin
@@ -57,145 +58,74 @@ class PanelStartView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-
-        # --- AUTO BACKUP: bardzo prosta, czytelna logika ---
-        try:
-            ust = BackupUstawienia.get_solo()
-        except Exception:
-            ust = None
-
-        if ust and ust.włączony:
-            now = timezone.now()
-            today = now.date()
-            last = ust.ostatni_backup
-            should_backup = False
-
-            # sprawdzamy, czy godzina już minęła
-            if ust.godzina:
-                if now.time() < ust.godzina:
-                    should_backup = False
-                else:
-                    # dopiero po tej godzinie możemy w ogóle myśleć o backupie
-                    should_backup = True
-            else:
-                # na wszelki wypadek: jeśli brak godziny, pozwalamy
-                should_backup = True
-
-            if should_backup:
-                # dodatkowe warunki zależne od częstotliwości
-                if ust.czestotliwosc == BackupUstawienia.CZESTOTLIWOSC_DAILY:
-                    if not last or last.date() < today:
-                        should_backup = True
-                    else:
-                        should_backup = False
-
-                elif ust.czestotliwosc == BackupUstawienia.CZESTOTLIWOSC_WEEKLY:
-                    mapa_dni = {
-                        "mon": 0, "tue": 1, "wed": 2,
-                        "thu": 3, "fri": 4, "sat": 5, "sun": 6,
-                    }
-                    target_dow = mapa_dni.get(ust.dzien_tygodnia, 0)
-                    if now.weekday() == target_dow:
-                        if not last or last.date() < today:
-                            should_backup = True
-                        else:
-                            should_backup = False
-                    else:
-                        should_backup = False
-
-                elif ust.czestotliwosc == BackupUstawienia.CZESTOTLIWOSC_MONTHLY:
-                    if now.day == 1:
-                        if not last:
-                            should_backup = True
-                        else:
-                            last_ym = (last.year, last.month)
-                            now_ym = (now.year, now.month)
-                            should_backup = last_ym < now_ym
-                    else:
-                        should_backup = False
-
-                elif ust.czestotliwosc == BackupUstawienia.CZESTOTLIWOSC_NEVER:
-                    should_backup = False
-
-            if should_backup:
-                try:
-                    wykonaj_backup_bazy(self.request, powod="AUTO")
-                    messages.info(
-                        self.request,
-                        "Wykonano automatyczną kopię zapasową bazy danych."
-                    )
-                except Exception as e:
-                    messages.error(
-                        self.request,
-                        f"Nie udało się wykonać automatycznego backupu: {e}"
-                    )
-
-        # ===== DALSZA CZĘŚĆ – TWOJE ISTNIEJĄCE STATYSTYKI / KALENDARZ =====
-
-        # Dziś (używane do sprawdzania czy dzień jest "dzisiejszy")
         today_real = timezone.localdate()
 
-        # --- 1. STATYSTYKI I WIDŻETY ---
+        # --- STATYSTYKI ---
         ctx["stats"] = {
             "osoby": Osoba.objects.count(),
             "rodziny": Rodzina.objects.count(),
             "chrzty": Chrzest.objects.count(),
             "bierzmowania": Bierzmowanie.objects.count(),
             "sluby": Malzenstwo.objects.count(),
+            "groby": Grob.objects.count(), # Dodano licznik grobów
         }
+        
+        # --- POWIADOMIENIA O GROBACH (NAPRAWIONE) ---
+        # Szukamy grobów, których ważność minęła (wazny_do < dzis)
+        ctx["groby_po_terminie"] = Grob.objects.filter(
+            wazny_do__isnull=False,
+            wazny_do__lt=today_real
+        ).count()
 
+        # --- NAJBLIŻSZE MSZE ---
         ctx["msze_najblizsze"] = (
             Msza.objects.filter(data__gte=today_real)
             .order_by("data", "godzina")
             .prefetch_related("intencje")[:8]
         )
 
+        # --- OSTATNIE WPISY ---
         ctx["ostatnie_chrzty"] = Chrzest.objects.select_related("ochrzczony").order_by("-id")[:5]
         ctx["ostatnie_sluby"] = (
             Malzenstwo.objects.select_related("malzonek_a", "malzonek_b").order_by("-id")[:5]
         )
 
-        # ===== 2. MINI KALENDARZ (LOGIKA ZMIANY MIESIĘCY) =====
-
-        # Pobieramy parametry z URL (np. ?year=2025&month=12)
+        # ===== MINI KALENDARZ =====
+        # 1. Parametry
         req_year = self.request.GET.get("year")
         req_month = self.request.GET.get("month")
 
-        # Ustalamy rok i miesiąc do wyświetlenia
         try:
             if req_year and req_month:
                 year = int(req_year)
                 month = int(req_month)
-                if month < 1 or month > 12:
-                    raise ValueError
+                if month < 1 or month > 12: raise ValueError
             else:
                 year, month = today_real.year, today_real.month
         except (ValueError, TypeError):
             year, month = today_real.year, today_real.month
 
-        first_day = date(year, month, 1)
-
+        # 2. Nawigacja
         if month == 1:
-            prev_year = year - 1
-            prev_month = 12
+            prev_year, prev_month = year - 1, 12
         else:
-            prev_year = year
-            prev_month = month - 1
-
+            prev_year, prev_month = year, month - 1
+        
         if month == 12:
-            next_year = year + 1
-            next_month = 1
+            next_year, next_month = year + 1, 1
         else:
-            next_year = year
-            next_month = month + 1
+            next_year, next_month = year, month + 1
 
         ctx["nav_prev"] = f"?year={prev_year}&month={prev_month}"
         ctx["nav_next"] = f"?year={next_year}&month={next_month}"
         ctx["nav_current"] = f"?year={today_real.year}&month={today_real.month}"
 
-        next_month_first_day = date(next_year, next_month, 1)
-        last_day = next_month_first_day - timedelta(days=1)
+        # 3. Zakres dat
+        first_day = date(year, month, 1)
+        next_month_first = date(next_year, next_month, 1)
+        last_day = next_month_first - timedelta(days=1)
 
+        # 4. Dane
         msze = (
             Msza.objects.filter(data__gte=first_day, data__lte=last_day)
             .order_by("data", "godzina")
@@ -208,6 +138,7 @@ class PanelStartView(LoginRequiredMixin, TemplateView):
             if m.intencje.exists():
                 rec["busy"] += 1
 
+        # 5. Kalendarz
         cal = calendar.Calendar(firstweekday=calendar.MONDAY)
         raw_weeks = cal.monthdatescalendar(year, month)
 
@@ -234,8 +165,8 @@ class PanelStartView(LoginRequiredMixin, TemplateView):
             "weeks": weeks_data,
             "month_label": f"{PL_MIESIACE[month]} {year}",
         }
-
         ctx["dni_tyg"] = ["pn", "wt", "śr", "czw", "pt", "sob", "nd"]
+
         return ctx
 
 

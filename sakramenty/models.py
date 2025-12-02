@@ -3,6 +3,7 @@ from django.db import models
 from django.urls import reverse
 from osoby.models import Osoba
 from slowniki.models import Parafia, Duchowny, Wyznanie
+from cmentarz.models import Grob
 
 
 # =============================================================================
@@ -463,6 +464,16 @@ class Zgon(models.Model):
         upload_to="skany/zgony/",
         null=True,
         blank=True
+    )
+
+    grob = models.ForeignKey(
+        Grob,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="pochowki",
+        verbose_name="Grób",
+        help_text="Grób, w którym pochowano zmarłego (jeśli dotyczy)."
     )
     
     class Meta:

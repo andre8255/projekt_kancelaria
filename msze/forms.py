@@ -4,6 +4,7 @@ from django.utils import timezone
 from .models import Msza, IntencjaMszy, TypMszy
 from slowniki.models import Duchowny
 
+
 class BootstrapFormMixin:
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -16,6 +17,7 @@ class BootstrapFormMixin:
                 widget.attrs["class"] = (existing + " form-control").strip()
             if not widget.attrs.get("placeholder") and field.label:
                 widget.attrs["placeholder"] = field.label
+
 
 class MszaForm(BootstrapFormMixin, forms.ModelForm):
     celebrans = forms.ModelChoiceField(
@@ -38,10 +40,11 @@ class MszaForm(BootstrapFormMixin, forms.ModelForm):
         ]
         widgets = {
             "data": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
-            "godzina": forms.TimeInput(attrs={"type": "time"}, format="%Y-%m-%d"),
-            "uwagi": forms.Textarea(attrs={"rows":3}),
+            # TU MIAŁEŚ LITERÓWKĘ W FORMACIE – poprawiam na %H:%M
+            "godzina": forms.TimeInput(attrs={"type": "time"}, format="%H:%M"),
+            "uwagi": forms.Textarea(attrs={"rows": 3}),
         }
-        
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["data"].input_formats = ["%Y-%m-%d", "%d.%m.%Y", "%d-%m-%Y"]
@@ -52,7 +55,7 @@ class MszaForm(BootstrapFormMixin, forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        
+
         # 1. Logika celebransa
         celebrans = cleaned_data.get("celebrans")
         opis = cleaned_data.get("celebrans_opis")
@@ -63,15 +66,14 @@ class MszaForm(BootstrapFormMixin, forms.ModelForm):
         typ = cleaned_data.get("typ")
         data = cleaned_data.get("data")
 
-        # Sprawdzamy czy wybrano typ "Niedzielna" i czy data jest poprawna
         if typ == TypMszy.NIEDZIELNA and data:
-            # Python: 0=Poniedziałek, ..., 6=Niedziela
+            # 0=pn ... 6=nd
             if data.weekday() != 6:
                 self.add_error(
-                    "data", 
+                    "data",
                     "Wybrano typ 'Niedzielna', ale ta data nie przypada w niedzielę."
                 )
-        
+
         return cleaned_data
 
     def clean_data(self):
@@ -82,16 +84,15 @@ class MszaForm(BootstrapFormMixin, forms.ModelForm):
                 raise forms.ValidationError("Data mszy nie może być wcześniejsza niż dzisiejsza.")
         return data
 
+
 class IntencjaForm(BootstrapFormMixin, forms.ModelForm):
     class Meta:
         model = IntencjaMszy
-        fields = [
-            "tresc",
-            "zamawiajacy",
-            "ofiara",
-            "uwagi",
-        ]
+        # UWAGA: bez pola "ofiara", z nowym polem "status_oplaty"
+        fields = ["tresc", "zamawiajacy", "status_oplaty", "uwagi"]
         widgets = {
-            "tresc": forms.Textarea(attrs={"rows":3}),
-            "uwagi": forms.Textarea(attrs={"rows":3}),
+            "tresc": forms.Textarea(attrs={"rows": 3}),
+            "zamawiajacy": forms.TextInput(),
+            "status_oplaty": forms.Select(),
+            "uwagi": forms.Textarea(attrs={"rows": 2}),
         }

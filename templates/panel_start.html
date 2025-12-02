@@ -280,6 +280,22 @@
     </div>
   </div>
 
+{% if cmentarz_alert.lacznie %}
+  <div class="alert alert-warning small d-flex align-items-center" role="alert">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+    <div>
+      Uwaga: {{ cmentarz_alert.po_terminie }} grobów po terminie dzierżawy,
+      {{ cmentarz_alert.do_6_miesiecy }} wygasa w ciągu 6 miesięcy.
+      <a href="{% url 'cmentarz:grob_lista' %}?status=po_terminie" class="alert-link">
+        Zobacz na liście cmentarza.
+      </a>
+    </div>
+  </div>
+{% endif %}
+
+
+
+
   {# Ostatnie wpisy #}
   <div class="col-lg-6">
     <div class="card shadow-sm border-0 mb-4">

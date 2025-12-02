@@ -1,0 +1,86 @@
+{% extends "base_panel.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h4 mb-0">
+      {% if object %}Edycja grobu: {{ object }}{% else %}Nowy grób{% endif %}
+  </h1>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-body">
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      
+      {% if form.non_field_errors %}
+        <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+      {% endif %}
+
+      <h6 class="text-uppercase text-muted small fw-bold mb-3">Lokalizacja</h6>
+      <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <label class="form-label small fw-bold">{{ form.sektor.label }}</label>
+            {{ form.sektor }}
+            {{ form.sektor.errors }}
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small fw-bold">{{ form.rzad.label }}</label>
+            {{ form.rzad }}
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small fw-bold">{{ form.numer.label }}</label>
+            {{ form.numer }}
+            {{ form.numer.errors }}
+        </div>
+        
+        <div class="col-md-3">
+            <label class="form-label small fw-bold">{{ form.typ.label }}</label>
+            {{ form.typ }}
+        </div>
+      </div>
+
+      <h6 class="text-uppercase text-muted small fw-bold mb-3">Własność i Płatności</h6>
+      <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <label class="form-label small fw-bold">{{ form.dysponent.label }}</label>
+            {{ form.dysponent }}
+            <div class="form-text small">Osoba odpowiedzialna za opłacanie miejsca.</div>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small fw-bold">{{ form.data_oplaty.label }}</label>
+            {{ form.data_oplaty }}
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small fw-bold">{{ form.wazny_do.label }}</label>
+            {{ form.wazny_do }}
+            <div class="form-text small">Puste = automat (+20 lat)</div>
+        </div>
+      </div>
+
+      <h6 class="text-uppercase text-muted small fw-bold mb-3">Inne</h6>
+      <div class="row g-3 mb-3">
+          <div class="col-md-12">
+              <label class="form-label small fw-bold">{{ form.uwagi.label }}</label>
+              {{ form.uwagi }}
+          </div>
+          </div>
+          <div class="row g-3 mb-3"></div>
+
+          <div class="col-md-6">
+              <label class="form-label small fw-bold">{{ form.zdjecie.label }}</label>
+              {{ form.zdjecie }}
+          </div>
+      </div>
+
+      <div class="border-top pt-3 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Zapisz</button>
+        {% if object %}
+            <a href="{% url 'cmentarz:grob_szczegoly' object.pk %}" class="btn btn-outline-secondary">Anuluj</a>
+        {% else %}
+            <a href="{% url 'cmentarz:grob_lista' %}" class="btn btn-outline-secondary">Anuluj</a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

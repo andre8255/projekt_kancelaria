@@ -184,16 +184,18 @@
 
     {# --- RODZICE --- #}
     <div class="row g-3 mb-3">
+      <!--
       <div class="col-md-4">
         <label class="form-label small fw-semibold text-muted">{{ form.ojciec.label }}</label>
         {{ form.ojciec }}
         {% if form.ojciec.errors %}<div class="text-danger small">{{ form.ojciec.errors }}</div>{% endif %}
       </div>
+      -->
       <div class="col-md-4">
         <label class="form-label small fw-semibold text-muted">{{ form.ojciec_wyznanie.label }}</label>
         {{ form.ojciec_wyznanie }}
       </div>
-    </div>
+  <!--  </div>
 
     <div class="row g-3 mb-3">
       <div class="col-md-4">
@@ -203,12 +205,12 @@
       <div class="col-md-4">
         <label class="form-label small fw-semibold text-muted">{{ form.nazwisko_matki_rodowe.label }}</label>
         {{ form.nazwisko_matki_rodowe }}
-      </div>
+      </div>-->
       <div class="col-md-4">
         <label class="form-label small fw-semibold text-muted">{{ form.matka_wyznanie.label }}</label>
         {{ form.matka_wyznanie }}
       </div>
-    </div>
+ <!--   </div>-->
 
     {# --- UWAGI I SKAN --- #}
     <div class="mb-3">

@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     "sakramenty.apps.SakramentyConfig",
     "slowniki",
     "konfiguracja",
+    "cmentarz",
 
 
 ]

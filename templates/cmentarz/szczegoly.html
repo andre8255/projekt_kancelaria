@@ -1,0 +1,174 @@
+{% extends "base_panel.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-3">
+  <div>
+      <h1 class="h4 mb-1">Grób: {{ grob.sektor }} / {{ grob.numer }}</h1>
+      <div class="text-muted small">{{ grob.get_typ_display }}</div>
+  </div>
+
+  <div class="d-flex gap-2 flex-wrap">
+    <a href="{% url 'cmentarz:grob_pdf' grob.pk %}" target="_blank" class="btn btn-outline-secondary btn-sm">
+        📄 Karta Grobu (PDF)
+    </a>
+    <a href="{% url 'cmentarz:grob_edytuj' grob.pk %}" class="btn btn-outline-secondary btn-sm">
+        ✏️ Edytuj
+    </a>
+    <a href="{% url 'cmentarz:grob_usun' grob.pk %}" class="btn btn-outline-danger btn-sm">
+        🗑️ Usuń
+    </a>
+    <a href="{% url 'cmentarz:grob_lista' %}" class="btn btn-outline-secondary btn-sm">
+       ⬅ Powrót
+    </a>
+  </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-5">
+        
+
+
+        <div class="card shadow-sm mb-3">
+            <div class="card-header fw-bold">Dane grobu</div>
+            <div class="card-body small">
+                <p class="mb-1"><strong>Sektor:</strong> {{ grob.sektor.nazwa }}</p>
+                <p class="mb-1"><strong>Numer:</strong> {{ grob.numer }}</p>
+                <p class="mb-1"><strong>Rząd:</strong> {{ grob.rzad|default:"-" }}</p>
+                <p class="mb-1"><strong>Typ:</strong> {{ grob.get_typ_display }}</p>
+                <hr>
+                <p class="mb-1"><strong>Dysponent (Opiekun):</strong></p>
+                {% if grob.dysponent %}
+                    <a href="{% url 'osoba_szczegoly' grob.dysponent.pk %}" class="fw-bold text-decoration-none">
+                        {{ grob.dysponent }}
+                    </a>
+                    <div class="text-muted">{{ grob.dysponent.adres_display }}</div>
+                {% else %}
+                    <span class="text-danger fst-italic">Brak przypisanego dysponenta</span>
+                {% endif %}
+            </div>
+        </div>
+
+
+
+
+
+
+        
+
+        
+
+        {% if grob.zdjecie %}
+        <div class="card shadow-sm">
+            <div class="card-header fw-bold">Zdjęcie nagrobka</div>
+            <div class="card-body p-0">
+                <img src="{{ grob.zdjecie.url }}" class="img-fluid rounded-bottom" alt="Zdjęcie grobu">
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+
+    <div class="col-md-7">
+
+<div class="card shadow-sm mb-3">
+            <div class="card-header fw-bold">Status Opłaty (Prolongata)</div>
+            <div class="card-body text-center">
+                {% if grob.status_oplaty == 'OK' %}
+                    <div class="display-6 text-success mb-2"><i class="bi bi-check-circle-fill"></i></div>
+                    <h5 class="text-success">Opłacony</h5>
+                    <p class="text-muted mb-0">Ważny do: <strong>{{ grob.wazny_do|date:"d.m.Y" }}</strong></p>
+                
+                {% elif grob.status_oplaty == 'WARNING' %}
+                    <div class="display-6 text-warning mb-2"><i class="bi bi-exclamation-circle-fill"></i></div>
+                    <h5 class="text-warning text-dark">Wygasa wkrótce</h5>
+                    <p class="mb-0">Ważny do: <strong>{{ grob.wazny_do|date:"d.m.Y" }}</strong></p>
+                
+                {% elif grob.status_oplaty == 'EXPIRED' %}
+                    <div class="display-6 text-danger mb-2"><i class="bi bi-x-circle-fill"></i></div>
+                    <h5 class="text-danger">Wygasł!</h5>
+                    <p class="text-danger fw-bold mb-0">Ważność minęła: {{ grob.wazny_do|date:"d.m.Y" }}</p>
+                    <div class="mt-2 small text-muted">Ostatnia wpłata: {{ grob.data_oplaty|date:"d.m.Y" }}</div>
+
+                {% else %}
+                    <div class="text-muted">Brak danych o dacie ważności.</div>
+                {% endif %}
+            </div>
+        </div>
+
+
+
+        <div class="card shadow-sm h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span class="fw-bold">Osoby pochowane</span>
+                <a href="{% url 'cmentarz:pochowany_nowy' grob.pk %}" class="btn btn-primary btn-sm">
+                    + Dodaj osobę
+                </a>
+            </div>
+            <div class="card-body p-0">
+                {% if grob.pochowani.exists %}
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light small">
+                            <tr>
+                                <th>Osoba</th>
+                                <th>Daty (ur. - zm.)</th>
+                                <th>Data pogrzebu</th>
+                                <th class="text-end"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in grob.pochowani.all %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'osoba_szczegoly' p.osoba.pk %}" class="fw-bold text-dark text-decoration-none">
+                                        {{ p.osoba.nazwisko }} {{ p.osoba.imie_pierwsze }}
+                                    </a>
+                                </td>
+                                
+                                {# --- NOWA KOLUMNA: Daty urodzenia i zgonu --- #}
+                                <td class="small">
+                                    <div>
+                                        <span class="text-muted">ur.</span> 
+                                        {{ p.osoba.data_urodzenia|date:"d.m.Y"|default:"—" }}
+                                    </div>
+                                    <div >
+                                        <span class="text-muted">zm.</span> 
+                                        {# Sprawdzamy czy jest wpisany zgon w osobie lub w tabeli Zgon #}
+                                        {% if p.osoba.data_zgonu %}
+                                            {{ p.osoba.data_zgonu|date:"d.m.Y" }}
+                                        {% elif p.osoba.zgon %}
+                                            {{ p.osoba.zgon.data_zgonu|date:"d.m.Y"|default:"—" }}
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </div>
+                                </td>
+
+                                <td>
+                                    {{ p.data_pochowania|date:"d.m.Y" }}
+                                </td>
+
+                                <td class="text-end">
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{% url 'osoba_szczegoly' p.osoba.pk %}" class="btn btn-outline-secondary" title="Karta osoby">
+                                            <i class="bi bi-person-lines-fill"></i>
+                                        </a>
+                                        <a href="{% url 'cmentarz:pochowany_usun' p.pk %}" class="btn btn-outline-danger" title="Usuń z grobu">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <div class="p-4 text-center text-muted">
+                        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                        W tym grobie nie ma jeszcze odnotowanych osób pochowanych.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

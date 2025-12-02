@@ -38,7 +38,8 @@
       <div class="card-body small">
         <p><strong>Data:</strong> {{ msza.data }}</p>
         <p><strong>Godzina:</strong> {{ msza.godzina }}</p>
-        <p><strong>Rodzaj:</strong> {{ msza.get_typ_display }}</p> <p><strong>Miejsce:</strong> {{ msza.miejsce }}</p>
+        <p><strong>Rodzaj:</strong> {{ msza.get_typ_display }}</p>
+        <p><strong>Miejsce:</strong> {{ msza.miejsce }}</p>
         
         {% if msza.celebrans %}
           <p><strong>Celebrans:</strong> {{ msza.celebrans }}</p>
@@ -71,7 +72,7 @@
             <tr>
               <th>Treść intencji</th>
               <th>Zamawiający</th>
-              <th>Ofiara</th>
+              <th>Status opłaty</th>
               <th class="text-end">Akcje</th> 
             </tr>
           </thead>
@@ -87,13 +88,23 @@
                   {% endif %}
                 </td>
                 <td class="small">{{ i.zamawiajacy }}</td>
-                <td class="small">{{ i.ofiara }}</td>
+                <td class="small">
+                  {% if i.status_oplaty == "OPLACONA" %}
+                    <span class="badge bg-success-subtle text-success border border-success">
+                      {{ i.get_status_oplaty_display }}
+                    </span>
+                  {% else %}
+                    <span class="badge bg-danger-subtle text-danger border border-danger">
+                      {{ i.get_status_oplaty_display }}
+                    </span>
+                  {% endif %}
+                </td>
                 <td class="text-end">
                   <a href="{% url 'intencja_edytuj' i.pk %}" class="btn btn-outline-secondary btn-sm me-1">
-                     Edytuj
+                    <i class="bi bi-pencil"></i> Edytuj
                   </a>
                   <a href="{% url 'intencja_usun' i.pk %}" class="btn btn-outline-danger btn-sm">
-                    Usuń
+                    <i class="bi bi-trash"></i> Usuń
                   </a>
                 </td>
               </tr>

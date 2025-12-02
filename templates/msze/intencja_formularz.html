@@ -18,7 +18,7 @@
 
   <div class="d-flex gap-2">
     <a href="{{ msza.get_absolute_url }}" class="btn btn-outline-secondary btn-sm">
-      Powrót
+     ⬅ Powrót
     </a>
   </div>
 </div>
@@ -31,60 +31,66 @@
       {{ form.non_field_errors }}
     </div>
   {% endif %}
-<div class="row g-3 mb-3">
+
   <div class="card shadow-sm border-0">
     <div class="card-body p-4">
-      <div class="col-md-4">
-        <label class="form-label small text-muted fw-semibold">
-          {{ form.tresc.label }}
-        </label>
-        {{ form.tresc }}
-        {% if form.tresc.errors %}
-        <div class="text-danger small">{{ form.tresc.errors }}</div>
-        {% else %}
-        <div class="form-text small">
-          Przykład: "+ Jan Kowalski od żony i dzieci".
+
+      <div class="row g-3 mb-3">
+        <div class="col-12">
+          <label class="form-label small text-muted fw-semibold">
+            {{ form.tresc.label }}
+          </label>
+          {{ form.tresc }}
+          {% if form.tresc.errors %}
+            <div class="text-danger small">{{ form.tresc.errors }}</div>
+          {% else %}
+            <div class="form-text small">
+              Przykład: „+ Jan Kowalski od żony i dzieci”.
+            </div>
+          {% endif %}
         </div>
-        {% endif %}
-      </div>
-</div>
-
-<div class="row g-3 mb-3">
-       <div class="col-md-4">
-        <label class="form-label small text-muted fw-semibold">
-          {{ form.zamawiajacy.label }}
-        </label>
-        {{ form.zamawiajacy }}
-        {% if form.zamawiajacy.errors %}
-        <div class="text-danger small">{{ form.zamawiający.errors }}</div>
-        {% else %}
-        <div class="form-text small">Kto zamówił intencję.</div>
-        {% endif %}
       </div>
 
-       <div class="col-md-4">
-        <label class="form-label small text-muted fw-semibold">
-          {{ form.ofiara.label }}
-        </label>
-        {{ form.ofiara }}
-        {% if form.ofiara.errors %}
-        <div class="text-danger small">{{ form.ofiara.errors }}</div>
-        {% else %}
-        <div class="form-text small">Kwota/dar (dla kancelarii, nie drukujemy).</div>
-        {% endif %}
+      <div class="row g-3 mb-3">
+        <div class="col-md-4">
+          <label class="form-label small text-muted fw-semibold">
+            {{ form.zamawiajacy.label }}
+          </label>
+          {{ form.zamawiajacy }}
+          {% if form.zamawiajacy.errors %}
+            <div class="text-danger small">{{ form.zamawiajacy.errors }}</div>
+          {% else %}
+            <div class="form-text small">Kto zamówił intencję.</div>
+          {% endif %}
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label small text-muted fw-semibold">
+            {{ form.status_oplaty.label }}
+          </label>
+          {{ form.status_oplaty }}
+          {% if form.status_oplaty.errors %}
+            <div class="text-danger small">{{ form.status_oplaty.errors }}</div>
+          {% else %}
+            <div class="form-text small">
+              Wybierz, czy intencja jest już opłacona.
+            </div>
+          {% endif %}
+        </div>
       </div>
-</div>
+
       <div class="mb-3">
         <label class="form-label small text-muted fw-semibold">
           {{ form.uwagi.label }}
         </label>
         {{ form.uwagi }}
         {% if form.uwagi.errors %}
-        <div class="text-danger small">{{ form.uwagi.errors }}</div>
+          <div class="text-danger small">{{ form.uwagi.errors }}</div>
         {% else %}
-        <div class="form-text small">Np. "rezerwacja telefoniczna".</div>
+          <div class="form-text small">Np. „rezerwacja telefoniczna”.</div>
         {% endif %}
       </div>
+
     </div>
   </div>
 

@@ -1,0 +1,97 @@
+{% extends "base_panel.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h4 mb-0">Ewidencja Cmentarza</h1>
+  
+  <div class="d-flex gap-2">
+      {# Przycisk do sektorów #}
+      <a href="{% url 'cmentarz:sektor_lista' %}" class="btn btn-outline-primary btn-sm">
+        <i class="bi bi-grid-3x3"></i> Sektory
+      </a>
+      
+      {# Przycisk nowego grobu #}
+      <a href="{% url 'cmentarz:grob_nowy' %}" class="btn btn-primary btn-sm">
+        + Nowy Grób
+      </a>
+  </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+  <div class="card-body bg-light py-2">
+    <form method="get" class="row g-2 align-items-center">
+      <div class="col-auto">
+        <select name="sektor" class="form-select form-select-sm">
+          <option value="">Wszystkie sektory</option>
+          {% for s in sektory %}
+             <option value="{{ s.pk }}">{{ s.nazwa }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-auto">
+        <input type="text" name="q" class="form-control form-control-sm" placeholder="Szukaj (rzad, nr, nazwisko)..." value="{{ request.GET.q }}">
+      </div>
+      <div class="col-auto">
+        <button class="btn btn-outline-secondary d-flex align-items-center gap-1">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+      </svg>
+      Szukaj
+    </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card shadow-sm border-0">
+  <table class="table table-hover align-middle mb-0 small">
+    <thead class="table-light">
+      <tr>
+        <th>Sektor / Rząd / Nr</th>
+        <th>Status opłaty</th>
+        <th>Dysponent</th>
+        <th>Pochowani</th>
+        <th class="text-end">Akcje</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for g in groby %}
+      <tr>
+        <td class="fw-bold">
+            {{ g.sektor }} / {{ g.rzad }} / {{ g.numer }}
+            <div class="fw-normal text-muted" style="font-size:0.8em;">{{ g.get_typ_display }}</div>
+        </td>
+        <td>
+            {% if g.status_oplaty == 'OK' %}
+                <span class="badge bg-success">Opłacony</span>
+            {% elif g.status_oplaty == 'WARNING' %}
+                <span class="badge bg-warning text-dark">Wygasa wkrótce</span>
+            {% elif g.status_oplaty == 'EXPIRED' %}
+                <span class="badge bg-danger">Wygasł ({{ g.wazny_do|date:"Y" }})</span>
+            {% else %}
+                <span class="badge bg-secondary">Brak danych</span>
+            {% endif %}
+        </td>
+        <td>
+            {% if g.dysponent %}
+                <a href="{% url 'osoba_szczegoly' g.dysponent.pk %}" class="text-decoration-none">{{ g.dysponent }}</a>
+            {% else %}
+                <span class="text-muted">—</span>
+            {% endif %}
+        </td>
+        <td>
+            {% for p in g.pochowani.all %}
+                <div>✝ {{ p.osoba.nazwisko }} {{ p.osoba.imie_pierwsze }} <small class="text-muted">({{ p.data_pochowania|date:"Y" }})</small></div>
+            {% empty %}
+                <span class="text-muted fst-italic">Pusty</span>
+            {% endfor %}
+        </td>
+        <td class="text-end">
+            <a href="{% url 'cmentarz:grob_szczegoly' g.pk %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-eye"></i> Szczegóły</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
