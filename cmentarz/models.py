@@ -66,11 +66,18 @@ class Grob(models.Model):
         return reverse("cmentarz:grob_szczegoly", args=[self.pk])
 
     def save(self, *args, **kwargs):
+        # Automat: Jeśli nie podano daty ważności, ustaw +20 lat od daty opłaty
         if self.data_oplaty and not self.wazny_do:
             try:
+                # Próba ustawienia tego samego dnia i miesiąca 20 lat później
+                # To zadziała w 99% przypadków (nawet dla lat przestępnych, bo 20 dzieli się przez 4)
                 self.wazny_do = self.data_oplaty.replace(year=self.data_oplaty.year + 20)
             except ValueError:
-                self.wazny_do = self.data_oplaty + timedelta(days=365*20 + 5)
+                # Wyjątek wystąpi TYLKO, gdy data_oplaty to 29 lutego, 
+                # a rok docelowy nie jest przestępny (rzadkie, np. 2080 -> 2100).
+                # Wtedy system ustawi ważność na 28 lutego.
+                self.wazny_do = self.data_oplaty.replace(year=self.data_oplaty.year + 20, month=2, day=28)
+        
         super().save(*args, **kwargs)
 
     @property
