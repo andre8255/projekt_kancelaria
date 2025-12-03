@@ -1,40 +1,68 @@
 # konta/tasks.py
 import os
 import shutil
-from datetime import datetime
-from django.conf import settings
 import glob
+from django.conf import settings
+from django.utils import timezone
+from .models import BackupUstawienia  # Importujemy model ustawień
 
 def wykonaj_automatyczny_backup():
-    # 1. Konfiguracja ścieżek
-    db_path = settings.DATABASES['default']['NAME']
-    backup_dir = os.path.join(settings.BASE_DIR, 'backups')
-    
-    # Upewnij się, że folder na kopie istnieje
-    if not os.path.exists(backup_dir):
-        os.makedirs(backup_dir)
-
-    # 2. Nazwa pliku z datą i godziną
-    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    filename = f"auto_backup_{timestamp}.sqlite3"
-    destination = os.path.join(backup_dir, filename)
-
     try:
-        # 3. Wykonanie kopii (kopiowanie pliku bazy)
+        # 1. POBIERANIE USTAWIEŃ
+        # Jeśli tabela nie istnieje (np. przed migracją), przerywamy cicho
+        try:
+            ust = BackupUstawienia.load()
+        except Exception:
+            return
+
+        if not ust.wlaczony:
+            return  # Backup wyłączony w panelu
+
+        # 2. SPRAWDZENIE GODZINY
+        teraz = timezone.localtime()
+        
+        # Jeśli jest wcześniej niż ustalona godzina, nic nie rób
+        if teraz.time() < ust.godzina_kopii:
+            return
+
+        # 3. KONFIGURACJA ŚCIEŻEK
+        db_path = settings.DATABASES['default']['NAME']
+        # Pobieramy katalog z ustawień (lub domyślny 'backups')
+        backup_dir = os.path.join(settings.BASE_DIR, ust.katalog)
+        
+        if not os.path.exists(backup_dir):
+            os.makedirs(backup_dir)
+
+        # 4. NAZWA PLIKU (BEZ SEKUND!)
+        # To jest klucz do naprawy błędu. Tworzymy nazwę opartą tylko o DATĘ.
+        # Dzięki temu, jeśli skrypt uruchomi się 5 razy w ciągu dnia, 
+        # za pierwszym razem utworzy plik, a za kolejnymi 4 razami zobaczy, że już jest.
+        data_str = teraz.strftime("%Y-%m-%d")
+        filename = f"auto_backup_{data_str}.sqlite3"
+        destination = os.path.join(backup_dir, filename)
+
+        # 5. BLOKADA DUPLIKATÓW
+        # Jeśli plik z dzisiejszą datą już istnieje -> PRZERYWAMY
+        if os.path.exists(destination):
+            # print(f"[BACKUP SKIPPED] Kopia na dzień {data_str} już istnieje.")
+            return
+
+        # 6. WYKONANIE KOPII
         shutil.copy2(db_path, destination)
         print(f"[BACKUP] Wykonano automatyczną kopię: {filename}")
         
-        # 4. Rotacja (usuwanie starych kopii) - zostawiamy np. 10 ostatnich
-        # Znajdź wszystkie pliki backupu
+        # 7. ROTACJA (Twoja logika - zachowujemy 5 ostatnich)
         list_of_files = glob.glob(os.path.join(backup_dir, 'auto_backup_*.sqlite3'))
-        # Posortuj od najstarszego do najnowszego
+        # Sortowanie po dacie utworzenia
         list_of_files.sort(key=os.path.getctime)
         
-        # Jeśli jest więcej niż 10 plików, usuń najstarsze
-        while len(list_of_files) > 10:
+        while len(list_of_files) > 5:
             oldest_file = list_of_files.pop(0)
-            os.remove(oldest_file)
-            print(f"[BACKUP] Usunięto stary backup: {oldest_file}")
+            try:
+                os.remove(oldest_file)
+                print(f"[BACKUP] Usunięto stary backup: {os.path.basename(oldest_file)}")
+            except OSError as e:
+                print(f"[BACKUP ERROR] Nie można usunąć pliku {oldest_file}: {e}")
             
     except Exception as e:
-        print(f"[BACKUP ERROR] Nie udało się wykonać kopii: {e}")
+        print(f"[BACKUP ERROR] Krytyczny błąd: {e}")
