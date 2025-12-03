@@ -1,5 +1,6 @@
 {% extends "base_panel.html" %}
 {% block content %}
+
 <div class="container py-4">
   <h3 class="mb-4">
     <i class="bi bi-search"></i> Wyniki wyszukiwania
@@ -10,6 +11,7 @@
     <p>Wpisz tekst w polu wyszukiwania w górnym pasku.</p>
   {% else %}
     <div class="row">
+      {# LEWA KOLUMNA – OSOBY #}
       <div class="col-md-6 mb-4">
         <h5>Osoby ({{ wyniki_osoby|length }})</h5>
         <ul class="list-group">
@@ -25,13 +27,49 @@
         </ul>
       </div>
 
+      {# PRAWA KOLUMNA – RODZINY + POCHOWANI #}
       <div class="col-md-6 mb-4">
+
         <h5>Rodziny ({{ wyniki_rodziny|length }})</h5>
-        <!-- analogicznie -->
+        <ul class="list-group mb-4">
+          {% for r in wyniki_rodziny %}
+            <li class="list-group-item">
+              <a href="{% url 'rodzina_szczegoly' r.pk %}">
+                {{ r.nazwa }}
+              </a>
+            </li>
+          {% empty %}
+            <li class="list-group-item text-muted">Brak wyników</li>
+          {% endfor %}
+        </ul>
+
+        <h5>Pochowani na cmentarzu ({{ wyniki_pochowani|length }})</h5>
+        <ul class="list-group">
+          {% for p in wyniki_pochowani %}
+            <li class="list-group-item">
+              <div class="fw-semibold">
+                <a href="{% url 'osoba_szczegoly' p.osoba.pk %}">
+                  {{ p.osoba.imie_pierwsze }} {{ p.osoba.nazwisko }}
+                </a>
+              </div>
+              <div class="small text-muted">
+                Grób:
+                sektor {{ p.grob.sektor }}
+                rząd {{ p.grob.rzad }}
+                nr {{ p.grob.numer }}
+                &nbsp;–&nbsp;
+                <a href="{% url 'cmentarz:grob_szczegoly' p.grob.pk %}">
+                  karta grobu
+                </a>
+              </div>
+            </li>
+          {% empty %}
+            <li class="list-group-item text-muted">Brak wyników</li>
+          {% endfor %}
+        </ul>
+
       </div>
     </div>
-
-    <!-- analogicznie sekcje dla chrztów / ślubów -->
   {% endif %}
 </div>
 {% endblock %}

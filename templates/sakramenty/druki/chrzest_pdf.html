@@ -190,7 +190,11 @@
             <td class="field-label">2. Imię i nazwisko ojca</td>
             <td>
                 <div class="row-split">
-                    <span><span class="user-data">{{ chrzest.ojciec }}</span></span>
+                    <span><span class="user-data">{% if chrzest.ochrzczony.imie_ojca or chrzest.ochrzczony.nazwisko_ojca %}
+              {{ chrzest.ochrzczony.imie_ojca }} {{ chrzest.ochrzczony.nazwisko_ojca }}
+            {% else %}
+              —
+            {% endif %}</span></span>
                     <span class="right-align">
                         Wyznanie: <span class="user-data">{% if chrzest.ojciec_wyznanie %}{{ chrzest.ojciec_wyznanie }}{% else %}—{% endif %}</span>
                     </span>
@@ -207,7 +211,11 @@
             <td>
                 <div class="row-split">
                     <span>
-                        <span class="user-data">{{ chrzest.matka }}</span>
+                        <span class="user-data">{% if chrzest.ochrzczony.imie_matki or chrzest.ochrzczony.nazwisko_matki %}
+              {{ chrzest.ochrzczony.imie_matki }} {{ chrzest.ochrzczony.nazwisko_matki }}
+            {% else %}
+              —
+            {% endif %}</span>
                         {% if chrzest.nazwisko_matki_rodowe %} <br><small>(z domu <strong>{{ chrzest.nazwisko_matki_rodowe }})</strong></small>{% endif %}
                     </span>
                     <span class="right-align">
@@ -225,8 +233,8 @@
             <td class="field-label">4. Data i miejsce ur.</td>
             <td>
                 <span class="user-data">
-                    {% if chrzest.data_urodzenia %}{{ chrzest.data_urodzenia }}{% elif chrzest.rok_urodzenia %}{{ chrzest.rok_urodzenia }}{% endif %}
-                    {% if chrzest.miejsce_urodzenia %}, {{ chrzest.miejsce_urodzenia }}{% endif %}
+                    {% if chrzest.ochrzczony.data_urodzenia %}{{ chrzest.ochrzczony.data_urodzenia }}{% elif chrzest.ochrzczony.rok_urodzenia %}{{ chrzest.ochrzczony.rok_urodzenia }}{% endif %}
+                    {% if chrzest.ochrzczony.miejsce_urodzenia %}, {{ chrzest.ochrzczony.miejsce_urodzenia }}{% endif %}
                 </span>
             </td>
         </tr>

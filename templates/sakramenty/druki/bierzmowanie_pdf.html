@@ -157,8 +157,8 @@
             <td>
                 <span class="user-data">
                     {% if chrzest %}
-                        {% if chrzest.data_urodzenia %}{{ chrzest.data_urodzenia }}{% elif chrzest.rok_urodzenia %}{{ chrzest.rok_urodzenia }}{% endif %}
-                        {% if chrzest.miejsce_urodzenia %}, {{ chrzest.miejsce_urodzenia }}{% endif %}
+                        {% if chrzest.ochrzczony.data_urodzenia %}{{ chrzest.ochrzczony.data_urodzenia }}{% elif chrzest.ochrzczony.rok_urodzenia %}{{ chrzest.ochrzczony.rok_urodzenia }}{% endif %}
+                        {% if chrzest.ochrzczony.miejsce_urodzenia %}, {{ chrzest.ochrzczony.miejsce_urodzenia }}{% endif %}
                     {% else %}
                         {{ bierzmowanie.osoba.data_urodzenia|default:"—" }}
                         {% if bierzmowanie.osoba.miejsce_urodzenia %}, {{ bierzmowanie.osoba.miejsce_urodzenia }}{% endif %}

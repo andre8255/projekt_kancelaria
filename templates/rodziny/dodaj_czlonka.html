@@ -51,19 +51,20 @@
           </div>
 
           {% if osoba %}
-            {# render „read-only” + ukryte pole z pk #}
-            <input class="form-control" value="{{ osoba.nazwisko }} {{ osoba.imie_pierwsze }}" readonly>
-            <input type="hidden" name="{{ form.osoba.html_name }}" value="{{ osoba.pk }}">
-          {% else %}
-            {{ form.osoba }}
-          {% endif %}
+  <input class="form-control"
+         value="{{ osoba.nazwisko }} {{ osoba.imie_pierwsze }}{% if osoba.data_urodzenia %} ({{ osoba.data_urodzenia }}){% endif %}"
+         readonly>
+  <input type="hidden" name="{{ form.osoba.html_name }}" value="{{ osoba.pk }}">
+{% else %}
+  {{ form.osoba }}
+{% endif %}
 
           {% if form.osoba.errors %}
             <div class="text-danger small">{{ form.osoba.errors }}</div>
           {% elif not osoba %}
             <div class="form-text small">
-              Jeśli tej osoby nie ma jeszcze w bazie, kliknij „+ Nowa osoba”
-              (otworzy się w nowej karcie), zapisz, wróć tutaj i odśwież stronę.
+              Jeśli tej osoby nie ma jeszcze w bazie, kliknij „+ Nowa osoba”.
+              
             </div>
           {% endif %}
         </div>

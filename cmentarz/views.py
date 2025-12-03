@@ -30,8 +30,9 @@ class GrobListaView(LoginRequiredMixin, ListView):
             qs = qs.filter(
                 Q(rzad__icontains=q) |
                 Q(numer__icontains=q) |
-                Q(dysponent__nazwisko__icontains=q) |
-                Q(pochowani__osoba__nazwisko__icontains=q)
+              # Q(dysponent__nazwisko__icontains=q) |
+                Q(pochowani__osoba__nazwisko__icontains=q) |
+                Q(pochowani__osoba__imie_pierwsze__icontains=q)
             ).distinct()
             
         sektor = self.request.GET.get("sektor")

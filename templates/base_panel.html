@@ -13,6 +13,9 @@
 
 
   <style>
+      .global-search-input {
+          min-width: 220px;   /* szerokość okienka */
+      }
       /* Ulepszenia dropdownów */
       .dropdown-item {
           padding: 8px 20px;
@@ -231,14 +234,21 @@
       </ul>
 
       {#  GLOBALNE SZUKANIE #}
-      <form class="d-flex ms-3" method="get" action="{% url 'global_search' %}">
-        <input class="form-control form-control-sm"
-               type="search"
-               placeholder="Szukaj..."
-               aria-label="Szukaj"
-               name="q"
-               value="{{ request.GET.q|default_if_none:'' }}">
-      </form>
+      <form class="d-flex align-items-center"
+      method="get"
+      action="{% url 'global_search' %}" 
+      role="search">
+
+  <input type="search"
+         name="q"
+         class="form-control form-control-sm global-search-input"
+         placeholder="Szukaj osoby, rodziny, grobu.."
+         value="{{ request.GET.q|default_if_none:'' }}">
+
+  <button class="btn btn-outline-secondary btn-sm ms-1" type="submit">
+    <i class="bi bi-search"></i>
+  </button>
+</form>
 
 
       {# --- PRAWA STRONA: przełącznik motywu + użytkownik --- #}

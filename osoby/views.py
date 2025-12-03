@@ -21,6 +21,7 @@ from konta.utils_backup import czy_backup_jest_nalezny, wykonaj_backup_bazy
 from konta.utils import zapisz_log
 from django.db.models.deletion import ProtectedError
 from cmentarz.models import Grob
+from cmentarz.models import Pochowany
 
 # Importy ról
 from konta.mixins import RolaWymaganaMixin
@@ -331,7 +332,7 @@ class OsobaUsunView(RolaWymaganaMixin, View):
 
         
 
-class GlobalSearchView(LoginRequiredMixin, TemplateView):
+class GlobalSearchView(TemplateView):
     template_name = "szukaj_globalnie.html"
 
     def get_context_data(self, **kwargs):
@@ -340,41 +341,30 @@ class GlobalSearchView(LoginRequiredMixin, TemplateView):
         ctx["q"] = q
 
         if not q:
-            ctx["wyniki_osoby"] = []
-            ctx["wyniki_rodziny"] = []
-            ctx["wyniki_chrzty"] = []
-            ctx["wyniki_sluby"] = []
+            ctx["wyniki_osoby"] = Osoba.objects.none()
+            ctx["wyniki_rodziny"] = Rodzina.objects.none()
+            ctx["wyniki_pochowani"] = Pochowany.objects.none()
             return ctx
 
-        # Osoby
         ctx["wyniki_osoby"] = Osoba.objects.filter(
             Q(imie_pierwsze__icontains=q) |
-            Q(imie_drugie__icontains=q) |
-            Q(nazwisko__icontains=q) |
-            Q(nazwisko_rodowe__icontains=q)
-        )[:20]
+            Q(nazwisko__icontains=q)
+        ).order_by("nazwisko", "imie_pierwsze")
 
-        # Rodziny
         ctx["wyniki_rodziny"] = Rodzina.objects.filter(
-            Q(nazwa__icontains=q) |
-            Q(ulica__icontains=q) |
-            Q(miejscowosc__icontains=q)
-        )[:20]
+            Q(nazwa__icontains=q)
+        ).order_by("nazwa")
 
-        # Chrzty
-        ctx["wyniki_chrzty"] = Chrzest.objects.select_related("ochrzczony").filter(
-            Q(ochrzczony__nazwisko__icontains=q) |
-            Q(ochrzczony__imie_pierwsze__icontains=q) |
-            Q(akt_nr__icontains=q)
-        )[:20]
-
-        # Małżeństwa
-        ctx["wyniki_sluby"] = Malzenstwo.objects.select_related(
-            "malzonek_a", "malzonek_b"
-        ).filter(
-            Q(malzonek_a__nazwisko__icontains=q) |
-            Q(malzonek_b__nazwisko__icontains=q)
-        )[:20]
+        # osoby pochowane na cmentarzu
+        ctx["wyniki_pochowani"] = (
+            Pochowany.objects
+            .filter(
+                Q(osoba__nazwisko__icontains=q) |
+                Q(osoba__imie_pierwsze__icontains=q)
+            )
+            .select_related("osoba", "grob", "grob__sektor")
+            .order_by("osoba__nazwisko", "osoba__imie_pierwsze")
+        )
 
         return ctx
 

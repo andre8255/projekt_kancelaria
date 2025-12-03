@@ -159,6 +159,19 @@
   html[data-theme="dark"] .mini-cal .day:hover {
     background-color: #252b38;
   }
+
+  .btn-compact {
+    padding-top: 0;
+    padding-bottom: 0;
+    padding-left: .4rem;
+    padding-right: .4rem;
+    font-size: .9rem;
+    line-height: 1;          /* bez rozciągania tekstu */
+    height: 30px;            /* STAŁA wysokość przycisku */
+    display: inline-flex;
+    align-items: center;     /* ikonka + tekst na środku */
+    justify-content: center;
+  }
 </style>
 
 {# --- ZMODYFIKOWANY NAGŁÓWEK KALENDARZA --- #}
@@ -186,10 +199,7 @@
 
   </div>
 
-  <div class="legend d-none d-sm-flex align-items-center">
-    <span class="dot dot-free me-1"></span><span class="text-muted small me-3">wolna</span>
-    <span class="dot dot-busy me-1"></span><span class="text-muted small">zajęta</span>
-  </div>
+  
 </div>
 
   <div class="card-body">
@@ -268,7 +278,7 @@
                     {% endif %}
                   </span>
                   <a class="btn btn-sm btn-outline-secondary" href="{% url 'msza_szczegoly' m.pk %}">
-                    Szczegóły
+                   <i class="bi bi-eye"></i> Szczegóły
                   </a>
                 </li>
               {% endif %}
@@ -305,9 +315,10 @@
                     </span>
                   {% endif %}
                 </span>
-                <a class="btn btn-sm btn-outline-secondary"
+                <a class="btn btn-outline-secondary btn-compact"
                    href="{% url 'cmentarz:grob_szczegoly' g.pk %}">
-                  Pokaż
+                  <i class="bi bi-info-circle"></i>
+                  <span class="ms-1"> Pokaż</span>
                 </a>
               </li>
             {% endfor %}
@@ -341,9 +352,10 @@
                     </span>
                   {% endif %}
                 </span>
-                <a class="btn btn-sm btn-outline-secondary"
+                <a class="btn btn-outline-secondary btn-compact"
                    href="{% url 'cmentarz:grob_szczegoly' g.pk %}">
-                  Pokaż
+                  <i class="bi bi-info-circle"></i>
+                  <span class="ms-1"> Pokaż</span>
                 </a>
               </li>
             {% endfor %}
@@ -358,7 +370,7 @@
   </div>
 </div>
 
-
+<!--
 {# --- KARTA BACKUPU --- #}
 <div class="row mt-4">
   <div class="col-12">
@@ -381,5 +393,5 @@
     </div>
   </div>
 </div>
-
+-->
 {% endblock %}

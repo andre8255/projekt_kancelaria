@@ -26,7 +26,7 @@ class KontaConfig(AppConfig):
         # scheduler.add_job(tasks.wykonaj_automatyczny_backup, 'interval', hours=24)
         
         # Opcja B: Codziennie o konkretnej godzinie (np. 22:00) - LEPSZA DLA PARAFII
-        scheduler.add_job(tasks.wykonaj_automatyczny_backup, 'cron', hour=22, minute=00)
+       # scheduler.add_job(tasks.wykonaj_automatyczny_backup, 'cron', hour=22, minute=00)
         
         # Opcja C (do testów): Co 1 minutę - ODKOMENTUJ ŻEBY SPRAWDZIĆ CZY DZIAŁA
         #scheduler.add_job(tasks.wykonaj_automatyczny_backup, 'interval', minutes=1)

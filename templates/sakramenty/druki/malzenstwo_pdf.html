@@ -196,29 +196,21 @@
             </tr>
 
             <tr>
-                <td class="label-col">
-                    2. Imiona rodziców
-                    <span class="la">Nomina patris et matris</span>
-                </td>
-                <td class="data-cell">
-                    {% if chrzest_a %}
-                        {{ chrzest_a.ojciec|default:"—" }}<br>
-                        {{ chrzest_a.matka|default:"—" }}
-                    {% else %}
-                        {{ malzenstwo.malzonek_a.imie_ojca|default:"—" }}<br>
-                        {{ malzenstwo.malzonek_a.imie_matki|default:"—" }}
-                    {% endif %}
-                </td>
-                <td class="data-cell">
-                    {% if chrzest_b %}
-                        {{ chrzest_b.ojciec|default:"—" }}<br>
-                        {{ chrzest_b.matka|default:"—" }}
-                    {% else %}
-                        {{ malzenstwo.malzonek_b.imie_ojca|default:"—" }}<br>
-                        {{ malzenstwo.malzonek_b.imie_matki|default:"—" }}
-                    {% endif %}
-                </td>
-            </tr>
+  <td class="label-col">
+    2. Imiona rodziców
+    <span class="la">Nomina patris et matris</span>
+  </td>
+
+  <td class="data-cell">
+    {{ malzenstwo.malzonek_a.imie_ojca|default:"—" }} <br>
+    {{ malzenstwo.malzonek_a.imie_matki|default:"—" }} 
+  </td>
+
+  <td class="data-cell">
+    {{ malzenstwo.malzonek_b.imie_ojca|default:"—" }} <br>
+    {{ malzenstwo.malzonek_b.imie_matki|default:"—" }} 
+  </td>
+</tr>
 
             <tr>
                 <td class="label-col">
@@ -275,7 +267,7 @@
                     5. Data i miejsce ślubu
                     <span class="la">Dies et locus matrimonii</span>
                 </td>
-                <td colspan="2" class="data-cell" style="text-align: center;">
+                <td colspan="2" class="data-cell" >
                     {{ malzenstwo.data_slubu|date:"d.m.Y"|default:"—" }} ,  
                     {% if malzenstwo.parafia %}
                         {{ malzenstwo.parafia.nazwa }} - 

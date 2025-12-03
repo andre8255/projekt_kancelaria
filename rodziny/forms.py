@@ -21,6 +21,12 @@ class BootstrapFormMixin:
             if not widget.attrs.get("placeholder") and field.label:
                 widget.attrs["placeholder"] = field.label
 
+class OsobaChoiceField(forms.ModelChoiceField):
+    def label_from_instance(self, obj: Osoba) -> str:
+        if obj.data_urodzenia:
+            return f"{obj.nazwisko} {obj.imie_pierwsze} ({obj.data_urodzenia:%d.%m.%Y})"
+        return f"{obj.nazwisko} {obj.imie_pierwsze}"
+
 class RodzinaForm(BootstrapFormMixin, forms.ModelForm):
     class Meta:
         model = Rodzina
@@ -76,14 +82,13 @@ class RodzinaForm(BootstrapFormMixin, forms.ModelForm):
 
         return cleaned_data
 
+
 class DodajCzlonkaForm(BootstrapFormMixin, forms.ModelForm):
-    """
-    Formularz do dodawania istniejącej osoby do rodziny.
-    """
-    osoba = forms.ModelChoiceField(
+    
+    osoba = OsobaChoiceField(
         queryset=Osoba.objects.all().order_by("nazwisko", "imie_pierwsze"),
         label="Wybierz osobę",
-        widget=forms.Select(attrs={"class": "form-select"})
+         widget=forms.Select(attrs={"class": "js-osoba-select"}),
     )
 
     class Meta:
@@ -130,7 +135,6 @@ class WizytaForm(BootstrapFormMixin, forms.ModelForm):
 
     class Meta:
         model = WizytaDuszpasterska
-        # ⭐ bez pola "ofiara"
         fields = ["rok", "data_wizyty", "ksiadz", "status", "notatka"]
         widgets = {
             "data_wizyty": forms.DateInput(attrs={"type": "date"}),
@@ -139,8 +143,8 @@ class WizytaForm(BootstrapFormMixin, forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # jeśli BootstrapFormMixin dodaje klasy, ta klasa zostanie zachowana + "form-control"
         if "ksiadz" in self.fields:
             w = self.fields["ksiadz"].widget
             css = w.attrs.get("class", "")
             w.attrs["class"] = (css + " js-tom-duchowny").strip()
+

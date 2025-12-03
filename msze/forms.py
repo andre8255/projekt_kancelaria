@@ -1,5 +1,6 @@
 # msze/forms.py
 from django import forms
+from datetime import datetime
 from django.utils import timezone
 from .models import Msza, IntencjaMszy, TypMszy
 from slowniki.models import Duchowny
@@ -26,6 +27,19 @@ class MszaForm(BootstrapFormMixin, forms.ModelForm):
         label="Celebrans (z listy)",
         empty_label="--- wybierz ---"
     )
+
+    MIEJSCE_CHOICES = [
+        ("Kościół", "Kościół"),
+        ("Kaplica", "Kaplica"),
+    ]
+
+    miejsce = forms.ChoiceField(
+        label="Miejsce",
+        choices=MIEJSCE_CHOICES,
+        initial="Kościół",          # domyślnie „Kościół”
+        widget=forms.Select(),      # zwykły <select>, BootstrapFormMixin doda klasy
+    )
+
 
     class Meta:
         model = Msza
@@ -81,15 +95,23 @@ class MszaForm(BootstrapFormMixin, forms.ModelForm):
                     "Wybrano typ 'Niedzielna', ale ta data nie przypada w niedzielę."
                 )
 
-        return cleaned_data
 
-    def clean_data(self):
-        data = self.cleaned_data.get('data')
-        if data:
-            today = timezone.localdate()
-            if data < today:
-                raise forms.ValidationError("Data mszy nie może być wcześniejsza niż dzisiejsza.")
-        return data
+    # 3. WALIDACJA: data + godzina nie mogą być w przeszłości
+        data = cleaned_data.get("data")
+        godzina = cleaned_data.get("godzina")
+
+        if data and godzina:
+            dt = datetime.combine(data, godzina)
+            # Upewniamy się, że jest to datetime z timezone
+            if timezone.is_naive(dt):
+                dt = timezone.make_aware(dt, timezone.get_current_timezone())
+
+            teraz = timezone.now()
+            if dt < teraz:
+                self.add_error("data", "Data i godzina mszy nie mogą być w przeszłości.")
+                self.add_error("godzina", "Data i godzina mszy nie mogą być w przeszłości.")
+
+        return cleaned_data
 
 
 class IntencjaForm(BootstrapFormMixin, forms.ModelForm):

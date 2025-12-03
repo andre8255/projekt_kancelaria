@@ -24,10 +24,9 @@
     <a href="{% url 'rodzina_usun' rodzina.pk %}" class="btn btn-outline-danger btn-sm">
      🗑️ Usuń
     </a>
-
-    <a href="{% url 'rodzina_lista' %}" class="btn btn-outline-secondary btn-sm">
-     ⬅ Powrót
-    </a>
+     {% url 'rodzina_lista' as lista_url %}
+   <a href="{{ request.META.HTTP_REFERER|default:lista_url }}" class="btn btn-outline-secondary btn-sm">
+      ⬅ Powrót</a>
   </div>
 </div>
 

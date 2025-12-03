@@ -172,7 +172,7 @@
             <td>
                 <span class="user-data">
                     {{ zgon.osoba.imie_pierwsze }} {{ zgon.osoba.nazwisko }}
-                    {% if zgon.osoba.nazwisko_rodowe %} (zd. {{ zgon.osoba.nazwisko_rodowe }}){% endif %}
+                    {% if zgon.osoba.nazwisko_rodowe %} (z domu {{ zgon.osoba.nazwisko_rodowe }}){% endif %}
                 </span>
             </td>
         </tr>
@@ -202,7 +202,8 @@
                     {% if chrzest %}
                         {{ chrzest.ojciec|default:"..." }} i {{ chrzest.matka|default:"..." }}
                     {% else %}
-                        {{ zgon.osoba.imie_ojca|default:"..." }} i {{ zgon.osoba.imie_matki|default:"..." }}
+                        {{ zgon.osoba.imie_ojca|default:"..." }} {{ zgon.osoba.nazwisko_ojca|default:"..." }} i 
+                        {{ zgon.osoba.imie_matki|default:"..." }} {{ zgon.osoba.nazwisko_matki|default:"..." }}
                     {% endif %}
                 </span>
             </td>
