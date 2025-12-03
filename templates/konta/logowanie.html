@@ -1,25 +1,82 @@
-<!-- konta/logowanie.html -->
 {% extends "base_public.html" %}
-
+{% load static %}
 {% block content %}
-  <h1 class="h5 mb-3 text-center">Zaloguj się</h1>
+<div class="d-flex justify-content-center" style="min-height: 100vh; padding-top: 1rem;">
+  <div class="w-100" style="max-width: 420px;">
 
-  {% if form.errors %}
-    <div class="alert alert-danger small">
-      Nieprawidłowy login lub hasło.
-    </div>
-  {% endif %}
+    <div class="text-center mb-4">
+  <div class="mb-2">
+    <img 
+      src="{% static 'vendor/Ikona/kancelaria_parafialna1.ico' %}" 
+      alt="Kancelaria parafialna"
+      style="width: 80px; height: 80px;"
+      class="mb-2"
+    >
+    {# jeśli chcesz, możesz zostawić też ikonkę bootstrap obok albo ją usunąć #}
+    {# <i class="bi bi-person-badge-fill" style="font-size: 2.5rem; color: #0d6efd;"></i> #}
+  </div>
 
-  <form method="post" class="card p-3 shadow-sm">
-    {% csrf_token %}
-    <div class="mb-2">
-      <label class="form-label small">Użytkownik</label>
-      {{ form.username }}
-    </div>
-    <div class="mb-3">
-      <label class="form-label small">Hasło</label>
-      {{ form.password }}
-    </div>
-    <button class="btn btn-primary w-100">Zaloguj</button>
-  </form>
+  <h1 class="h4 mb-1">Logowanie do panelu</h1>
+  <p class="text-muted small mb-0">
+    Wprowadź nazwę użytkownika i hasło, </br>aby przejść do kancelarii parafialnej.
+  </p>
+</div>
+
+    {% if form.non_field_errors or form.errors %}
+      <div class="alert alert-danger small">
+        <div class="fw-semibold mb-1">
+          <i class="bi bi-exclamation-triangle-fill me-1"></i>
+          Nieprawidłowy login lub hasło.
+        </div>
+        <div class="text-muted">
+          Sprawdź poprawność danych. W razie problemów skontaktuj się z administratorem systemu.
+        </div>
+      </div>
+    {% endif %}
+
+    <form method="post" class="card shadow-sm border-0">
+      {% csrf_token %}
+      <div class="card-body p-4">
+
+        <div class="mb-3">
+          <label class="form-label small text-muted fw-semibold" for="{{ form.username.id_for_label }}">
+            Nazwa użytkownika
+          </label>
+          {{ form.username }}
+          {% if form.username.errors %}
+            <div class="text-danger small mt-1">{{ form.username.errors|striptags }}</div>
+          {% endif %}
+        </div>
+
+        <div class="mb-2">
+          <label class="form-label small text-muted fw-semibold" for="{{ form.password.id_for_label }}">
+            Hasło &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          </label>
+          {{ form.password }}
+          {% if form.password.errors %}
+            <div class="text-danger small mt-1">{{ form.password.errors|striptags }}</div>
+          {% endif %}
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div class="form-text small text-muted">
+            Dostęp tylko dla uprawnionych użytkowników parafii.
+          </div>
+        </div>
+
+        <button class="btn btn-primary w-100">
+          <i class="bi bi-box-arrow-in-right me-1"></i>
+          Zaloguj się
+        </button>
+      </div>
+
+      <div class="card-footer bg-light border-0 text-center py-2">
+        <small class="text-muted">
+          Zapomniałeś hasła? Skontaktuj się z administratorem systemu.
+        </small>
+      </div>
+    </form>
+
+  </div>
+</div>
 {% endblock %}
