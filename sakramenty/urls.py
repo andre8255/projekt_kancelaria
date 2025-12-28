@@ -3,7 +3,7 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    # CHRZEST - zakładam, że to już masz, tylko przykład:
+    # CHRZEST 
     path("chrzty/", views.ChrzestListaView.as_view(), name="chrzest_lista"),
     path("chrzty/nowy/", views.ChrzestNowyView.as_view(), name="chrzest_dodaj"),
     path("osoby/<int:osoba_pk>/chrzest/nowy/", views.ChrzestNowyView.as_view(), name="chrzest_dodaj_dla_osoby"),  
@@ -50,21 +50,6 @@ urlpatterns = [
     path("zgony/<int:pk>/", views.ZgonSzczegolyView.as_view(), name="zgon_szczegoly"),
     path("zgony/<int:pk>/edytuj/", views.ZgonEdycjaView.as_view(), name="zgon_edytuj"),
     path("zgony/<int:pk>/usun/", views.ZgonUsunView.as_view(), name="zgon_usun"),
-
-    # --- DRUKI (widoki "print-friendly") ---
-
-    path("panel/chrzty/<int:pk>/druk/", views.ChrzestDrukView.as_view(), name="chrzest_druk"),
-    path("chrzty/lista/druk/", views.ChrzestListaDrukView.as_view(), name="chrzest_lista_druk"),
-    path("panel/komunie/<int:pk>/druk/", views.KomuniaDrukView.as_view(), name="komunia_druk"),
-    path("komunie/lista/druk/", views.KomuniaListaDrukView.as_view(), name="komunia_lista_druk"),
-    path("panel/bierzmowania/<int:pk>/druk/", views.BierzmowanieDrukView.as_view(), name="bierzmowanie_druk"),
-    path("bierzmowania/lista/druk/", views.BierzmowanieListaDrukView.as_view(), name="bierzmowanie_lista_druk"),
-    path("panel/malzenstwa/<int:pk>/druk/", views.MalzenstwoDrukView.as_view(), name="malzenstwo_druk"),
-    path("malzenstwa/lista/druk/", views.MalzenstwoListaDrukView.as_view(), name="malzenstwo_lista_druk"),
-    path("panel/namaszczenie/<int:pk>/druk/", views.NamaszczenieDrukView.as_view(), name="namaszczenie_druk"),
-    path("namaszczenia/lista/druk/", views.NamaszczenieListaDrukView.as_view(), name="namaszczenie_lista_druk"),
-    path("panel/zgony/<int:pk>/druk/", views.ZgonDrukView.as_view(), name="zgon_druk"),
-    path("zgony/lista/druk/", views.ZgonListaDrukView.as_view(), name="zgon_lista_druk"),
 
     # --- PDFy ---
     path("chrzest/<int:pk>/pdf/", views.ChrzestPDFView.as_view(), name="chrzest_pdf"),

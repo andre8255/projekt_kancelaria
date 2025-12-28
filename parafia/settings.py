@@ -1,15 +1,38 @@
 # parafia/settings.py
+
 from pathlib import Path
+
 from decouple import config
+from django.contrib.messages import constants as messages
+
+
+# ======================================
+#  ŚCIEŻKI BAZOWE
+# ======================================
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+
+# ======================================
+#  BEZPIECZEŃSTWO / ŚRODOWISKO
+# ======================================
+
+# Klucz trzymamy w .env
 SECRET_KEY = config("SECRET_KEY")
-# cast=bool sprawia, że napis "True"/"False" z pliku .env zostanie zamieniony na poprawną wartość logiczną w Pythonie
+
+# DEBUG pobierany z .env (True/False jako tekst → bool)
 DEBUG = config("DEBUG", default=False, cast=bool)
-ALLOWED_HOSTS = []
+
+# W środowisku produkcyjnym warto to też przerzucić do .env
+ALLOWED_HOSTS: list[str] = []
+
+
+# ======================================
+#  APLIKACJE
+# ======================================
 
 INSTALLED_APPS = [
+    # --- Django core ---
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -17,18 +40,21 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 
-    # nasze appki – dodamy za chwilę
+    # --- Aplikacje domenowe projektu ---
     "konta.apps.KontaConfig",
     "osoby.apps.OsobyConfig",
     "rodziny.apps.RodzinyConfig",
     "msze.apps.MszeConfig",
     "sakramenty.apps.SakramentyConfig",
-    "slowniki",
-    "konfiguracja",
-    "cmentarz",
-
-
+    "slowniki.apps.SlownikiConfig",
+    "konfiguracja.apps.KonfiguracjaConfig",
+    "cmentarz.apps.CmentarzConfig",
 ]
+
+
+# ======================================
+#  MIDDLEWARE
+# ======================================
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -40,12 +66,26 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+
+# ======================================
+#  URL / WSGI / ASGI
+# ======================================
+
 ROOT_URLCONF = "parafia.urls"
+
+WSGI_APPLICATION = "parafia.wsgi.application"
+ASGI_APPLICATION = "parafia.asgi.application"
+
+
+# ======================================
+#  SZABLONY
+# ======================================
 
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "templates"],  # nasze globalne szablony
+        # globalny katalog templates/
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -53,15 +93,17 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-
+                # dane ustawień parafii dostępne globalnie w szablonach
                 "konfiguracja.context_processors.dane_parafii",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = "parafia.wsgi.application"
-ASGI_APPLICATION = "parafia.asgi.application"
+
+# ======================================
+#  BAZA DANYCH
+# ======================================
 
 DATABASES = {
     "default": {
@@ -70,10 +112,21 @@ DATABASES = {
     }
 }
 
+
+# ======================================
+#  LOKALIZACJA / CZAS
+# ======================================
+
 LANGUAGE_CODE = "pl"
 TIME_ZONE = "Europe/Warsaw"
+
 USE_I18N = True
 USE_TZ = True
+
+
+# ======================================
+#  STATIC / MEDIA
+# ======================================
 
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
@@ -82,17 +135,38 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
-# LOGOWANIE
+
+# ======================================
+#  LOGOWANIE / UWIERZYTELNIANIE
+# ======================================
+
 LOGIN_URL = "konta:logowanie"
-LOGIN_REDIRECT_URL = "panel_start"     # wspólny dashboard po zalogowaniu
+# wspólny dashboard po zalogowaniu
+LOGIN_REDIRECT_URL = "panel_start"
 LOGOUT_REDIRECT_URL = "konta:logowanie"
 
-# E-maile w trybie offline (nic nie wysyła)
+
+# ======================================
+#  E-MAIL
+# ======================================
+
+# W trybie developerskim nic nie wysyłamy, tylko „połykamy” maile.
 EMAIL_BACKEND = "django.core.mail.backends.dummy.EmailBackend"
 
-# Szablony pokażą komunikaty (messages)
-from django.contrib.messages import constants as messages
-MESSAGE_TAGS = { messages.ERROR: "danger" }
+
+# ======================================
+#  KOMUNIKATY (django.contrib.messages)
+# ======================================
+
+MESSAGE_TAGS = {
+    messages.ERROR: "danger",
+}
+
+
+# ======================================
+#  INNE
+# ======================================
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-handler403 = "parafia.views.permission_denied_view"
+
+

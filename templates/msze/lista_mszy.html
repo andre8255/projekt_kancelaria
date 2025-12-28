@@ -98,7 +98,9 @@
             <td>{{ msza.godzina|time:"H:i" }}</td>
 
             <td>
-                {% if msza.typ == 'NIEDZIELNA' %}
+                {% if msza.typ == 'SWIATECZNA' %}
+                    <span class="badge text-bg-danger bg-opacity-10 text-danger border border-danger-subtle">Świąteczna</span>
+                {% elif msza.typ == 'NIEDZIELNA' %}
                     <span class="badge text-bg-danger bg-opacity-10 text-danger border border-danger-subtle">Niedzielna</span>
                 {% elif msza.typ == 'SLUBNA' %}
                     <span class="badge text-bg-warning bg-opacity-10 text-warning-emphasis border border-warning-subtle">Ślub</span>

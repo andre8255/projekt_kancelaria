@@ -44,8 +44,6 @@ class GrobForm(BootstrapFormMixin, forms.ModelForm):
         widget=forms.Select(attrs={'class': 'form-select'}) # Klasa dla stylów
     )
 
-
-
     class Meta:
         model = Grob
         fields = ["sektor", "rzad","numer", "typ", "dysponent", "data_oplaty", "wazny_do", "uwagi", "zdjecie"]

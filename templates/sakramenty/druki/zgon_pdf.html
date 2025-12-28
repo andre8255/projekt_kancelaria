@@ -12,7 +12,7 @@
         body {
             font-family: "Times New Roman", serif;
             font-size: 11pt;
-            color: #063267; /* Twój niebieski kolor */
+            color: #063267;
             line-height: 1.3;
         }
 
@@ -21,7 +21,6 @@
             margin: 0 auto;
         }
 
-        /* --- NAGŁÓWEK PARAFII --- */
         .parish-header {
             text-align: center;
             margin-bottom: 0.2cm;
@@ -38,7 +37,6 @@
             color: #000;
         }
 
-        /* --- TYTUŁ I PIECZĘĆ --- */
         .seal {
             float: left;
             width: 5cm; 
@@ -75,7 +73,6 @@
             font-style: italic;
         }
 
-        /* --- TABELA DANYCH --- */
         table.data-table { 
             width: 100%; 
             border-collapse: collapse; 
@@ -97,9 +94,10 @@
         }
         .field-label::after { content: ": "; }
 
+        /* wszystkie dane z bazy */
         .user-data { 
-            font-weight: 705; 
-            color: #000; /* Dane wypełniane czarne */
+            font-weight: 700; 
+            color: #000;
         }
 
         .tiny-row {
@@ -111,7 +109,6 @@
             border-bottom: 1px dotted #ccc;
         }
 
-        /* --- STOPKA --- */
         .footer-table {
             width: 100%;
             margin-top: 2cm;
@@ -142,10 +139,10 @@
 <div class="doc">
 
     <div class="parish-header">
-        {{ parafia.nazwa }}
+        <span class="user-data">{{ parafia.nazwa }}</span>
     </div>
     <div class="parish-subheader">
-    
+        <!-- np. adres parafii, jeśli chcesz -->
     </div>
 
     <div style="overflow: hidden; margin-bottom: 10px;">
@@ -163,7 +160,7 @@
     <div class="bookref">
         <span class="field-label" style="width: auto;">Rok i numer księgi zmarłych</span>
         <span class="user-data">{{ zgon.rok|default:"—" }}/{{ zgon.akt_nr|default:"—" }}</span>
-        <div class="tiny">/Annus et numerus libri mortuorum/</div>
+        <div class="tiny">/Annus et numerus libri mortuorum/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
     </div>
 
     <table class="data-table">
@@ -196,19 +193,30 @@
         <tr><td colspan="2" class="tiny-row">/Dies et locus nativitatis/</td></tr>
 
         <tr>
-            <td class="field-label">3. Imiona i nazwiska rodziców</td>
-            <td>
-                <span class="user-data">
-                    {% if chrzest %}
-                        {{ chrzest.ojciec|default:"..." }} i {{ chrzest.matka|default:"..." }}
-                    {% else %}
-                        {{ zgon.osoba.imie_ojca|default:"..." }} {{ zgon.osoba.nazwisko_ojca|default:"..." }} i 
-                        {{ zgon.osoba.imie_matki|default:"..." }} {{ zgon.osoba.nazwisko_matki|default:"..." }}
-                    {% endif %}
-                </span>
-            </td>
-        </tr>
-        <tr><td colspan="2" class="tiny-row">/Nomen, cognomen parentum/</td></tr>
+    <td class="field-label">3. Imiona i nazwiska rodziców</td>
+    <td>
+        <span class="user-data">
+            {# 1. Najpierw próbujemy z chrztu #}
+            {% if chrzest %}
+                {% if chrzest.ojciec or chrzest.matka %}
+                    {{ chrzest.ojciec|default:"..." }} i {{ chrzest.matka|default:"..." }}
+                {% else %}
+                    {{ zgon.osoba.imie_ojca|default:"..." }}
+                    {{ zgon.osoba.nazwisko_ojca|default:"..." }} i
+                    {{ zgon.osoba.imie_matki|default:"..." }}
+                    {{ zgon.osoba.nazwisko_matki|default:"..." }}
+                {% endif %}
+            {% else %}
+                {# 2. Jeśli brak wpisu chrztu, bierzemy dane z profilu osoby #}
+                {{ zgon.osoba.imie_ojca|default:"..." }}
+                {{ zgon.osoba.nazwisko_ojca|default:"..." }} i
+                {{ zgon.osoba.imie_matki|default:"..." }}
+                {{ zgon.osoba.nazwisko_matki|default:"..." }}
+            {% endif %}
+        </span>
+    </td>
+</tr>
+<tr><td colspan="2" class="tiny-row">/Nomen, cognomen parentum/</td></tr>
 
         <tr>
             <td class="field-label">4. Data i miejsce zgonu</td>
@@ -243,19 +251,6 @@
             </td>
         </tr>
         <tr><td colspan="2" class="tiny-row">/Dies et locus sepulturae/</td></tr>
-<!--
-        {% if namaszczenie %}
-        <tr>
-            <td class="field-label">6. Sakramenty przed śmiercią</td>
-            <td>
-                <span class="user-data">
-                    Opatrzony św. sakramentami dnia {{ namaszczenie.data|date:"d.m.Y" }}
-                </span>
-            </td>
-        </tr>
-        <tr><td colspan="2" class="tiny-row">/Sacramenta/</td></tr>
-        {% endif %}
--->
     </table>
 
     <table class="footer-table">
@@ -273,7 +268,8 @@
                 <div class="la">/Concordat cum libro mortuorum/</div>
                 
                 <div class="signature"></div>
-                <div style="font-weight: 700;">Proboszcz | Parochus</div>
+                <div style="font-weight: 700;">Proboszcz</div>
+                <div class="la">/Parochus/</div>
             </td>
         </tr>
     </table>

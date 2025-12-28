@@ -168,22 +168,23 @@
     </div>
 
     <div class="bookref">
-        Rok i numer księgi: <span class="user-data">{{ malzenstwo.rok|default:"—" }} / {{ malzenstwo.akt_nr|default:"—" }}</span>
+        Rok i numer księgi zaślubionych: <span class="user-data">{{ malzenstwo.rok|default:"—" }} / {{ malzenstwo.akt_nr|default:"—" }}</span>
+        <span class="la">/Annus et numerus libri matrimoniorum/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
     </div>
 
     <table class="main-table">
         <thead>
             <tr>
                 <th class="label-col-head"></th>
-                <th>MAŁŻONEK<br><span class="la">SPONSUS</span></th>
-                <th>MAŁŻONKA<br><span class="la">SPONSA</span></th>
+                <th>MAŁŻONEK<br><span class="la">/SPONSUS/</span></th>
+                <th>MAŁŻONKA<br><span class="la">/SPONSA/</span></th>
             </tr>
         </thead>
         <tbody>
             <tr>
                 <td class="label-col">
                     1. Imię i nazwisko
-                    <span class="la">Nomen, cognomen</span>
+                    <span class="la">/Nomen, cognomen/</span>
                 </td>
                 <td class="data-cell">
                     {{ malzenstwo.malzonek_a.imie_pierwsze }}<br>
@@ -198,7 +199,7 @@
             <tr>
   <td class="label-col">
     2. Imiona rodziców
-    <span class="la">Nomina patris et matris</span>
+    <span class="la">/Nomina patris et matris/</span>
   </td>
 
   <td class="data-cell">
@@ -215,7 +216,7 @@
             <tr>
                 <td class="label-col">
                     3. Data i miejsce ur.
-                    <span class="la">Dies et locus nativitatis</span>
+                    <span class="la">/Dies et locus nativitatis/</span>
                 </td>
                 <td class="data-cell">
                     {% if chrzest_a.data_urodzenia %}
@@ -252,7 +253,7 @@
             <tr>
                 <td class="label-col">
                     4. Wyznanie (obrządek)
-                    <span class="la">Religio (ritus)</span>
+                    <span class="la">/Religio (ritus)/</span>
                 </td>
                 <td class="data-cell">
                     {{ malzenstwo.malzonek_a.wyznanie|default:"—" }}
@@ -265,7 +266,7 @@
             <tr>
                 <td class="label-col">
                     5. Data i miejsce ślubu
-                    <span class="la">Dies et locus matrimonii</span>
+                    <span class="la">/Dies et locus matrimonii/</span>
                 </td>
                 <td colspan="2" class="data-cell" >
                     {{ malzenstwo.data_slubu|date:"d.m.Y"|default:"—" }} ,  
@@ -283,7 +284,7 @@
             <tr>
                 <td class="label-col">
                     6. Asystujący
-                    <span class="la">Assistens</span>
+                    <span class="la">/Assistens/</span>
                 </td>
                 <td colspan="2" class="data-cell">
                     {% if malzenstwo.swiadek_urzedowy %}
@@ -299,7 +300,7 @@
             <tr>
                 <td class="label-col">
                     7. Świadkowie
-                    <span class="la">Testes</span>
+                    <span class="la">/Testes/</span>
                 </td>
                 <td colspan="2" class="data-cell">
                     1. {{ malzenstwo.swiadek_a|default:"—" }}<br>
@@ -317,17 +318,17 @@
                 <span class="user-data">
                     {{ parafia.miejscowosc }}, {{ today|date:"d.m.Y" }}
                 </span>
-                <span class="la">Locus et dies</span>
+                <span class="la">/Locus et dies/</span>
             </td>
             <td style="width: 55%; text-align: center;">
                 <div style="margin-bottom: 10px;">
                     Potwierdzam zgodność z księgą zaślubionych
-                    <span class="la">Concordat cum libro matrimoniorum</span>
+                    <span class="la">/Concordat cum libro matrimoniorum/</span>
                 </div>
                 
                 <div class="signature-line"></div>
-                <div>Proboszcz / Wikariusz</div>
-                <span class="la">Parochus / Vicarius</span>
+                <div>Proboszcz</div>
+                <span class="la">/Parochus/</span>
             </td>
         </tr>
     </table>

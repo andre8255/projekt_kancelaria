@@ -147,15 +147,24 @@
         </tr>
 
         <tr>
-            <td class="label-cell">Imiona rodziców:</td>
-            <td class="value-cell">
-                {% if chrzest %}
-                    {{ chrzest.ojciec|default:"..." }} i {{ chrzest.matka|default:"..." }}
-                {% else %}
-                    {{ komunia.osoba.imie_ojca|default:"..." }} i {{ komunia.osoba.imie_matki|default:"..." }}
-                {% endif %}
-            </td>
-        </tr>
+    <td class="label-cell">Imiona rodziców:</td>
+    <td class="value-cell">
+        {% with osoba=komunia.osoba %}
+            {# 1. Najpierw profil osoby #}
+            {% if osoba.imie_ojca or osoba.imie_matki %}
+                {{ osoba.imie_ojca|default:"..." }} i {{ osoba.imie_matki|default:"..." }}
+            
+            {# 2. Jak profil pusty, próbuj z aktu chrztu (stare pola) #}
+            {% elif chrzest %}
+                {{ chrzest.ojciec|default:"..." }} i {{ chrzest.matka|default:"..." }}
+            
+            {# 3. Ostateczna rezerwa #}
+            {% else %}
+                ...
+            {% endif %}
+        {% endwith %}
+    </td>
+</tr>
 
         <tr class="spacer-row">
             <td colspan="2">

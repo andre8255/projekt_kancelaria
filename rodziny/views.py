@@ -1,25 +1,29 @@
-#rodziny/views.py
-from django.utils import timezone
-from django.conf import settings
-from django.views import View
+# rodziny/views.py
+from django.conf import settings  # (obecnie niewykorzystywane, ale zostawiam jeśli planujesz użyć)
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
 from django.db.models.deletion import ProtectedError
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse_lazy
-from parafia.utils_pdf import render_to_pdf
+from django.utils import timezone
+from django.views import View
 from django.views.generic import (
-    ListView, DetailView, CreateView, UpdateView, DeleteView, FormView
+    ListView,
+    DetailView,
+    CreateView,
+    UpdateView,
+    DeleteView,
+    FormView,
 )
 
-# Importy ról
+from parafia.utils_pdf import render_to_pdf
+
+# Importy ról / logowania akcji
 from konta.mixins import RolaWymaganaMixin
 from konta.models import Rola
 from konta.utils import zapisz_log
 
-from .models import Rodzina, CzlonkostwoRodziny,WizytaDuszpasterska
-from .forms import RodzinaForm, DodajCzlonkaForm,WizytaForm
 from sakramenty.models import (
     Chrzest,
     PierwszaKomunia,
@@ -28,19 +32,27 @@ from sakramenty.models import (
     NamaszczenieChorych,
     Zgon,
 )
+from .forms import RodzinaForm, DodajCzlonkaForm, WizytaForm
+from .models import Rodzina, CzlonkostwoRodziny, WizytaDuszpasterska
 
+
+# =============================================================================
+# LISTA / SZCZEGÓŁY RODZINY
+# =============================================================================
 
 class RodzinaListaView(LoginRequiredMixin, ListView):
+    """
+    Lista rodzin / kartotek z prostą wyszukiwarką (po nazwie i adresie).
+    """
     model = Rodzina
     template_name = "rodziny/lista.html"
     context_object_name = "rodziny"
     paginate_by = 20
 
     def get_queryset(self):
-        qs = Rodzina.objects.all().order_by(
-            "miejscowosc", "ulica", "nr_domu", "nr_mieszkania", "nazwa"
-        )
+        qs = Rodzina.objects.all()
         q = (self.request.GET.get("q") or "").strip()
+
         if q:
             for slowo in q.split():
                 qs = qs.filter(
@@ -48,9 +60,20 @@ class RodzinaListaView(LoginRequiredMixin, ListView):
                     Q(ulica__icontains=slowo) |
                     Q(miejscowosc__icontains=slowo)
                 )
-        return qs
+
+        return qs.order_by(
+            "nazwa",
+            "miejscowosc",
+            "ulica",
+            "nr_domu",
+            "nr_mieszkania",
+        )
+
 
 class RodzinaSzczegolyView(LoginRequiredMixin, DetailView):
+    """
+    Szczegóły konkretnej rodziny + członkowie + informacje o sakramentach.
+    """
     model = Rodzina
     template_name = "rodziny/szczegoly.html"
     context_object_name = "rodzina"
@@ -59,7 +82,7 @@ class RodzinaSzczegolyView(LoginRequiredMixin, DetailView):
         ctx = super().get_context_data(**kwargs)
         rodzina = self.object
 
-        # pobieramy członków rodziny (relacje CzlonkostwoRodziny)
+        # członkowie rodziny
         czlonkowie = (
             CzlonkostwoRodziny.objects
             .select_related("osoba")
@@ -74,13 +97,12 @@ class RodzinaSzczegolyView(LoginRequiredMixin, DetailView):
             "INNA": 4,
         }
 
-        def kolejnosc(cz):
-            return PRIORYTET_ROLI.get(cz.rola, 99)
+        def kolejnosc(czlonkostwo: CzlonkostwoRodziny) -> int:
+            return PRIORYTET_ROLI.get(czlonkostwo.rola, 99)
 
         posortowani = sorted(czlonkowie, key=kolejnosc)
 
-        # teraz przygotowujemy bogatszą listę:
-        # dla KAŻDEJ osoby w rodzinie sprawdzamy, czy ma wpisy w sakramentach
+        # budujemy listę zawierającą też info o sakramentach
         wynik = []
         for wpis in posortowani:
             osoba = wpis.osoba
@@ -95,7 +117,7 @@ class RodzinaSzczegolyView(LoginRequiredMixin, DetailView):
             ma_zgon = Zgon.objects.filter(osoba=osoba).exists()
 
             wynik.append({
-                "relacja": wpis,  # obiekt CzlonkostwoRodziny
+                "relacja": wpis,
                 "osoba": osoba,
                 "rola_display": wpis.get_rola_display(),
                 "status_display": wpis.get_status_display() if wpis.status else "",
@@ -106,14 +128,21 @@ class RodzinaSzczegolyView(LoginRequiredMixin, DetailView):
                     "malzenstwo": ma_malzenstwo,
                     "namaszczenie": ma_namaszczenie,
                     "zgon": ma_zgon,
-                }
+                },
             })
 
         ctx["czlonkowie_posortowani"] = wynik
         return ctx
 
 
+# =============================================================================
+# CRUD RODZINY
+# =============================================================================
+
 class RodzinaNowaView(RolaWymaganaMixin, CreateView):
+    """
+    Dodanie nowej rodziny / kartoteki.
+    """
     dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
     model = Rodzina
     form_class = RodzinaForm
@@ -127,15 +156,17 @@ class RodzinaNowaView(RolaWymaganaMixin, CreateView):
             self.request,
             "DODANIE_RODZINY",
             self.object,
-            opis=f"Dodano rodzinę: {self.object.nazwa}"
+            opis=f"Dodano rodzinę: {self.object.nazwa}",
         )
 
         messages.success(self.request, "Dodano nową rodzinę.")
         return response
 
 
-
 class RodzinaEdycjaView(RolaWymaganaMixin, UpdateView):
+    """
+    Edycja istniejącej rodziny.
+    """
     dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
     model = Rodzina
     form_class = RodzinaForm
@@ -149,15 +180,17 @@ class RodzinaEdycjaView(RolaWymaganaMixin, UpdateView):
             self.request,
             "EDYCJA_RODZINY",
             self.object,
-            opis=f"Zmieniono dane rodziny: {self.object.nazwa}"
+            opis=f"Zmieniono dane rodziny: {self.object.nazwa}",
         )
 
         messages.success(self.request, "Zapisano zmiany danych rodziny.")
         return response
 
 
-
 class RodzinaUsunView(RolaWymaganaMixin, DeleteView):
+    """
+    Usunięcie rodziny (z obsługą błędu, gdy są powiązani członkowie).
+    """
     dozwolone_role = [Rola.ADMIN, Rola.KSIAZD]
     model = Rodzina
     template_name = "rodziny/potwierdz_usuniecie.html"
@@ -170,7 +203,7 @@ class RodzinaUsunView(RolaWymaganaMixin, DeleteView):
         except ProtectedError:
             messages.error(
                 request,
-                "Nie można usunąć tej rodziny, bo są do niej przypisane osoby."
+                "Nie można usunąć tej rodziny, bo są do niej przypisane osoby.",
             )
             return redirect(self.object.get_absolute_url())
 
@@ -182,25 +215,38 @@ class RodzinaUsunView(RolaWymaganaMixin, DeleteView):
             request,
             "USUNIECIE_RODZINY",
             self.object,
-            opis=f"Usunięto rodzinę: {self.object.nazwa}"
+            opis=f"Usunięto rodzinę: {self.object.nazwa}",
         )
 
         messages.success(request, "Rodzina została usunięta.")
         return response
 
 
+# =============================================================================
+# DRUK / PDF RODZINY
+# =============================================================================
+
 class RodzinaPDFView(LoginRequiredMixin, View):
+    """
+    Generuje PDF kartoteki rodziny (członkowie + wizyty duszpasterskie).
+    """
+
     def get(self, request, *args, **kwargs):
-        rodzina = get_object_or_404(Rodzina, pk=kwargs['pk'])
-        
-        # 1. Pobieramy członków
-        czlonkowie = CzlonkostwoRodziny.objects.select_related("osoba").filter(rodzina=rodzina)
-        
-        # Sortowanie członków (Mąż -> Żona -> Dzieci -> Inni)
+        rodzina = get_object_or_404(Rodzina, pk=kwargs["pk"])
+
+        # --- 1. Członkowie rodziny ---
+        czlonkowie = (
+            CzlonkostwoRodziny.objects
+            .select_related("osoba")
+            .filter(rodzina=rodzina)
+        )
+
         PRIORYTET_ROLI = {"MAZ": 1, "ZONA": 2, "DZIECKO": 3, "INNA": 4}
-        posortowani = sorted(czlonkowie, key=lambda cz: PRIORYTET_ROLI.get(cz.rola, 99))
-        
-        # Budowanie listy z informacjami o sakramentach
+        posortowani = sorted(
+            czlonkowie,
+            key=lambda cz: PRIORYTET_ROLI.get(cz.rola, 99),
+        )
+
         wynik_czlonkowie = []
         for wpis in posortowani:
             osoba = wpis.osoba
@@ -211,33 +257,97 @@ class RodzinaPDFView(LoginRequiredMixin, View):
                     "chrzest": Chrzest.objects.filter(ochrzczony=osoba).exists(),
                     "komunia": PierwszaKomunia.objects.filter(osoba=osoba).exists(),
                     "bierzmowanie": Bierzmowanie.objects.filter(osoba=osoba).exists(),
-                    "malzenstwo": Malzenstwo.objects.filter(Q(malzonek_a=osoba) | Q(malzonek_b=osoba)).exists(),
+                    "malzenstwo": Malzenstwo.objects.filter(
+                        Q(malzonek_a=osoba) | Q(malzonek_b=osoba)
+                    ).exists(),
                     "namaszczenie": NamaszczenieChorych.objects.filter(osoba=osoba).exists(),
                     "zgon": Zgon.objects.filter(osoba=osoba).exists(),
-                }
+                },
             })
-        
-        # 2. Pobieramy wizyty (najnowsze na górze)
-        wizyty = rodzina.wizyty.all().select_related("ksiadz").order_by('-rok', '-data_wizyty')
+
+        # --- 2. Wizyty duszpasterskie (najnowsze na górze) ---
+        wizyty = (
+            rodzina.wizyty
+            .all()
+            .select_related("ksiadz")
+            .order_by("-rok", "-data_wizyty")
+        )
 
         context = {
-            'rodzina': rodzina,
-            'czlonkowie_posortowani': wynik_czlonkowie,
-            'wizyty': wizyty,
-            'today': timezone.localdate(),
-            # 'parafia': ... (dodawane automatycznie przez utils_pdf)
+            "rodzina": rodzina,
+            "czlonkowie_posortowani": wynik_czlonkowie,
+            "wizyty": wizyty,
+            "today": timezone.localdate(),
+            # 'parafia' – dokładane automatycznie w render_to_pdf
         }
-        
-        # Bezpieczna nazwa pliku (usuwamy spacje itp)
-        safe_name = "".join([c if c.isalnum() else "_" for c in rodzina.nazwa])
+
+        # Bezpieczna nazwa pliku
+        safe_name = "".join(c if c.isalnum() else "_" for c in rodzina.nazwa)
         filename = f"Kartoteka_{safe_name}.pdf"
-        
-        return render_to_pdf('rodziny/druki/rodzina_pdf.html', context, filename)
+
+        return render_to_pdf("rodziny/druki/rodzina_pdf.html", context, filename)
 
 
-# === WIZYTY DUSZPASTERSKIE ===
+class RodzinaDrukView(LoginRequiredMixin, DetailView):
+    """
+    Widok „pod drukarkę” (HTML) – kartoteka rodziny.
+    """
+    model = Rodzina
+    template_name = "rodziny/druki/rodzina_druk.html"
+    context_object_name = "rodzina"
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        rodzina = self.object
+
+        czlonkowie = (
+            CzlonkostwoRodziny.objects
+            .select_related("osoba")
+            .filter(rodzina=rodzina)
+        )
+
+        PRIORYTET_ROLI = {"MAZ": 1, "ZONA": 2, "DZIECKO": 3, "INNA": 4}
+
+        def kolejnosc(cz):
+            return PRIORYTET_ROLI.get(cz.rola, 99)
+
+        posortowani = sorted(czlonkowie, key=kolejnosc)
+
+        wynik = []
+        for wpis in posortowani:
+            osoba = wpis.osoba
+
+            ma_chrzest = Chrzest.objects.filter(ochrzczony=osoba).exists()
+            ma_komunia = PierwszaKomunia.objects.filter(osoba=osoba).exists()
+            ma_bierzmowanie = Bierzmowanie.objects.filter(osoba=osoba).exists()
+            ma_malzenstwo = Malzenstwo.objects.filter(
+                Q(malzonek_a=osoba) | Q(malzonek_b=osoba)
+            ).exists()
+
+            wynik.append({
+                "relacja": wpis,
+                "osoba": osoba,
+                "sakramenty": {
+                    "chrzest": ma_chrzest,
+                    "komunia": ma_komunia,
+                    "bierzmowanie": ma_bierzmowanie,
+                    "malzenstwo": ma_malzenstwo,
+                },
+            })
+
+        ctx["czlonkowie_posortowani"] = wynik
+        ctx["today"] = timezone.localdate()
+        return ctx
+
+
+# =============================================================================
+# WIZYTY DUSZPASTERSKIE
+# =============================================================================
 
 class WizytaNowaView(RolaWymaganaMixin, CreateView):
+    """
+    Dodanie wizyty duszpasterskiej dla konkretnej rodziny.
+    """
     dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
     model = WizytaDuszpasterska
     form_class = WizytaForm
@@ -256,7 +366,7 @@ class WizytaNowaView(RolaWymaganaMixin, CreateView):
             self.request,
             "DODANIE_WIZYTY",
             wizyta,
-            opis=f"Dodano wizytę duszpasterską ({wizyta.rok}) dla rodziny {self.rodzina.nazwa}"
+            opis=f"Dodano wizytę duszpasterską ({wizyta.rok}) dla rodziny {self.rodzina.nazwa}",
         )
 
         messages.success(self.request, f"Dodano wizytę duszpasterską ({wizyta.rok}).")
@@ -269,6 +379,9 @@ class WizytaNowaView(RolaWymaganaMixin, CreateView):
 
 
 class WizytaEdycjaView(RolaWymaganaMixin, UpdateView):
+    """
+    Edycja wizyty duszpasterskiej.
+    """
     dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
     model = WizytaDuszpasterska
     form_class = WizytaForm
@@ -281,7 +394,7 @@ class WizytaEdycjaView(RolaWymaganaMixin, UpdateView):
             self.request,
             "EDYCJA_WIZYTY",
             self.object,
-            opis=f"Zmieniono wizytę duszpasterską ({self.object.rok}) dla rodziny {self.object.rodzina.nazwa}"
+            opis=f"Zmieniono wizytę duszpasterską ({self.object.rok}) dla rodziny {self.object.rodzina.nazwa}",
         )
 
         return response
@@ -292,6 +405,9 @@ class WizytaEdycjaView(RolaWymaganaMixin, UpdateView):
 
 
 class WizytaUsunView(RolaWymaganaMixin, DeleteView):
+    """
+    Usunięcie wizyty duszpasterskiej.
+    """
     dozwolone_role = [Rola.ADMIN, Rola.KSIAZD]
     model = WizytaDuszpasterska
     template_name = "rodziny/wizyta_usun.html"
@@ -303,7 +419,8 @@ class WizytaUsunView(RolaWymaganaMixin, DeleteView):
             request,
             "USUNIECIE_WIZYTY",
             self.object,
-            opis=f"Usunięto wizytę duszpasterską ({self.object.rok}) dla rodziny {self.object.rodzina.nazwa}"
+            opis=f"Usunięto wizytę duszpasterską ({self.object.rok}) "
+                 f"dla rodziny {self.object.rodzina.nazwa}",
         )
 
         return super().delete(request, *args, **kwargs)
@@ -313,58 +430,14 @@ class WizytaUsunView(RolaWymaganaMixin, DeleteView):
         return self.object.rodzina.get_absolute_url()
 
 
-
-class RodzinaDrukView(LoginRequiredMixin, DetailView):
-    model = Rodzina
-    template_name = "rodziny/druki/rodzina_druk.html"
-    context_object_name = "rodzina"
-
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        rodzina = self.object
-
-        # --- Ta sama logika co w szczegółach, aby pobrać statusy sakramentów ---
-        czlonkowie = (
-            CzlonkostwoRodziny.objects
-            .select_related("osoba")
-            .filter(rodzina=rodzina)
-        )
-
-        PRIORYTET_ROLI = {
-            "MAZ": 1, "ZONA": 2, "DZIECKO": 3, "INNA": 4,
-        }
-        def kolejnosc(cz): return PRIORYTET_ROLI.get(cz.rola, 99)
-        posortowani = sorted(czlonkowie, key=kolejnosc)
-
-        wynik = []
-        for wpis in posortowani:
-            osoba = wpis.osoba
-            
-            # Sprawdzamy sakramenty (True/False)
-            ma_chrzest = Chrzest.objects.filter(ochrzczony=osoba).exists()
-            ma_komunia = PierwszaKomunia.objects.filter(osoba=osoba).exists()
-            ma_bierzmowanie = Bierzmowanie.objects.filter(osoba=osoba).exists()
-            ma_malzenstwo = Malzenstwo.objects.filter(Q(malzonek_a=osoba) | Q(malzonek_b=osoba)).exists()
-            # ma_zgon = Zgon.objects.filter(osoba=osoba).exists() # Opcjonalnie jeśli chcesz oznaczać zmarłych
-
-            wynik.append({
-                "relacja": wpis,
-                "osoba": osoba,
-                "sakramenty": {
-                    "chrzest": ma_chrzest,
-                    "komunia": ma_komunia,
-                    "bierzmowanie": ma_bierzmowanie,
-                    "malzenstwo": ma_malzenstwo,
-                }
-            })
-
-        ctx["czlonkowie_posortowani"] = wynik
-        ctx["today"] = timezone.localdate()
-        return ctx
-
-
+# =============================================================================
+# CZŁONKOWIE RODZINY
+# =============================================================================
 
 class DodajCzlonkaView(RolaWymaganaMixin, FormView):
+    """
+    Dodanie osoby (CzlonkostwoRodziny) do konkretnej rodziny.
+    """
     dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
     template_name = "rodziny/dodaj_czlonka.html"
     form_class = DodajCzlonkaForm
@@ -382,6 +455,7 @@ class DodajCzlonkaView(RolaWymaganaMixin, FormView):
         czlonek = form.save(commit=False)
         czlonek.rodzina = self.rodzina
         czlonek.save()
+
         messages.success(self.request, "Osoba została przypisana do rodziny.")
         return redirect(self.rodzina.get_absolute_url())
 
@@ -391,14 +465,15 @@ class DodajCzlonkaView(RolaWymaganaMixin, FormView):
         return ctx
 
 
-
-    
 class UsunCzlonkaZRodzinyView(RolaWymaganaMixin, View):
+    """
+    Prosty widok potwierdzenia usunięcia członka z konkretnej rodziny.
+    """
     dozwolone_role = [Rola.ADMIN, Rola.KSIAZD]
     template_name = "rodziny/usun_czlonka.html"
 
     def dispatch(self, request, *args, **kwargs):
-        # pobierz rodzinę i członkostwo na początku, żeby mieć je w get/post
+        # pobieramy rodzinę i członkostwo na starcie (używane w GET i POST)
         self.rodzina = get_object_or_404(Rodzina, pk=kwargs["rodzina_pk"])
         self.czlonek = get_object_or_404(
             CzlonkostwoRodziny,
@@ -408,11 +483,15 @@ class UsunCzlonkaZRodzinyView(RolaWymaganaMixin, View):
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, rodzina_pk, czlonek_pk):
-        # pokazujemy stronę potwierdzenia
-        return render(request, self.template_name, {
-            "rodzina": self.rodzina,
-            "czlonek": self.czlonek,
-        })
+        # wyświetlenie strony z potwierdzeniem
+        return render(
+            request,
+            self.template_name,
+            {
+                "rodzina": self.rodzina,
+                "czlonek": self.czlonek,
+            },
+        )
 
     def post(self, request, rodzina_pk, czlonek_pk):
         osoba_txt = f"{self.czlonek.osoba.nazwisko} {self.czlonek.osoba.imie_pierwsze}"
@@ -421,18 +500,21 @@ class UsunCzlonkaZRodzinyView(RolaWymaganaMixin, View):
             request,
             "USUNIECIE_CZLONKA_RODZINY",
             self.czlonek,
-            opis=f"Usunięto osobę {osoba_txt} z rodziny {self.rodzina.nazwa}"
+            opis=f"Usunięto osobę {osoba_txt} z rodziny {self.rodzina.nazwa}",
         )
 
         self.czlonek.delete()
         messages.success(
             request,
-            f"Osoba {osoba_txt} została usunięta z tej rodziny."
+            f"Osoba {osoba_txt} została usunięta z tej rodziny.",
         )
         return redirect(self.rodzina.get_absolute_url())
 
 
 class CzlonkostwoUsunView(RolaWymaganaMixin, DeleteView):
+    """
+    Klasyczny DeleteView dla CzlonkostwoRodziny (gdy nie używamy wariantu z rodzina_pk).
+    """
     dozwolone_role = [Rola.ADMIN, Rola.KSIAZD]
     model = CzlonkostwoRodziny
     template_name = "rodziny/czlonek_usun.html"
@@ -445,7 +527,10 @@ class CzlonkostwoUsunView(RolaWymaganaMixin, DeleteView):
             request,
             "USUNIECIE_CZLONKA_RODZINY",
             self.object,
-            opis=f"Usunięto członka rodziny: {self.object.osoba} z rodziny {self.object.rodzina.nazwa}"
+            opis=(
+                f"Usunięto członka rodziny: {self.object.osoba} "
+                f"z rodziny {self.object.rodzina.nazwa}"
+            ),
         )
 
         return super().delete(request, *args, **kwargs)

@@ -20,6 +20,11 @@
               <a href="{% url 'osoba_szczegoly' o.pk %}">
                 {{ o.imie_pierwsze }} {{ o.nazwisko }}
               </a>
+              {% if o.data_urodzenia %}
+                <span class="text-muted small">
+                  &nbsp;– ur. {{ o.data_urodzenia|date:"Y-m-d" }}
+                </span>
+              {% endif %}
             </li>
           {% empty %}
             <li class="list-group-item text-muted">Brak wyników</li>
@@ -30,38 +35,37 @@
       {# PRAWA KOLUMNA – RODZINY + POCHOWANI #}
       <div class="col-md-6 mb-4">
 
+        {# RODZINY #}
         <h5>Rodziny ({{ wyniki_rodziny|length }})</h5>
         <ul class="list-group mb-4">
           {% for r in wyniki_rodziny %}
             <li class="list-group-item">
-              <a href="{% url 'rodzina_szczegoly' r.pk %}">
+              <a href="{% url 'rodzina_szczegoly' r.pk %}" class="fw-semibold">
                 {{ r.nazwa }}
               </a>
+              <span class="small text-muted">
+                &nbsp;– ul. {{ r.ulica }} {{ r.nr_domu }}{% if r.nr_mieszkania %}/{{ r.nr_mieszkania }}{% endif %}
+              </span>
             </li>
           {% empty %}
             <li class="list-group-item text-muted">Brak wyników</li>
           {% endfor %}
         </ul>
 
+        {# POCHOWANI NA CMENTARZU #}
         <h5>Pochowani na cmentarzu ({{ wyniki_pochowani|length }})</h5>
         <ul class="list-group">
           {% for p in wyniki_pochowani %}
             <li class="list-group-item">
-              <div class="fw-semibold">
-                <a href="{% url 'osoba_szczegoly' p.osoba.pk %}">
-                  {{ p.osoba.imie_pierwsze }} {{ p.osoba.nazwisko }}
-                </a>
-              </div>
-              <div class="small text-muted">
-                Grób:
-                sektor {{ p.grob.sektor }}
-                rząd {{ p.grob.rzad }}
+              <a href="{% url 'osoba_szczegoly' p.osoba.pk %}">
+                {{ p.osoba.imie_pierwsze }} {{ p.osoba.nazwisko }}
+              </a>
+              <span class="small text-muted">
+                &nbsp;– grób: sektor {{ p.grob.sektor }},
+                rząd {{ p.grob.rzad }},
                 nr {{ p.grob.numer }}
-                &nbsp;–&nbsp;
-                <a href="{% url 'cmentarz:grob_szczegoly' p.grob.pk %}">
-                  karta grobu
-                </a>
-              </div>
+                (&nbsp;<a href="{% url 'cmentarz:grob_szczegoly' p.grob.pk %}">karta grobu</a>&nbsp;)
+              </span>
             </li>
           {% empty %}
             <li class="list-group-item text-muted">Brak wyników</li>

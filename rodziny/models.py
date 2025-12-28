@@ -1,10 +1,10 @@
 # rodziny/models.py
 from django.db import models
 from django.urls import reverse
-from osoby.models import Osoba
-from django.utils import timezone
-from slowniki.models import Duchowny
 
+from django.utils import timezone  # (na razie niewykorzystane, ale zostawiam)
+from osoby.models import Osoba
+from slowniki.models import Duchowny
 
 
 class Rodzina(models.Model):
@@ -32,13 +32,23 @@ class Rodzina(models.Model):
             models.Index(fields=["miejscowosc", "ulica", "nr_domu"]),
         ]
 
-    def __str__(self):
-        adres = f"{self.ulica} {self.nr_domu}"
+    def __str__(self) -> str:
+        """
+        Zwraca czytelną nazwę rodziny wraz z adresem,
+        np. "Kowalscy (ul. Polna 12/3, Parafia Dolna)".
+        """
+        adres = f"{self.ulica} {self.nr_domu}".strip()
+
         if self.nr_mieszkania:
             adres += f"/{self.nr_mieszkania}"
+
         if self.miejscowosc:
-            adres += f", {self.miejscowosc}"
-        return f"{self.nazwa} ({adres})"
+            if adres:
+                adres += f", {self.miejscowosc}"
+            else:
+                adres = self.miejscowosc
+
+        return f"{self.nazwa} ({adres})" if adres else self.nazwa
 
     def get_absolute_url(self):
         return reverse("rodzina_szczegoly", args=[self.pk])
@@ -61,19 +71,19 @@ class CzlonkostwoRodziny(models.Model):
     rodzina = models.ForeignKey(
         Rodzina,
         on_delete=models.CASCADE,
-        related_name="czlonkowie"
+        related_name="czlonkowie",
     )
     osoba = models.ForeignKey(
         Osoba,
         on_delete=models.CASCADE,
         related_name="przynaleznosci_rodzinne",
-        help_text="Osoba przypisana do tej rodziny"
+        help_text="Osoba przypisana do tej rodziny",
     )
 
     rola = models.CharField(
         max_length=20,
         choices=RolaWRodzinie.choices,
-        default=RolaWRodzinie.INNA
+        default=RolaWRodzinie.INNA,
     )
 
     status = models.CharField(
@@ -91,7 +101,7 @@ class CzlonkostwoRodziny(models.Model):
         ordering = ["rola", "osoba__nazwisko", "osoba__imie_pierwsze"]
         unique_together = ("rodzina", "osoba")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.osoba} jako {self.get_rola_display()} ({self.get_status_display()})"
 
 
@@ -107,29 +117,42 @@ class WizytaDuszpasterska(models.Model):
         Rodzina,
         on_delete=models.CASCADE,
         related_name="wizyty",
-        verbose_name="Rodzina"
+        verbose_name="Rodzina",
     )
-    
+
     rok = models.IntegerField("Rok wizyty")
     data_wizyty = models.DateField("Data wizyty", null=True, blank=True)
-    
+
     ksiadz = models.ForeignKey(
         Duchowny,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        verbose_name="Ksiądz odwiedzający"
+        verbose_name="Ksiądz odwiedzający",
     )
-    
-    status = models.CharField("Status", max_length=20, choices=STATUSY, default="PRZYJETA")
-    
-    ofiara = models.CharField("Ofiara", max_length=100, blank=True, help_text="Opcjonalnie")
-    notatka = models.TextField("Notatki duszpasterskie", blank=True)
+
+    status = models.CharField(
+        "Status",
+        max_length=20,
+        choices=STATUSY,
+        default="PRZYJETA",
+    )
+
+    ofiara = models.CharField(
+        "Ofiara",
+        max_length=100,
+        blank=True,
+        help_text="Opcjonalnie",
+    )
+    notatka = models.TextField(
+        "Notatki duszpasterskie",
+        blank=True,
+    )
 
     class Meta:
         verbose_name = "Wizyta duszpasterska"
         verbose_name_plural = "Wizyty duszpasterskie"
         ordering = ["-rok", "-data_wizyty"]
 
-    def __str__(self):
-        return f"Kolęda {self.rok} - {self.rodzina}"
+    def __str__(self) -> str:
+        return f"Kolęda {self.rok} – {self.rodzina}"

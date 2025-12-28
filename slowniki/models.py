@@ -16,7 +16,7 @@ class Parafia(models.Model):
         max_length=120,
         blank=True
     )
-# --- Nowe pola adresowe ---
+    
     ulica = models.CharField(
         "Ulica",
         max_length=120,

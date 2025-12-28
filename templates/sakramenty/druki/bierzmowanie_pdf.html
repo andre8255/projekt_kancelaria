@@ -12,7 +12,7 @@
         body {
             font-family: "Times New Roman", serif;
             font-size: 11pt;
-            color: #063267; /* Twój kolor */
+            color: #063267;
             line-height: 1.3;
         }
 
@@ -21,7 +21,7 @@
             margin: 0 auto;
         }
 
-        /* --- NAGŁÓWEK PARAFII (PROFESJONALIZACJA) --- */
+        /* --- NAGŁÓWEK PARAFII --- */
         .parish-header {
             text-align: center;
             margin-bottom: 0.2cm;
@@ -38,8 +38,11 @@
             color: #000;
         }
 
-        /* --- TWOJE STYLE --- */
-        h1 { text-align: center; margin: 0.2cm 0 0.1cm; font-size: 1.6em; }
+        h1 {
+            text-align: center;
+            margin: 0.2cm 0 0.1cm;
+            font-size: 1.6em;
+        }
         
         .bookref { 
             text-align: right; 
@@ -53,7 +56,6 @@
             border: 1px dashed #acabab;
             color: #c3c4c5;
             text-align: center;
-            /* Flexbox dla wyśrodkowania */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -62,9 +64,10 @@
             font-size: 10pt;
         }
 
+        /* >>> wszystkie dane z bazy mają być pogrubione <<< */
         .user-data { 
-            font-weight: 705; 
-            color: #000; /* Dane czarne dla kontrastu */
+            font-weight: 700;   /* klasyczne bold */
+            color: #000;        /* czarne dla kontrastu */
         }
         
         .field-label { 
@@ -73,7 +76,6 @@
         }
         .field-label::after { content: ": "; }
         
-        /* --- TABELA --- */
         table.data-table { 
             width: 100%; 
             border-collapse: collapse; 
@@ -83,14 +85,12 @@
         table.data-table td { 
             vertical-align: top; 
             padding: 8px 4px; 
-            border-bottom: 1px dotted #ccc; /* Delikatne linie oddzielające */
+            border-bottom: 1px dotted #ccc;
         }
-        /* Usuń linię dla ostatniego wiersza */
         table.data-table tr:last-child td {
             border-bottom: none;
         }
 
-        /* --- STOPKA --- */
         .footer-table {
             width: 100%;
             margin-top: 2cm;
@@ -118,10 +118,10 @@
 
 <div class="doc">
     <div class="parish-header">
-        {{ parafia.nazwa }}
+        <span class="user-data">{{ parafia.nazwa }}</span>
     </div>
     <div class="parish-subheader">
-        
+        <!-- tu możesz dodać np. adres parafii -->
     </div>
 
     <div style="overflow: hidden; margin-bottom: 10px;">
@@ -133,23 +133,30 @@
             {% endif %}
         </div>
         <h1>ŚWIADECTWO BIERZMOWANIA</h1>
-        <div style="text-align: center; font-style: italic; font-size: 10pt;">Testimonium Confirmationis</div>
     </div>
 
     <div class="bookref">
-        <span class="field-label">Rok i nr w księdze</span>
+        <span class="field-label">Rok i nr w księdze bierzmowanych</span>
         <span class="user-data">{{ bierzmowanie.rok }}/{{ bierzmowanie.akt_nr }}</span>
     </div>
     
     <table class="data-table">
         <tr>
             <td class="field-label" style="width:35%;">Imię i nazwisko</td>
-            <td><span class="user-data">{{ bierzmowanie.osoba.imie_pierwsze }} {{ bierzmowanie.osoba.nazwisko }}</span></td>
+            <td>
+                <span class="user-data">
+                    {{ bierzmowanie.osoba.imie_pierwsze }} {{ bierzmowanie.osoba.nazwisko }}
+                </span>
+            </td>
         </tr>
 
         <tr>
             <td class="field-label">Imię z bierzmowania</td>
-            <td><span class="user-data">{{ bierzmowanie.imie_bierzmowania|default:"—" }}</span></td>
+            <td>
+                <span class="user-data">
+                    {{ bierzmowanie.imie_bierzmowania|default:"—" }}
+                </span>
+            </td>
         </tr>
 
         <tr>
@@ -157,11 +164,19 @@
             <td>
                 <span class="user-data">
                     {% if chrzest %}
-                        {% if chrzest.ochrzczony.data_urodzenia %}{{ chrzest.ochrzczony.data_urodzenia }}{% elif chrzest.ochrzczony.rok_urodzenia %}{{ chrzest.ochrzczony.rok_urodzenia }}{% endif %}
-                        {% if chrzest.ochrzczony.miejsce_urodzenia %}, {{ chrzest.ochrzczony.miejsce_urodzenia }}{% endif %}
+                        {% if chrzest.ochrzczony.data_urodzenia %}
+                            {{ chrzest.ochrzczony.data_urodzenia }}
+                        {% elif chrzest.ochrzczony.rok_urodzenia %}
+                            {{ chrzest.ochrzczony.rok_urodzenia }}
+                        {% endif %}
+                        {% if chrzest.ochrzczony.miejsce_urodzenia %}
+                            , {{ chrzest.ochrzczony.miejsce_urodzenia }}
+                        {% endif %}
                     {% else %}
                         {{ bierzmowanie.osoba.data_urodzenia|default:"—" }}
-                        {% if bierzmowanie.osoba.miejsce_urodzenia %}, {{ bierzmowanie.osoba.miejsce_urodzenia }}{% endif %}
+                        {% if bierzmowanie.osoba.miejsce_urodzenia %}
+                            , {{ bierzmowanie.osoba.miejsce_urodzenia }}
+                        {% endif %}
                     {% endif %}
                 </span>
             </td>
@@ -172,7 +187,13 @@
             <td>
                 <span class="user-data">
                     {% if chrzest %}
-                        {% if chrzest.data_chrztu %}{{ chrzest.data_chrztu }}{% elif chrzest.rok_chrztu %}Rok {{ chrzest.rok_chrztu }}{% else %}—{% endif %}
+                        {% if chrzest.data_chrztu %}
+                            {{ chrzest.data_chrztu }}
+                        {% elif chrzest.rok_chrztu %}
+                            Rok {{ chrzest.rok_chrztu }}
+                        {% else %}
+                            —
+                        {% endif %}
                         (Akt nr: {{ chrzest.rok }}/{{ chrzest.akt_nr }})
                     {% else %}
                         —
@@ -186,7 +207,8 @@
             <td>
                 <span class="user-data">
                     {% if chrzest and chrzest.parafia %}
-                        {{ chrzest.parafia.nazwa }} <br><small>{{ chrzest.parafia.miejscowosc }}</small>
+                        {{ chrzest.parafia.nazwa }}<br>
+                        <small>{{ chrzest.parafia.miejscowosc }}</small>
                     {% elif chrzest and chrzest.miejsce_chrztu %}
                         {{ chrzest.miejsce_chrztu }} (brak w słowniku parafii)
                     {% else %}
@@ -200,7 +222,11 @@
             <td class="field-label">Data i miejsce bierzmowania</td>
             <td>
                 <span class="user-data">
-                    {% if bierzmowanie.data_bierzmowania %}{{ bierzmowanie.data_bierzmowania }}{% else %}Rok: {{ bierzmowanie.rok }}{% endif %}
+                    {% if bierzmowanie.data_bierzmowania %}
+                        {{ bierzmowanie.data_bierzmowania }}
+                    {% else %}
+                        Rok: {{ bierzmowanie.rok }}
+                    {% endif %}
                     {% if bierzmowanie.parafia %}
                         <br>w parafii: {{ bierzmowanie.parafia.nazwa }}
                     {% elif bierzmowanie.parafia_nazwa_reczna %}
@@ -218,14 +244,20 @@
                         {{ bierzmowanie.szafarz }}
                     {% elif bierzmowanie.szafarz_opis_reczny %}
                         {{ bierzmowanie.szafarz_opis_reczny }}
-                    {% else %}—{% endif %}
+                    {% else %}
+                        —
+                    {% endif %}
                 </span>
             </td>
         </tr>
 
         <tr>
             <td class="field-label">Świadek</td>
-            <td><span class="user-data">{{ bierzmowanie.swiadek|default:"—" }}</span></td>
+            <td>
+                <span class="user-data">
+                    {{ bierzmowanie.swiadek|default:"—" }}
+                </span>
+            </td>
         </tr>
     </table>
 
@@ -233,16 +265,14 @@
         <tr>
             <td style="width: 40%;">
                 <br>
-                <span style="font-weight: 700;">Miejsce i data:</span><br>
+                <span class="field-label">Miejsce i data</span><br>
                 <span class="user-data">
                     {{ parafia.miejscowosc }}, {{ today|date:"d.m.Y" }}
                 </span>
-                <div class="la">Locus et dies</div>
             </td>
             <td style="width: 60%; text-align: center;">
                 <div class="signature"></div>
                 Podpis Proboszcza
-                <div class="la">Parochus</div>
             </td>
         </tr>
     </table>
