@@ -32,15 +32,13 @@ ALLOWED_HOSTS: list[str] = []
 # ======================================
 
 INSTALLED_APPS = [
-    # --- Django core ---
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-
-    # --- Aplikacje domenowe projektu ---
+    
     "konta.apps.KontaConfig",
     "osoby.apps.OsobyConfig",
     "rodziny.apps.RodzinyConfig",

@@ -101,6 +101,11 @@ class BackupUstawienia(models.Model):
         verbose_name="Godzina uruchamiania",
     )
 
+    ostatni_backup = models.DateTimeField(
+        "Ostatni wykonany backup",
+        null=True,
+        blank=True
+    )
     class Meta:
         verbose_name = "Ustawienia backupu"
         verbose_name_plural = "Ustawienia backupu"

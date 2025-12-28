@@ -5,31 +5,17 @@ from django.contrib import admin
 from django.http import HttpResponseRedirect
 from django.urls import include, path, reverse
 
-
 def root_redirect(request):
-    """
-    Strona główna:
-    - zalogowany → panel_start
-    - niezalogowany → logowanie
-    """
+ 
     if request.user.is_authenticated:
         return HttpResponseRedirect(reverse("panel_start"))
     return HttpResponseRedirect(reverse("konta:logowanie"))
 
-
 urlpatterns = [
     path("", root_redirect, name="root"),
-
-    # Admin
     path("admin/", admin.site.urls),
-
-    # Konta / logowanie
     path("", include("konta.urls")),
-
-    # Moduł cmentarza (z przestrzenią nazw)
     path("panel/cmentarz/", include(("cmentarz.urls", "cmentarz"), namespace="cmentarz")),
-
-    # Pozostałe moduły panelu
     path("panel/", include("osoby.urls")),
     path("panel/", include("rodziny.urls")),
     path("panel/", include("msze.urls")),
