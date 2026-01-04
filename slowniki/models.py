@@ -1,3 +1,4 @@
+#slowniki/models.py
 from django.db import models
 
 class Parafia(models.Model):

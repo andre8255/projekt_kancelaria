@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     
+    "django_extensions",
+
     "konta.apps.KontaConfig",
     "osoby.apps.OsobyConfig",
     "rodziny.apps.RodzinyConfig",

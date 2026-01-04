@@ -1,11 +1,12 @@
+#konta\utils.py
 from django.contrib.auth.models import Group
 from typing import Optional
 from django.http import HttpRequest
 
 from .models import LogAkcji
 
-ROLE_PROBOSZCZ  = "Proboszcz"
-ROLE_WIKARIUSZ  = "Wikariusz"
+ROLE_ADMIN       = "Admin"
+ROLE_KSIAZD      = "Ksiądz"
 ROLE_SEKRETARIAT = "Sekretariat"
 
 def user_in_group(user, group_name: str) -> bool:

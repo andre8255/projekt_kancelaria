@@ -216,7 +216,6 @@ class OsobaListaView(LoginRequiredMixin, ListView):
                     | Q(imie_pierwsze__icontains=slowo)
                     | Q(nazwisko_rodowe__icontains=slowo)
                 )
-
         return qs
 
 

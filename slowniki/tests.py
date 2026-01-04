@@ -1,8 +1,6 @@
 # slowniki/tests.py
 from django.test import TestCase
-
 from slowniki.forms import ParafiaForm
-
 
 class ParafiaFormValidationTest(TestCase):
     def test_invalid_postal_code(self):

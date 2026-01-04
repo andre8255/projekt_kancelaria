@@ -1,0 +1,98 @@
+@startuml use_case
+title System "Kancelaria Parafialna" — Diagram Przypadków Użycia
+left to right direction
+
+' --- KONFIGURACJA STYLU (CZYTELNOŚĆ) ---
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam actorStyle awesome
+skinparam usecase {
+    BackgroundColor White
+    BorderColor Black
+    ArrowColor Black
+}
+
+' --- AKTORZY ---
+' Rozdzielamy Księdza na Proboszcza (szefa) i Wikarego (pomoc), 
+' chyba że w systemie mają te same prawa - wtedy zostaw jednego "Księdza".
+actor "Proboszcz" as P
+actor "Wikariusz" as W
+actor "Sekretariat" as S
+actor "Administrator Systemu" as A
+
+rectangle "System Kancelarii (Django)" {
+
+    package "Kartoteki i Rodziny" {
+        usecase "Zarządzanie osobami\n(CRUD)" as UC_Osoby
+        usecase "Zarządzanie rodzinami" as UC_Rodziny
+        usecase "Edycja członków rodziny" as UC_Czlonkowie
+        usecase "Wydruk kartoteki (PDF)" as UC_Print_Karta
+    }
+
+    package "Wizyty Duszpasterskie" {
+        usecase "Rejestracja Kolędy" as UC_Koleda
+        usecase "Podgląd historii wizyt" as UC_Koleda_View
+    }
+
+    package "Sakramenty" {
+        usecase "Rejestracja Sakramentów\n(Chrzest, Ślub, Zgon itd.)" as UC_Sakramenty
+        usecase "Edycja wpisów historycznych" as UC_Sakr_Edit
+        usecase "Wydruk aktów/zaświadczeń (PDF)" as UC_Print_Sakr
+    }
+
+    package "Cmentarz i Finanse" {
+        usecase "Zarządzanie grobami" as UC_Groby
+        usecase "Ewidencja opłat cmentarnych" as UC_Oplaty
+        usecase "Rejestracja intencji mszalnych" as UC_Intencje
+    }
+
+    package "Administracja" {
+        usecase "Zarządzanie słownikami" as UC_Slowniki
+        usecase "Konfiguracja Backupu" as UC_Backup
+        usecase "Podgląd logów (Audyt)" as UC_Logs
+    }
+}
+
+' --- PRZYPISANIE UPRAWNIEŃ (JAWNE LINIE) ---
+
+' 1. SEKRETARIAT (Tylko podstawowe prace biurowe)
+S --> UC_Osoby
+S --> UC_Rodziny
+S --> UC_Czlonkowie
+S --> UC_Koleda
+S --> UC_Print_Karta
+S --> UC_Print_Sakr
+S --> UC_Intencje
+
+' 2. WIKARIUSZ (To co sekretariat + edycja sakramentów + cmentarz)
+W --> UC_Osoby
+W --> UC_Rodziny
+W --> UC_Koleda
+W --> UC_Sakramenty
+W --> UC_Print_Sakr
+W --> UC_Intencje
+W --> UC_Groby
+
+' 3. PROBOSZCZ (Ma dostęp do WSZYSTKIEGO, w tym finansów i edycji historii)
+P --> UC_Osoby
+P --> UC_Rodziny
+P --> UC_Koleda
+P --> UC_Sakramenty
+P --> UC_Sakr_Edit
+P --> UC_Print_Sakr
+P --> UC_Intencje
+P --> UC_Groby
+P --> UC_Oplaty
+P --> UC_Slowniki
+P --> UC_Logs
+
+' 4. ADMINISTRATOR (Techniczny)
+A --> UC_Backup
+A --> UC_Slowniki
+A --> UC_Logs
+
+' --- POWIĄZANIA DODATKOWE ---
+UC_Osoby ..> UC_Print_Karta : <<extend>>
+UC_Sakramenty ..> UC_Print_Sakr : <<extend>>
+
+@enduml
