@@ -6,7 +6,7 @@ from datetime import time
 
 class Rola(models.TextChoices):
     ADMIN = "ADMIN", "Administrator"
-    KSIAZD = "KSIAZD", "Ksiądz"
+    KSIAZD = "KSIADZ", "Ksiądz"
     SEKRETARIAT = "SEKRET", "Sekretariat"
 
 class Profil(models.Model):

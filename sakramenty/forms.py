@@ -207,12 +207,20 @@ class ChrzestForm(BootstrapFormMixin, forms.ModelForm):
 
         # 4. Walidacja dat
         data_urodzenia = cleaned_data.get("data_urodzenia")
+        osoba = cleaned_data.get("ochrzczony")
+        data_chrztu = cleaned_data.get("data_chrztu")
+        today = timezone.localdate()
+
+    # jeśli nie wpisano data_urodzenia w rekordzie chrztu, bierz z osoby
+        if not data_urodzenia and osoba:
+            data_urodzenia = getattr(osoba, "data_urodzenia", None)
+
         if data_chrztu:
             if data_chrztu > today:
                 self.add_error("data_chrztu", "Data chrztu nie może być z przyszłości.")
-            
-            if data_urodzenia and data_chrztu < data_urodzenia:
-                self.add_error("data_chrztu", "Data chrztu nie może być wcześniejsza niż data urodzenia.")
+
+        if data_urodzenia and data_chrztu < data_urodzenia:
+            self.add_error("data_chrztu", "Data chrztu nie może być wcześniejsza niż data urodzenia.")
 
         return cleaned_data
 
@@ -398,6 +406,53 @@ class BierzmowanieForm(BootstrapFormMixin, forms.ModelForm):
             if osoba and getattr(osoba, 'data_urodzenia', None):
                 if data_bierzmowania < osoba.data_urodzenia:
                     self.add_error('data_bierzmowania', 'Data bierzmowania wcześniejsza niż urodzenie.')
+
+# --- WALIDACJA: bierzmowanie nie może być przed chrztem ---
+        if osoba:
+            chrzest = (
+                Chrzest.objects
+                .filter(ochrzczony=osoba)
+                .only("data_chrztu", "rok_chrztu")
+                .first()
+            )
+
+            # Opcja 1: jeśli CHCESZ wymagać, aby chrzest istniał:
+            # if not chrzest:
+            #     self.add_error("osoba", "Brak wpisu chrztu dla tej osoby. Najpierw uzupełnij chrzest.")
+            # else:
+
+            if chrzest:
+                # 1) porównanie po pełnej dacie
+                if data_bierzmowania and chrzest.data_chrztu:
+                    if data_bierzmowania < chrzest.data_chrztu:
+                        self.add_error(
+                            "data_bierzmowania",
+                            "Data bierzmowania nie może być wcześniejsza niż data chrztu."
+                        )
+
+                # 2) jeśli nie ma daty chrztu, ale jest rok chrztu
+                elif data_bierzmowania and chrzest.rok_chrztu:
+                    try:
+                        if data_bierzmowania.year < int(chrzest.rok_chrztu):
+                            self.add_error(
+                                "data_bierzmowania",
+                                "Bierzmowanie nie może być wcześniejsze niż chrzest (wg roku chrztu)."
+                            )
+                    except (TypeError, ValueError):
+                        pass
+
+                # 3) jeśli nie ma daty bierzmowania, ale jest rok bierzmowania
+                elif rok:
+                    try:
+                        rok_b = int(rok)
+                        if chrzest.data_chrztu and rok_b < chrzest.data_chrztu.year:
+                            self.add_error("rok", "Rok bierzmowania nie może być wcześniejszy niż rok chrztu.")
+                        elif chrzest.rok_chrztu and rok_b < int(chrzest.rok_chrztu):
+                            self.add_error("rok", "Rok bierzmowania nie może być wcześniejszy niż rok chrztu.")
+                    except (TypeError, ValueError):
+                        pass
+
+
         return cleaned
 
     def save(self, commit=True):
