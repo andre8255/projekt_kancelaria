@@ -52,7 +52,7 @@ class Msza(models.Model):
 
     celebrans_opis = models.CharField(
         "Celebrans (opis ręczny)",
-        max_length=120,
+        max_length=30,
         blank=True,
         help_text="Wypełnij tylko jeśli celebransa nie ma na liście powyżej.",
     )

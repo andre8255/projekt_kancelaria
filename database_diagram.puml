@@ -1,0 +1,382 @@
+@startuml database_full
+title Diagram Bazy Danych - System Kancelarii Parafialnej
+!theme plain
+hide circle
+skinparam linetype ortho
+skinparam shadowing false
+
+' ============================================================
+' PAKIET: SYSTEM I KONTA
+' ============================================================
+package "System i Uprawnienia" {
+  entity "auth_user" {
+    *id : integer
+    --
+    username : varchar(150)
+    password : varchar(128)
+    first_name : varchar(150)
+    last_name : varchar(150)
+    email : varchar(254)
+    is_superuser : bool
+    is_staff : bool
+    is_active : bool
+    date_joined : datetime
+    last_login : datetime
+  }
+
+  entity "konta_profil" {
+    *id : integer
+    --
+    *uzytkownik_id : integer (FK)
+    rola : varchar(20)
+  }
+
+  entity "konta_logakcji" {
+    *id : integer
+    --
+    uzytkownik_id : integer (FK)
+    akcja : varchar(50)
+    model : varchar(100)
+    obiekt_id : integer
+    opis : text
+    kiedy : datetime
+  }
+  
+  entity "konta_backupustawienia" {
+    *id : integer
+    --
+    wlaczony : bool
+    czestotliwosc : varchar(20)
+    dzien_tygodnia : integer
+    godzina : time
+    ostatni_backup : datetime
+  }
+  
+  entity "konfiguracja_ustawieniaparafii" {
+    *id : integer
+    --
+    nazwa : varchar(255)
+    miejscowosc : varchar(100)
+    adres : varchar(255)
+    nip : varchar(20)
+    regon : varchar(20)
+    konto_bankowe : varchar(60)
+    logo : varchar(100)
+  }
+}
+
+' ============================================================
+' PAKIET: SŁOWNIKI
+' ============================================================
+package "Słowniki" {
+  entity "slowniki_parafia" {
+    *id : integer
+    --
+    nazwa : varchar(200)
+    miejscowosc : varchar(120)
+    diecezja : varchar(120)
+    ulica : varchar(120)
+    nr_domu : varchar(30)
+    nr_mieszkania : varchar(30)
+    kod_pocztowy : varchar(15)
+    poczta : varchar(120)
+    telefon : varchar(40)
+    email : varchar(254)
+    uwagi : text
+  }
+
+  entity "slowniki_duchowny" {
+    *id : integer
+    --
+    imie_nazwisko : varchar(200)
+    tytul : varchar(20)
+    parafia_id : integer (FK)
+    aktywny : bool
+    uwagi : text
+  }
+
+  entity "slowniki_wyznanie" {
+    *id : integer
+    --
+    nazwa : varchar(200)
+    aktywne : bool
+  }
+}
+
+' ============================================================
+' PAKIET: OSOBY I RODZINY
+' ============================================================
+package "Osoby i Rodziny" {
+  entity "osoby_osoba" {
+    *id : integer
+    --
+    imie_pierwsze : varchar(120)
+    imie_drugie : varchar(120)
+    nazwisko : varchar(120)
+    nazwisko_rodowe : varchar(120)
+    imie_ojca : varchar(120)
+    imie_matki : varchar(120)
+    nazwisko_ojca : varchar(120)
+    nazwisko_matki : varchar(120)
+    nazwisko_matki_rodowe : varchar(120)
+    imie_bierzmowanie : varchar(120)
+    data_urodzenia : date
+    miejsce_urodzenia : varchar(200)
+    data_zgonu : date
+    ulica : varchar(120)
+    nr_domu : varchar(30)
+    nr_mieszkania : varchar(30)
+    kod_pocztowy : varchar(15)
+    miejscowosc : varchar(120)
+    poczta : varchar(120)
+    telefon : varchar(40)
+    email : varchar(254)
+    uwagi : text
+    wyznanie_id : integer (FK)
+  }
+
+  entity "rodziny_rodzina" {
+    *id : integer
+    --
+    nazwa : varchar(200)
+    ulica : varchar(120)
+    nr_domu : varchar(30)
+    nr_mieszkania : varchar(30)
+    kod_pocztowy : varchar(15)
+    miejscowosc : varchar(120)
+    poczta : varchar(120)
+    telefon_kontaktowy : varchar(40)
+    email_kontaktowy : varchar(254)
+    uwagi : text
+  }
+
+  entity "rodziny_czlonkostworodziny" {
+    *id : integer
+    --
+    *rodzina_id : integer (FK)
+    *osoba_id : integer (FK)
+    rola : varchar(20)
+    status : varchar(20)
+    uwagi : text
+  }
+
+  entity "rodziny_wizytaduszpasterska" {
+    *id : integer
+    --
+    *rodzina_id : integer (FK)
+    ksiadz_id : integer (FK)
+    rok : integer
+    data_wizyty : date
+    status : varchar(20)
+    ofiara : varchar(100)
+    notatka : text
+  }
+}
+
+' ============================================================
+' PAKIET: SAKRAMENTY
+' ============================================================
+package "Sakramenty" {
+  entity "sakramenty_chrzest" {
+    *id : integer
+    --
+    *ochrzczony_id : integer (FK)
+    parafia_id : integer (FK)
+    rok : integer
+    akt_nr : varchar(20)
+    data_urodzenia : date
+    rok_urodzenia : integer
+    miejsce_urodzenia : varchar(200)
+    data_chrztu : date
+    rok_chrztu : integer
+    miejsce_chrztu : varchar(200)
+    ojciec : varchar(200)
+    matka : varchar(200)
+    nazwisko_matki_rodowe : varchar(200)
+    ojciec_wyznanie_id : integer (FK)
+    matka_wyznanie_id : integer (FK)
+    uwagi_wew : text
+    skan_aktu : varchar(100)
+  }
+
+  entity "sakramenty_pierwszakomunia" {
+    *id : integer
+    --
+    *osoba_id : integer (FK)
+    parafia_id : integer (FK)
+    rok : varchar(10)
+    uwagi_wew : text
+  }
+
+  entity "sakramenty_bierzmowanie" {
+    *id : integer
+    --
+    *osoba_id : integer (FK)
+    parafia_id : integer (FK)
+    szafarz_id : integer (FK)
+    rok : varchar(10)
+    akt_nr : varchar(20)
+    data_bierzmowania : date
+    imie_bierzmowania : varchar(100)
+    miejsce_bierzmowania : varchar(100)
+    parafia_nazwa_reczna : varchar(200)
+    szafarz_opis_reczny : varchar(200)
+    swiadek : varchar(200)
+    uwagi_wew : text
+    skan_aktu : varchar(100)
+  }
+
+  entity "sakramenty_malzenstwo" {
+    *id : integer
+    --
+    *malzonek_a_id : integer (FK)
+    *malzonek_b_id : integer (FK)
+    parafia_id : integer (FK)
+    swiadek_urzedowy_id : integer (FK)
+    rok : varchar(10)
+    akt_nr : varchar(30)
+    data_slubu : date
+    parafia_opis_reczny : varchar(200)
+    swiadek_urzedowy_opis_reczny : varchar(200)
+    swiadek_a : varchar(200)
+    swiadek_b : varchar(200)
+    uwagi_wew : text
+    skan_aktu : varchar(100)
+  }
+
+  entity "sakramenty_namaszczeniechorych" {
+    *id : integer
+    --
+    *osoba_id : integer (FK)
+    szafarz_id : integer (FK)
+    data : date
+    miejsce : varchar(200)
+    spowiedz : bool
+    komunia : bool
+    namaszczenie : bool
+    uwagi_wew : text
+  }
+
+  entity "sakramenty_zgon" {
+    *id : integer
+    --
+    *osoba_id : integer (FK)
+    grob_id : integer (FK)
+    rok : varchar(10)
+    akt_nr : varchar(20)
+    data_zgonu : date
+    miejsce_zgonu : varchar(200)
+    data_pogrzebu : date
+    cmentarz : varchar(200)
+    uwagi_wew : text
+    skan_aktu : varchar(100)
+  }
+}
+
+' ============================================================
+' PAKIET: MSZE
+' ============================================================
+package "Msze" {
+  entity "msze_msza" {
+    *id : integer
+    --
+    data : date
+    godzina : time
+    typ : varchar(20)
+    miejsce : varchar(120)
+    celebrans_id : integer (FK)
+    celebrans_opis : varchar(120)
+    uwagi : text
+  }
+
+  entity "msze_intencjamszy" {
+    *id : integer
+    --
+    *msza_id : integer (FK)
+    tresc : text
+    zamawiajacy : varchar(200)
+    uwagi : text
+    status_oplaty : varchar(12)
+  }
+}
+
+' ============================================================
+' PAKIET: CMENTARZ
+' ============================================================
+package "Cmentarz" {
+  entity "cmentarz_sektor" {
+    *id : integer
+    --
+    nazwa : varchar(50)
+    opis : text
+  }
+
+  entity "cmentarz_grob" {
+    *id : integer
+    --
+    *sektor_id : integer (FK)
+    dysponent_id : integer (FK)
+    rzad : varchar(20)
+    numer : varchar(20)
+    typ : varchar(20)
+    data_oplaty : date
+    wazny_do : date
+    uwagi : text
+    zdjecie : varchar(100)
+  }
+
+  entity "cmentarz_pochowany" {
+    *id : integer
+    --
+    *grob_id : integer (FK)
+    *osoba_id : integer (FK)
+    data_pochowania : date
+  }
+}
+
+' ============================================================
+' RELACJE (Wyświetlanie powiązań)
+' ============================================================
+
+auth_user ||--|| konta_profil
+auth_user ||..o{ konta_logakcji
+
+slowniki_duchowny }o..|| slowniki_parafia
+osoby_osoba }o..|| slowniki_wyznanie
+
+rodziny_rodzina ||--|{ rodziny_czlonkostworodziny
+osoby_osoba     ||--|{ rodziny_czlonkostworodziny
+rodziny_rodzina ||--o{ rodziny_wizytaduszpasterska
+rodziny_wizytaduszpasterska }o..o| slowniki_duchowny
+
+osoby_osoba ||--|| sakramenty_chrzest
+sakramenty_chrzest }o..|| slowniki_parafia
+sakramenty_chrzest }o..o| slowniki_wyznanie
+
+osoby_osoba ||--|| sakramenty_pierwszakomunia
+sakramenty_pierwszakomunia }o..|| slowniki_parafia
+
+osoby_osoba ||--|| sakramenty_bierzmowanie
+sakramenty_bierzmowanie }o..|| slowniki_parafia
+sakramenty_bierzmowanie }o..o| slowniki_duchowny
+
+osoby_osoba ||--o{ sakramenty_malzenstwo
+osoby_osoba ||--o{ sakramenty_malzenstwo
+sakramenty_malzenstwo }o..|| slowniki_parafia
+sakramenty_malzenstwo }o..o| slowniki_duchowny
+
+osoby_osoba ||--o{ sakramenty_namaszczeniechorych
+sakramenty_namaszczeniechorych }o..o| slowniki_duchowny
+
+osoby_osoba ||--|| sakramenty_zgon
+sakramenty_zgon |o..o| cmentarz_grob
+
+msze_msza ||--|{ msze_intencjamszy
+msze_msza }o..o| slowniki_duchowny
+
+cmentarz_sektor ||--|{ cmentarz_grob
+cmentarz_grob }o..o| osoby_osoba
+cmentarz_grob ||--|{ cmentarz_pochowany
+osoby_osoba ||--o{ cmentarz_pochowany
+
+@enduml

@@ -9,17 +9,17 @@ from slowniki.models import Duchowny
 
 class Rodzina(models.Model):
     nazwa = models.CharField(
-        max_length=200,
+        max_length=30,
     )
 
-    ulica = models.CharField(max_length=120, blank=True)
-    nr_domu = models.CharField(max_length=30, blank=True)
-    nr_mieszkania = models.CharField(max_length=30, blank=True)
-    kod_pocztowy = models.CharField(max_length=15, blank=True)
-    miejscowosc = models.CharField(max_length=120, blank=True)
-    poczta = models.CharField(max_length=120, blank=True)
+    ulica = models.CharField(max_length=30, blank=True)
+    nr_domu = models.CharField(max_length=4, blank=True)
+    nr_mieszkania = models.CharField(max_length=4, blank=True)
+    kod_pocztowy = models.CharField(max_length=8, blank=True)
+    miejscowosc = models.CharField(max_length=30, blank=True)
+    poczta = models.CharField(max_length=30, blank=True)
 
-    telefon_kontaktowy = models.CharField(max_length=40, blank=True)
+    telefon_kontaktowy = models.CharField(max_length=15, blank=True)
     email_kontaktowy = models.EmailField(blank=True)
 
     uwagi = models.TextField(blank=True)
@@ -140,7 +140,7 @@ class WizytaDuszpasterska(models.Model):
 
     ofiara = models.CharField(
         "Ofiara",
-        max_length=100,
+        max_length=30,
         blank=True,
         help_text="Opcjonalnie",
     )

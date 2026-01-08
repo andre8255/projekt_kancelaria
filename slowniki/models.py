@@ -4,50 +4,50 @@ from django.db import models
 class Parafia(models.Model):
     nazwa = models.CharField(
         "Nazwa parafii",
-        max_length=200,
+        max_length=50,
         help_text="Np. Parafia św. Jana Chrzciciela"
     )
     miejscowosc = models.CharField(
         "Miejscowość",
-        max_length=120,
+        max_length=30,
         blank=True
     )
     diecezja = models.CharField(
         "Diecezja",
-        max_length=120,
+        max_length=30,
         blank=True
     )
     
     ulica = models.CharField(
         "Ulica",
-        max_length=120,
+        max_length=30,
         blank=True
     )
     nr_domu = models.CharField(
         "Nr domu",
-        max_length=30,
+        max_length=4,
         blank=True
     )
     nr_mieszkania = models.CharField(
         "Nr mieszkania",
-        max_length=30,
+        max_length=4,
         blank=True
     )
     kod_pocztowy = models.CharField(
         "Kod pocztowy",
-        max_length=15,
+        max_length=8,
         blank=True
     )
     poczta = models.CharField(
         "Poczta",
-        max_length=120,
+        max_length=30,
         blank=True
     )
 
     # --- Kontakt ---
     telefon = models.CharField(
         "Telefon",
-        max_length=40,
+        max_length=15,
         blank=True
     )
     email = models.EmailField(
@@ -93,7 +93,7 @@ class Duchowny(models.Model):
 
     imie_nazwisko = models.CharField(
         "Imię i nazwisko",
-        max_length=200,
+        max_length=30,
         help_text="Np. Jan Kowalski"
     )
 
@@ -133,7 +133,7 @@ class Duchowny(models.Model):
 class Wyznanie(models.Model):
     nazwa = models.CharField(
         "Nazwa wyznania",
-        max_length=200,
+        max_length=30,
         unique=True,
         help_text='Np. "rzymskokatolickie", "prawosławne", "ewangelickie", "brak"'
     )

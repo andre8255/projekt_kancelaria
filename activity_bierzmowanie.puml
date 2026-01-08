@@ -1,0 +1,49 @@
+@startuml activity_bierzmowanie_simple
+title Proces Rejestracji Sakramentu Bierzmowania
+skinparam monochrome true
+skinparam shadowing false
+' Wymuszenie prostych linii
+skinparam linetype ortho 
+
+start
+
+:Wyszukaj osobę w bazie danych;
+:Wybierz opcję "Dodaj Bierzmowanie";
+
+' Decyzja (Romb)
+if (Czy wpis bierzmowania już istnieje?) then (Tak)
+  :Wyświetl komunikat błędu\n"Wpis już istnieje";
+  stop
+else (Nie)
+  :Wyświetl pusty formularz;
+endif
+
+:Wprowadź dane sakramentu:
+- Data i Numer aktu
+- Imię bierzmowania
+- Szafarz (Biskup)
+- Świadek;
+
+
+:Kliknij przycisk "Zapisz";
+
+' Grupowanie automatycznych działań systemu
+partition "Operacje w tle (System)" {
+  :Walidacja danych;
+  :Utworzenie rekordu w tabeli **Bierzmowanie**;
+  :Aktualizacja tabeli **Osoba**
+  (Zapisanie imienia z bierzmowania);
+  :Zapisanie Logu Akcji (Audyt);
+}
+
+:Wyświetl komunikat "Zapisano pomyślnie";
+
+if (Czy chcesz wydrukować świadectwo bierzmowania?) then (Tak)
+  :Generuj dokument PDF;
+  :Wydrukuj lub Pobierz plik na dysk;
+else (Nie)
+  :Wróć do widoku szczegółów osoby;
+endif
+
+stop
+@enduml

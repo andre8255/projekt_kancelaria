@@ -27,7 +27,7 @@ class Chrzest(models.Model):
     )
     akt_nr = models.CharField(
         "Nr aktu",
-        max_length=20,
+        max_length=5,
         help_text="Numer aktu chrztu w danym roku; jeśli nie podasz, wypełni się automatycznie.",
     )
 
@@ -53,7 +53,7 @@ class Chrzest(models.Model):
     )
     miejsce_urodzenia = models.CharField(
         "Miejsce urodzenia",
-        max_length=200,
+        max_length=30,
         blank=True,
     )
 
@@ -72,7 +72,7 @@ class Chrzest(models.Model):
     )
     miejsce_chrztu = models.CharField(
         "Miejsce chrztu",
-        max_length=200,
+        max_length=30,
         blank=True,
     )
 
@@ -89,7 +89,7 @@ class Chrzest(models.Model):
     # Rodzice
     ojciec = models.CharField(
         "Ojciec (imię i nazwisko)",
-        max_length=200,
+        max_length=30,
         blank=True,
     )
     ojciec_wyznanie = models.ForeignKey(
@@ -103,12 +103,12 @@ class Chrzest(models.Model):
 
     matka = models.CharField(
         "Matka (imię i nazwisko)",
-        max_length=200,
+        max_length=30,
         blank=True,
     )
     nazwisko_matki_rodowe = models.CharField(
         "Nazwisko rodowe matki",
-        max_length=200,
+        max_length=30,
         blank=True,
     )
     matka_wyznanie = models.ForeignKey(
@@ -176,7 +176,7 @@ class PierwszaKomunia(models.Model):
     )
     rok = models.CharField(
         "Rok I Komunii",
-        max_length=10,
+        max_length=5,
         blank=True,
         help_text="Np. 1998.",
     )
@@ -232,13 +232,13 @@ class Bierzmowanie(models.Model):
     # Dane aktu
     rok = models.CharField(
         "Rok bierzmowania",
-        max_length=10,
+        max_length=5,
         blank=True,
         help_text="Np. 2005.",
     )
     akt_nr = models.CharField(
         "Nr aktu bierzmowania",
-        max_length=20,
+        max_length=5,
         blank=True,
         help_text="Numer aktu bierzmowania; jeśli nie podasz, może zostać wypełniony automatycznie.",
     )
@@ -252,13 +252,13 @@ class Bierzmowanie(models.Model):
     )
     imie_bierzmowania = models.CharField(
         "Imię bierzmowania",
-        max_length=100,
+        max_length=30,
         blank=True,
         help_text="Imię przyjęte przy bierzmowaniu.",
     )
     miejsce_bierzmowania = models.CharField(
         "Miejsce bierzmowania",
-        max_length=100,
+        max_length=30,
         blank=True,
     )
 
@@ -272,7 +272,7 @@ class Bierzmowanie(models.Model):
     )
     parafia_nazwa_reczna = models.CharField(
         "Parafia (opis ręczny)",
-        max_length=200,
+        max_length=50,
         blank=True,
         help_text="Jeśli nie ma na liście powyżej.",
     )
@@ -287,14 +287,14 @@ class Bierzmowanie(models.Model):
     )
     szafarz_opis_reczny = models.CharField(
         "Szafarz (opis ręczny)",
-        max_length=200,
+        max_length=30,
         blank=True,
         help_text='Np. „bp Jan Kowalski”, „ks. Piotr Nowak”.',
     )
 
     swiadek = models.CharField(
         "Świadek bierzmowania",
-        max_length=200,
+        max_length=30,
         blank=True,
         help_text="Imię i nazwisko świadka.",
     )
@@ -355,13 +355,13 @@ class Malzenstwo(models.Model):
     # Dane aktu
     rok = models.CharField(
         "Rok ślubu",
-        max_length=10,
+        max_length=5,
         blank=True,
         help_text="Np. 2014. Możesz wpisać tylko rok.",
     )
     akt_nr = models.CharField(
         "Nr aktu małżeństwa",
-        max_length=30,
+        max_length=5,
         blank=True,
         help_text="Numer aktu w księdze małżeństw.",
     )
@@ -383,7 +383,7 @@ class Malzenstwo(models.Model):
     )
     parafia_opis_reczny = models.CharField(
         "Parafia ślubu (opis ręczny)",
-        max_length=200,
+        max_length=50,
         blank=True,
         help_text="Jeśli nie ma parafii na liście powyżej, wpisz tutaj.",
     )
@@ -398,19 +398,19 @@ class Malzenstwo(models.Model):
     )
     swiadek_urzedowy_opis_reczny = models.CharField(
         "Świadek urzędowy / asystujący (opis ręczny)",
-        max_length=200,
+        max_length=30,
         blank=True,
         help_text="Kapłan/diakon, który asystował przy zawarciu małżeństwa.",
     )
 
     swiadek_a = models.CharField(
         "Świadek A",
-        max_length=200,
+        max_length=30,
         blank=True,
     )
     swiadek_b = models.CharField(
         "Świadek B",
-        max_length=200,
+        max_length=230,
         blank=True,
     )
 
@@ -480,7 +480,7 @@ class NamaszczenieChorych(models.Model):
     )
     miejsce = models.CharField(
         "Miejsce",
-        max_length=200,
+        max_length=30,
         blank=True,
         help_text="Np. dom chorego, szpital.",
     )
@@ -535,13 +535,13 @@ class Zgon(models.Model):
     # Dane aktu
     rok = models.CharField(
         "Rok zgonu / księgi",
-        max_length=10,
+        max_length=5,
         blank=True,
         help_text="Np. 2024.",
     )
     akt_nr = models.CharField(
         "Nr aktu zgonu",
-        max_length=20,
+        max_length=5,
         blank=True,
         help_text="Numer aktu w księdze zgonów.",
     )
@@ -554,7 +554,7 @@ class Zgon(models.Model):
     )
     miejsce_zgonu = models.CharField(
         "Miejsce zgonu",
-        max_length=200,
+        max_length=30,
         blank=True,
     )
     data_pogrzebu = models.DateField(
@@ -564,7 +564,7 @@ class Zgon(models.Model):
     )
     cmentarz = models.CharField(
         "Cmentarz",
-        max_length=200,
+        max_length=30,
         blank=True,
     )
 

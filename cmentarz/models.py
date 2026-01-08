@@ -40,8 +40,8 @@ class Grob(models.Model):
         related_name="groby",
         verbose_name="Sektor",
     )
-    rzad = models.CharField("Rząd", max_length=20, blank=True)
-    numer = models.CharField("Numer grobu", max_length=20)
+    rzad = models.CharField("Rząd", max_length=4, blank=True)
+    numer = models.CharField("Numer grobu", max_length=4)
     typ = models.CharField("Typ grobu", max_length=20, choices=TYPY, default="ZIEMNY_1")
 
     # Osoba odpowiedzialna za grób (np. opiekun/dysponent wskazywany przy rozliczeniach).

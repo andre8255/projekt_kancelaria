@@ -1,0 +1,197 @@
+@startuml class_diagram_final
+title Diagram Klas — System Kancelarii Parafialnej
+skinparam monochrome true
+skinparam shadowing false
+skinparam linetype ortho
+hide methods
+hide circle
+
+' Ustawienie wyglądu klas
+skinparam class {
+    BackgroundColor White
+    BorderColor Black
+    ArrowColor Black
+}
+
+' ==========================================
+' PAKIET 1: UŻYTKOWNICY I SYSTEM
+' ==========================================
+package "System i Uprawnienia" {
+    class User {
+        +username: str
+        +is_active: bool
+        +is_superuser: bool
+    }
+
+    class Profil {
+        +rola: enum {ADMIN, KSIAZD, SEKRETARIAT}
+    }
+
+    class LogAkcji {
+        +akcja: str
+        +kiedy: datetime
+        +model: str
+        +opis: text
+    }
+
+    User "1" -- "1" Profil : (OneToOne)
+    LogAkcji "*" --> "0..1" User : (autorem jest)
+}
+
+' ==========================================
+' PAKIET 2: SŁOWNIKI
+' ==========================================
+package "Słowniki" {
+    class Parafia {
+        +nazwa: str
+        +miejscowosc: str
+        +diecezja: str
+    }
+
+    class Duchowny {
+        +imie_nazwisko: str
+        +tytul: enum
+        +aktywny: bool
+    }
+
+    class Wyznanie {
+        +nazwa: str
+    }
+
+    Duchowny "*" --> "0..1" Parafia : posługuje w
+}
+
+' ==========================================
+' PAKIET 3: OSOBY I RODZINY (CORE)
+' ==========================================
+package "Kartoteki (Core)" {
+    class Osoba {
+        +imie: str
+        +nazwisko: str
+        +data_urodzenia: date
+        +data_zgonu: date
+        +adres: str
+    }
+
+    class Rodzina {
+        +nazwa: str
+        +adres: str
+    }
+
+    class CzlonkostwoRodziny {
+        +rola: enum {Mąż, Żona, Dziecko...}
+        +status: enum {Mieszka, Wyprowadził się}
+    }
+
+    class WizytaDuszpasterska {
+        +rok: int
+        +status: enum
+        +ofiara: str
+    }
+
+    ' Relacje wewnątrz pakietu
+    Rodzina "1" *-- "*" CzlonkostwoRodziny
+    Osoba "1" *-- "*" CzlonkostwoRodziny
+    Rodzina "1" -- "*" WizytaDuszpasterska
+    WizytaDuszpasterska "*" --> "0..1" Duchowny : kolęduje
+    Osoba "*" --> "0..1" Wyznanie
+}
+
+' ==========================================
+' PAKIET 4: MSZE I INTENCJE
+' ==========================================
+package "Liturgia" {
+    class Msza {
+        +data: date
+        +godzina: time
+        +typ: str
+        +celebrujacy: str
+    }
+
+    class Intencja {
+        +tresc: text
+        +ofiara: str
+        +typ: enum {Zwykła, Gregoriańska}
+    }
+
+    Msza "1" *-- "*" Intencja : zawiera
+}
+
+' ==========================================
+' PAKIET 5: SAKRAMENTY
+' ==========================================
+package "Księgi Sakramentalne" {
+    class Chrzest {
+        +akt_nr: str
+        +rok: int
+        +data_chrztu: date
+    }
+    
+    class Bierzmowanie {
+        +akt_nr: str
+        +imie_bierzmowania: str
+    }
+
+    class Malzenstwo {
+        +akt_nr: str
+        +data_slubu: date
+    }
+
+    class Zgon {
+        +akt_nr: str
+        +data_zgonu: date
+    }
+
+    class NamaszczenieChorych {
+        +data: date
+        +miejsce: enum {Dom, Szpital}
+    }
+
+    ' Relacje Sakramenty -> Osoba
+    Osoba "1" -- "0..1" Chrzest : ochrzczony
+    Osoba "1" -- "0..1" Bierzmowanie : bierzmowany
+    Osoba "1" -- "0..*" NamaszczenieChorych
+    Osoba "1" -- "0..1" Zgon : zmarły
+
+    ' Małżeństwo łączy dwie osoby
+    Malzenstwo "*" --> "1" Osoba : mąż
+    Malzenstwo "*" --> "1" Osoba : żona
+
+    ' Powiązania ze słownikami
+    Chrzest "*" --> "0..1" Parafia : miejsce
+    Malzenstwo "*" --> "0..1" Parafia : miejsce
+    Malzenstwo "*" --> "0..1" Duchowny : świadek
+}
+
+' ==========================================
+' PAKIET 6: CMENTARZ
+' ==========================================
+package "Cmentarz" {
+    class Sektor {
+        +nazwa: str
+        +opis: text
+    }
+
+    class Grob {
+        +numer: str
+        +rzad: str
+        +typ: enum
+        +wazny_do: date
+    }
+
+    class Pochowany {
+        +data_pochowania: date
+    }
+
+    Sektor "1" -- "*" Grob
+    Grob "1" *-- "*" Pochowany
+    
+    ' Relacje Cmentarz -> Osoba
+    Grob "*" --> "0..1" Osoba : dysponent (opiekun)
+    Pochowany "*" --> "1" Osoba : osoba zmarła
+    
+    ' Relacja Zgon -> Grób (opcjonalna)
+    Zgon "0..1" .. "0..1" Grob : powiązanie
+}
+
+@enduml

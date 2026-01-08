@@ -15,7 +15,7 @@ from django.views import View
 from django.views.generic import ListView, UpdateView
 
 from parafia.utils_pdf import render_to_pdf
-
+from konta.models import Rola
 from .forms import BackupUstawieniaForm
 from .models import BackupUstawienia, LogAkcji
 from .utils_backup import wykonaj_backup_bazy
@@ -71,16 +71,12 @@ class LogAkcjiListaView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     paginate_by = 50
 
     def test_func(self):
-        """
-        Dostęp tylko dla proboszcza (grupa 'Proboszcz') albo superusera.
-        Możesz to dostosować do swojego systemu ról.
-        """
         user = self.request.user
         if not user.is_authenticated:
             return False
         if user.is_superuser:
             return True
-        return user.groups.filter(name="Proboszcz").exists()
+        return getattr(user, "rola", None) in {Rola.ADMIN, Rola.KSIAZD}
 
 
 class LogAkcjiPDFView(LogAkcjiListaView):

@@ -1,0 +1,53 @@
+@startuml activity_dodaj_czlonka
+title Proces Dodawania Osoby do Rodziny
+skinparam monochrome true
+skinparam shadowing false
+skinparam linetype ortho 
+
+start
+
+:Otwórz kartotekę Rodziny (Szczegóły);
+:Kliknij przycisk "Dodaj członka rodziny";
+:Wyszukaj osobę w bazie
+  (Wpisz nazwisko/imię);
+
+' Decyzja: Czy osoba jest w bazie?
+if (Czy osoba istnieje już w systemie?) then (Tak)
+  :Wybierz osobę z listy wyników;
+else (Nie)
+  :Kliknij "Utwórz nową osobę";
+  :Wypełnij dane personalne
+  (Imię, Nazwisko, Data ur.);
+  :Zapisz nową osobę w bazie;
+endif
+
+' Walidacja logiczna
+if (Czy ta osoba jest już w tej rodzinie?) then (Tak)
+  :Wyświetl błąd:
+  "Osoba jest już przypisana do tej rodziny";
+  stop
+else (Nie)
+  :Przejdź do formularza członkostwa;
+endif
+
+:Określ szczegóły relacji:
+- **Rola** (Mąż, Żona, Dziecko, Inna)
+- **Status** (Mieszka, Wyprowadził/a się);
+
+:Kliknij "Zapisz powiązanie";
+
+partition "Operacje w tle (System)" {
+  :Utworzenie rekordu w tabeli pośredniej
+  **CzlonkostwoRodziny**
+  (Rodzina_ID + Osoba_ID + Rola);
+  
+  :Zapisanie Logu Akcji
+  (np. "Przypisano Jana do rodziny Kowalskich");
+}
+
+:Wyświetl komunikat "Osoba dodana do rodziny";
+:Odśwież widok kartoteki Rodziny
+(Nowa osoba pojawia się na liście członków);
+
+stop
+@enduml

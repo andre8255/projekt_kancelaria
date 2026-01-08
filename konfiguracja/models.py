@@ -6,14 +6,14 @@ class UstawieniaParafii(models.Model):
     Model Singleton - przechowuje dane parafii do wydruków.
     W bazie może istnieć tylko jeden taki rekord.
     """
-    nazwa = models.CharField("Nazwa Parafii (nagłówek)", max_length=255, default="RZYMSKOKATOLICKA PARAFIA PW. ...")
-    miejscowosc = models.CharField("Miejscowość", max_length=100, default="Mykanów")
-    adres = models.CharField("Adres (ulica i kod)", max_length=255, default="ul. Cicha 1, 42-233 Mykanów")
+    nazwa = models.CharField("Nazwa Parafii (nagłówek)", max_length=100, default="")
+    miejscowosc = models.CharField("Miejscowość", max_length=30, default="")
+    adres = models.CharField("Adres (ulica i kod)", max_length=30, default="")
     
     # Opcjonalne pola "PRO" (Efekt WOW)
-    nip = models.CharField("NIP", max_length=20, blank=True, null=True)
-    regon = models.CharField("REGON", max_length=20, blank=True, null=True)
-    konto_bankowe = models.CharField("Nr konta bankowego", max_length=60, blank=True, null=True)
+    nip = models.CharField("NIP", max_length=11, blank=True, null=True)
+    regon = models.CharField("REGON", max_length=10, blank=True, null=True)
+    konto_bankowe = models.CharField("Nr konta bankowego", max_length=30, blank=True, null=True)
     logo = models.ImageField("Logo / Pieczęć (do wydruków)", upload_to="konfiguracja/logo/", blank=True, null=True)
 
     class Meta:
