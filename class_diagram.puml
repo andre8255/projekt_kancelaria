@@ -16,32 +16,32 @@ skinparam class {
 ' ==========================================
 ' PAKIET 1: UŻYTKOWNICY I SYSTEM
 ' ==========================================
-package "System i Uprawnienia" {
-    class User {
-        +username: str
-        +is_active: bool
-        +is_superuser: bool
-    }
+'
+ '   class User {
+ '       +username: str
+ '       +is_active: bool
+  '      +is_superuser: bool
+  '  }
 
-    class Profil {
-        +rola: enum {ADMIN, KSIAZD, SEKRETARIAT}
-    }
+  '  class Profil {
+  '      +rola: enum {ADMIN, KSIAZD, SEKRETARIAT}
+  '  }
 
-    class LogAkcji {
-        +akcja: str
-        +kiedy: datetime
-        +model: str
-        +opis: text
-    }
+   ' class LogAkcji {
+   '     +akcja: str
+   '     +kiedy: datetime
+   '     +model: str
+   '     +opis: text
+   ' }
 
-    User "1" -- "1" Profil : (OneToOne)
-    LogAkcji "*" --> "0..1" User : (autorem jest)
-}
+   ' User "1" -- "1" Profil : (OneToOne)
+   ' LogAkcji "*" --> "0..1" User : (autorem jest)
+
 
 ' ==========================================
 ' PAKIET 2: SŁOWNIKI
 ' ==========================================
-package "Słowniki" {
+
     class Parafia {
         +nazwa: str
         +miejscowosc: str
@@ -59,12 +59,12 @@ package "Słowniki" {
     }
 
     Duchowny "*" --> "0..1" Parafia : posługuje w
-}
+    Duchowny "*" -- "*" Msza : koncelebruje
 
 ' ==========================================
 ' PAKIET 3: OSOBY I RODZINY (CORE)
 ' ==========================================
-package "Kartoteki (Core)" {
+
     class Osoba {
         +imie: str
         +nazwisko: str
@@ -95,12 +95,12 @@ package "Kartoteki (Core)" {
     Rodzina "1" -- "*" WizytaDuszpasterska
     WizytaDuszpasterska "*" --> "0..1" Duchowny : kolęduje
     Osoba "*" --> "0..1" Wyznanie
-}
+
 
 ' ==========================================
 ' PAKIET 4: MSZE I INTENCJE
 ' ==========================================
-package "Liturgia" {
+
     class Msza {
         +data: date
         +godzina: time
@@ -115,12 +115,12 @@ package "Liturgia" {
     }
 
     Msza "1" *-- "*" Intencja : zawiera
-}
+
 
 ' ==========================================
 ' PAKIET 5: SAKRAMENTY
 ' ==========================================
-package "Księgi Sakramentalne" {
+
     class Chrzest {
         +akt_nr: str
         +rok: int
@@ -161,12 +161,12 @@ package "Księgi Sakramentalne" {
     Chrzest "*" --> "0..1" Parafia : miejsce
     Malzenstwo "*" --> "0..1" Parafia : miejsce
     Malzenstwo "*" --> "0..1" Duchowny : świadek
-}
+
 
 ' ==========================================
 ' PAKIET 6: CMENTARZ
 ' ==========================================
-package "Cmentarz" {
+
     class Sektor {
         +nazwa: str
         +opis: text
@@ -192,6 +192,6 @@ package "Cmentarz" {
     
     ' Relacja Zgon -> Grób (opcjonalna)
     Zgon "0..1" .. "0..1" Grob : powiązanie
-}
+
 
 @enduml

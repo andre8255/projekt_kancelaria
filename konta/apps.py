@@ -49,13 +49,3 @@ def petla_sprawdzajaca_backup():
             wykonaj_automatyczny_backup()
         except Exception as e:
             print(f"[SCHEDULER ERROR] Błąd w pętli backupu: {e}")
-
-# --- SYGNAŁY (Twoja funkcja grup) ---
-@receiver(post_migrate)
-def create_default_groups(sender, **kwargs):
-    # Importy wewnątrz funkcji, żeby uniknąć cykli importów
-    from django.contrib.auth.models import Group
-    # Sprawdzamy czy to nasza aplikacja wywołała migrację
-    if sender.name == "konta":
-        for name in ["Proboszcz", "Wikariusz", "Sekretariat"]:
-            Group.objects.get_or_create(name=name)

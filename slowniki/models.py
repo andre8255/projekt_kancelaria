@@ -4,33 +4,33 @@ from django.db import models
 class Parafia(models.Model):
     nazwa = models.CharField(
         "Nazwa parafii",
-        max_length=50,
+        max_length=80,
         help_text="Np. Parafia św. Jana Chrzciciela"
     )
     miejscowosc = models.CharField(
         "Miejscowość",
-        max_length=30,
+        max_length=50,
         blank=True
     )
     diecezja = models.CharField(
         "Diecezja",
-        max_length=30,
+        max_length=50,
         blank=True
     )
     
     ulica = models.CharField(
         "Ulica",
-        max_length=30,
+        max_length=50,
         blank=True
     )
     nr_domu = models.CharField(
         "Nr domu",
-        max_length=4,
+        max_length=5,
         blank=True
     )
     nr_mieszkania = models.CharField(
         "Nr mieszkania",
-        max_length=4,
+        max_length=5,
         blank=True
     )
     kod_pocztowy = models.CharField(
@@ -133,7 +133,7 @@ class Duchowny(models.Model):
 class Wyznanie(models.Model):
     nazwa = models.CharField(
         "Nazwa wyznania",
-        max_length=30,
+        max_length=50,
         unique=True,
         help_text='Np. "rzymskokatolickie", "prawosławne", "ewangelickie", "brak"'
     )

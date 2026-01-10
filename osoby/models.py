@@ -38,13 +38,13 @@ class Osoba(models.Model):
     data_zgonu = models.DateField(null=True, blank=True)
 
     ulica = models.CharField(max_length=30, blank=True)
-    nr_domu = models.CharField(max_length=4, blank=True)
-    nr_mieszkania = models.CharField(max_length=4, blank=True)
+    nr_domu = models.CharField(max_length=5, blank=True)
+    nr_mieszkania = models.CharField(max_length=5, blank=True)
     kod_pocztowy = models.CharField(max_length=8, blank=True)
     miejscowosc = models.CharField(max_length=30, blank=True)
     poczta = models.CharField(max_length=30, blank=True)
 
-    telefon = models.CharField(max_length=415, blank=True)
+    telefon = models.CharField(max_length=15, blank=True)
     email = models.EmailField(blank=True)
 
     wyznanie = models.ForeignKey(

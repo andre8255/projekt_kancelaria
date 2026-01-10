@@ -1,3 +1,4 @@
+#konta/views.py
 import os
 
 from django.conf import settings
@@ -76,7 +77,8 @@ class LogAkcjiListaView(LoginRequiredMixin, UserPassesTestMixin, ListView):
             return False
         if user.is_superuser:
             return True
-        return getattr(user, "rola", None) in {Rola.ADMIN, Rola.KSIAZD}
+        rola = getattr(getattr(user, "profil", None), "rola", None)
+        return rola in {Rola.ADMIN, Rola.KSIADZ}
 
 
 class LogAkcjiPDFView(LogAkcjiListaView):

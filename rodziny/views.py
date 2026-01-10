@@ -143,7 +143,7 @@ class RodzinaNowaView(RolaWymaganaMixin, CreateView):
     """
     Dodanie nowej rodziny / kartoteki.
     """
-    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = Rodzina
     form_class = RodzinaForm
     template_name = "rodziny/formularz.html"
@@ -167,7 +167,7 @@ class RodzinaEdycjaView(RolaWymaganaMixin, UpdateView):
     """
     Edycja istniejącej rodziny.
     """
-    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = Rodzina
     form_class = RodzinaForm
     template_name = "rodziny/formularz.html"
@@ -187,40 +187,47 @@ class RodzinaEdycjaView(RolaWymaganaMixin, UpdateView):
         return response
 
 
+from django.contrib import messages
+from django.db.models.deletion import ProtectedError
+from django.shortcuts import redirect
+from django.urls import reverse_lazy
+from django.views.generic import DeleteView
+
+from konta.mixins import RolaWymaganaMixin
+from konta.models import Rola
+from konta.utils import zapisz_log
+from .models import Rodzina
+
+
 class RodzinaUsunView(RolaWymaganaMixin, DeleteView):
-    """
-    Usunięcie rodziny (z obsługą błędu, gdy są powiązani członkowie).
-    """
-    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = Rodzina
     template_name = "rodziny/potwierdz_usuniecie.html"
     success_url = reverse_lazy("rodzina_lista")
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
+
+        # snapshot danych (bo po delete obiekt znika)
+        rodzina_id = self.object.pk
+        rodzina_nazwa = getattr(self.object, "nazwa", str(self.object))
+
         try:
-            return super().post(request, *args, **kwargs)
+            response = super().post(request, *args, **kwargs)  # to wywoła delete()
         except ProtectedError:
-            messages.error(
-                request,
-                "Nie można usunąć tej rodziny, bo są do niej przypisane osoby.",
-            )
+            messages.error(request, "Nie można usunąć tej rodziny, bo są do niej przypisane osoby.")
             return redirect(self.object.get_absolute_url())
 
-    def delete(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        response = super().delete(request, *args, **kwargs)
-
         zapisz_log(
-            request,
-            "USUNIECIE_RODZINY",
-            self.object,
-            opis=f"Usunięto rodzinę: {self.object.nazwa}",
-        )
-
+    request,
+    "USUNIECIE_RODZINY",
+    None,
+    opis=f"Usunięto rodzinę: {rodzina_nazwa}",
+    model="Rodzina",
+    obiekt_id=rodzina_id,
+)
         messages.success(request, "Rodzina została usunięta.")
         return response
-
 
 # =============================================================================
 # DRUK / PDF RODZINY
@@ -348,7 +355,7 @@ class WizytaNowaView(RolaWymaganaMixin, CreateView):
     """
     Dodanie wizyty duszpasterskiej dla konkretnej rodziny.
     """
-    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = WizytaDuszpasterska
     form_class = WizytaForm
     template_name = "rodziny/wizyta_formularz.html"
@@ -382,7 +389,7 @@ class WizytaEdycjaView(RolaWymaganaMixin, UpdateView):
     """
     Edycja wizyty duszpasterskiej.
     """
-    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = WizytaDuszpasterska
     form_class = WizytaForm
     template_name = "rodziny/wizyta_formularz.html"
@@ -408,7 +415,7 @@ class WizytaUsunView(RolaWymaganaMixin, DeleteView):
     """
     Usunięcie wizyty duszpasterskiej.
     """
-    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = WizytaDuszpasterska
     template_name = "rodziny/wizyta_usun.html"
 
@@ -438,7 +445,7 @@ class DodajCzlonkaView(RolaWymaganaMixin, FormView):
     """
     Dodanie osoby (CzlonkostwoRodziny) do konkretnej rodziny.
     """
-    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     template_name = "rodziny/dodaj_czlonka.html"
     form_class = DodajCzlonkaForm
 
@@ -469,7 +476,7 @@ class UsunCzlonkaZRodzinyView(RolaWymaganaMixin, View):
     """
     Prosty widok potwierdzenia usunięcia członka z konkretnej rodziny.
     """
-    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     template_name = "rodziny/usun_czlonka.html"
 
     def dispatch(self, request, *args, **kwargs):
@@ -515,7 +522,7 @@ class CzlonkostwoUsunView(RolaWymaganaMixin, DeleteView):
     """
     Klasyczny DeleteView dla CzlonkostwoRodziny (gdy nie używamy wariantu z rodzina_pk).
     """
-    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = CzlonkostwoRodziny
     template_name = "rodziny/czlonek_usun.html"
     context_object_name = "czlonkostwo"

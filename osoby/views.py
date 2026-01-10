@@ -270,7 +270,7 @@ class OsobaSzczegolyView(LoginRequiredMixin, DetailView):
 #  CRUD OSOBY
 # =============================================================================
 class OsobaNowaView(RolaWymaganaMixin, CreateView):
-    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = Osoba
     form_class = OsobaForm
     template_name = "osoby/formularz.html"
@@ -288,7 +288,7 @@ class OsobaNowaView(RolaWymaganaMixin, CreateView):
 
 
 class OsobaEdycjaView(RolaWymaganaMixin, UpdateView):
-    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = Osoba
     form_class = OsobaForm
     template_name = "osoby/formularz.html"
@@ -310,7 +310,7 @@ class OsobaEdycjaView(RolaWymaganaMixin, UpdateView):
 
 
 class OsobaUsunView(RolaWymaganaMixin, View):
-    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     template_name = "osoby/osoba_usun.html"
 
     def get_object(self):
@@ -318,34 +318,42 @@ class OsobaUsunView(RolaWymaganaMixin, View):
 
     def get(self, request, *args, **kwargs):
         osoba = self.get_object()
-        # tylko wyświetlamy potwierdzenie
         return render(request, self.template_name, {"object": osoba})
 
     def post(self, request, *args, **kwargs):
         osoba = self.get_object()
+
+        # --- przygotuj dane do loga PRZED usunięciem ---
+        osoba_id = osoba.pk
+        osoba_txt = f"{osoba.imie_pierwsze} {osoba.nazwisko}"
+        opis = f"Usunięto osobę: {osoba_txt} (ID={osoba_id})"
+
         try:
             osoba.delete()
         except ProtectedError:
             messages.error(
                 request,
                 (
-                    f"Nie można usunąć osoby '{osoba}', "
+                    f"Nie można usunąć osoby '{osoba_txt}', "
                     f"ponieważ jest powiązana z aktami (np. chrztu, ślubu) "
                     f"lub rodziną."
                 ),
             )
-            return redirect("osoba_szczegoly", pk=osoba.pk)
-        else:
-            zapisz_log(
-                request,
-                "USUNIECIE_OSOBY",
-                osoba,
-                opis=f"Usunięto osobę: {osoba.imie_pierwsze} {osoba.nazwisko}",
-            )
-            messages.success(request, f"Osoba {osoba} została usunięta.")
-            return redirect("osoba_lista")
+            return redirect("osoba_szczegoly", pk=osoba_id)
 
+        # obiekt już nie istnieje → przekazujemy None, ale zapisujemy model i ID
+        zapisz_log(
+            request,
+            "USUNIECIE_OSOBY",
+            None,
+            opis=opis,
+            model="Osoba",
+            obiekt_id=osoba_id,
+        )
 
+        messages.success(request, "Osoba została usunięta.")
+        return redirect("osoba_lista")
+    
 # =============================================================================
 #  WYSZUKIWARKA GLOBALNA
 # =============================================================================

@@ -372,12 +372,12 @@ class BierzmowanieForm(BootstrapFormMixin, forms.ModelForm):
 
         # --- WALIDACJA PARAFII (Lista LUB Ręczna) ---
         parafia = cleaned.get("parafia")
-        parafia_reczna = cleaned.get("parafia_nazwa_reczna")
+        parafia_reczna = cleaned.get("parafia_nowa")
         
         if not parafia and not parafia_reczna:
              msg = "Wybierz parafię z listy LUB wpisz nazwę ręcznie."
              self.add_error("parafia", msg)
-             self.add_error("parafia_nazwa_reczna", msg)
+             self.add_error("parafia_nowa", msg)
 
         today = timezone.localdate()
         osoba = cleaned.get("osoba")
@@ -717,6 +717,10 @@ class NamaszczenieChorychForm(BootstrapFormMixin, forms.ModelForm):
     def clean(self):
         cleaned = super().clean()
         today = timezone.localdate()
+        szafarz = cleaned.get("szafarz")
+        
+        if not szafarz:
+            self.add_error("szafarz", "Wybierz szafarza posługi (pole wymagane).")
 
         if not self.initial.get("osoba") and not cleaned.get("osoba"):
             self.add_error("osoba", "Wybierz osobę.")

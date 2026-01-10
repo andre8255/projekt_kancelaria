@@ -60,7 +60,7 @@ class GrobSzczegolyView(LoginRequiredMixin, DetailView):
 
 
 class GrobNowyView(RolaWymaganaMixin, CreateView):
-    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = Grob
     form_class = GrobForm
     template_name = "cmentarz/formularz.html"
@@ -70,7 +70,7 @@ class GrobNowyView(RolaWymaganaMixin, CreateView):
 
 
 class GrobEdycjaView(RolaWymaganaMixin, UpdateView):
-    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = Grob
     form_class = GrobForm
     template_name = "cmentarz/formularz.html"
@@ -81,7 +81,7 @@ class GrobEdycjaView(RolaWymaganaMixin, UpdateView):
 
 
 class GrobUsunView(RolaWymaganaMixin, DeleteView):
-    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = Grob
     template_name = "cmentarz/grob_usun.html"
     success_url = reverse_lazy("cmentarz:grob_lista")
@@ -97,7 +97,7 @@ class GrobUsunView(RolaWymaganaMixin, DeleteView):
 
 
 class PochowanyNowyView(RolaWymaganaMixin, CreateView):
-    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = Pochowany
     form_class = PochowanyForm
     template_name = "cmentarz/pochowany_formularz.html"
@@ -121,7 +121,7 @@ class PochowanyNowyView(RolaWymaganaMixin, CreateView):
 
 
 class PochowanyUsunView(RolaWymaganaMixin, DeleteView):
-    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = Pochowany
     template_name = "cmentarz/pochowany_usun.html"
 
@@ -161,7 +161,7 @@ class SektorListaView(LoginRequiredMixin, ListView):
 
 
 class SektorNowyView(RolaWymaganaMixin, CreateView):
-    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = Sektor
     form_class = SektorForm
     template_name = "cmentarz/sektor_formularz.html"

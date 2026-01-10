@@ -30,7 +30,7 @@ class Msza(models.Model):
 
     typ = models.CharField(
         "Rodzaj mszy",
-        max_length=20,
+        max_length=30,
         choices=TypMszy.choices,
         default=TypMszy.POWSZEDNIA,
     )
@@ -52,7 +52,7 @@ class Msza(models.Model):
 
     celebrans_opis = models.CharField(
         "Celebrans (opis ręczny)",
-        max_length=30,
+        max_length=50,
         blank=True,
         help_text="Wypełnij tylko jeśli celebransa nie ma na liście powyżej.",
     )
@@ -119,7 +119,7 @@ class IntencjaMszy(models.Model):
 
     zamawiajacy = models.CharField(
         "Zamawiający / od kogo",
-        max_length=200,
+        max_length=50,
         blank=True,
         help_text="Np. Rodzina Kowalskich.",
     )

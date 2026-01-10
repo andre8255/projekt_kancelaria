@@ -6,12 +6,12 @@ from datetime import time
 
 class Rola(models.TextChoices):
     ADMIN = "ADMIN", "Administrator"
-    KSIAZD = "KSIADZ", "Ksiądz"
+    KSIADZ = "KSIADZ", "Ksiądz"
     SEKRETARIAT = "SEKRET", "Sekretariat"
 
 class Profil(models.Model):
     uzytkownik = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profil")
-    rola = models.CharField(max_length=20, choices=Rola.choices, default=Rola.SEKRETARIAT)
+    rola = models.CharField(max_length=30, choices=Rola.choices, default=Rola.SEKRETARIAT)
 
     def __str__(self):
         return f"{self.uzytkownik.username} ({self.get_rola_display()})"

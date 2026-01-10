@@ -7,8 +7,8 @@ class UstawieniaParafii(models.Model):
     W bazie może istnieć tylko jeden taki rekord.
     """
     nazwa = models.CharField("Nazwa Parafii (nagłówek)", max_length=100, default="")
-    miejscowosc = models.CharField("Miejscowość", max_length=30, default="")
-    adres = models.CharField("Adres (ulica i kod)", max_length=30, default="")
+    miejscowosc = models.CharField("Miejscowość", max_length=50, default="")
+    adres = models.CharField("Adres (ulica i kod)", max_length=80, default="")
     
     # Opcjonalne pola "PRO" (Efekt WOW)
     nip = models.CharField("NIP", max_length=11, blank=True, null=True)

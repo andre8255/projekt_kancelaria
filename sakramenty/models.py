@@ -272,7 +272,7 @@ class Bierzmowanie(models.Model):
     )
     parafia_nazwa_reczna = models.CharField(
         "Parafia (opis ręczny)",
-        max_length=50,
+        max_length=60,
         blank=True,
         help_text="Jeśli nie ma na liście powyżej.",
     )
@@ -287,14 +287,14 @@ class Bierzmowanie(models.Model):
     )
     szafarz_opis_reczny = models.CharField(
         "Szafarz (opis ręczny)",
-        max_length=30,
+        max_length=50,
         blank=True,
         help_text='Np. „bp Jan Kowalski”, „ks. Piotr Nowak”.',
     )
 
     swiadek = models.CharField(
         "Świadek bierzmowania",
-        max_length=30,
+        max_length=50,
         blank=True,
         help_text="Imię i nazwisko świadka.",
     )
@@ -383,7 +383,7 @@ class Malzenstwo(models.Model):
     )
     parafia_opis_reczny = models.CharField(
         "Parafia ślubu (opis ręczny)",
-        max_length=50,
+        max_length=60,
         blank=True,
         help_text="Jeśli nie ma parafii na liście powyżej, wpisz tutaj.",
     )
@@ -398,19 +398,19 @@ class Malzenstwo(models.Model):
     )
     swiadek_urzedowy_opis_reczny = models.CharField(
         "Świadek urzędowy / asystujący (opis ręczny)",
-        max_length=30,
+        max_length=60,
         blank=True,
         help_text="Kapłan/diakon, który asystował przy zawarciu małżeństwa.",
     )
 
     swiadek_a = models.CharField(
         "Świadek A",
-        max_length=30,
+        max_length=50,
         blank=True,
     )
     swiadek_b = models.CharField(
         "Świadek B",
-        max_length=230,
+        max_length=50,
         blank=True,
     )
 
@@ -480,7 +480,7 @@ class NamaszczenieChorych(models.Model):
     )
     miejsce = models.CharField(
         "Miejsce",
-        max_length=30,
+        max_length=50,
         blank=True,
         help_text="Np. dom chorego, szpital.",
     )
@@ -554,7 +554,7 @@ class Zgon(models.Model):
     )
     miejsce_zgonu = models.CharField(
         "Miejsce zgonu",
-        max_length=30,
+        max_length=50,
         blank=True,
     )
     data_pogrzebu = models.DateField(
@@ -564,7 +564,7 @@ class Zgon(models.Model):
     )
     cmentarz = models.CharField(
         "Cmentarz",
-        max_length=30,
+        max_length=50,
         blank=True,
     )
 

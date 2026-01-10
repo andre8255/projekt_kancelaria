@@ -1,4 +1,4 @@
-# osoby/urls.py
+# rodziny/urls.py
 from django.urls import path
 from . import views
 

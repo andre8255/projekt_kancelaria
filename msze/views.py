@@ -101,7 +101,7 @@ class MszaListaView(LoginRequiredMixin, ListView):
 #  CRUD MSZY
 # =============================================================================
 class MszaNowaView(RolaWymaganaMixin, CreateView):
-    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = Msza
     form_class = MszaForm
     template_name = "msze/msza_formularz.html"
@@ -145,7 +145,7 @@ class MszaNowaView(RolaWymaganaMixin, CreateView):
 
 
 class MszaEdycjaView(RolaWymaganaMixin, UpdateView):
-    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = Msza
     form_class = MszaForm
     template_name = "msze/msza_formularz.html"
@@ -179,7 +179,7 @@ class MszaSzczegolyView(LoginRequiredMixin, DetailView):
 
 
 class MszaUsunView(RolaWymaganaMixin, DeleteView):
-    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = Msza
     template_name = "msze/msza_usun.html"
     success_url = reverse_lazy("msza_lista")
@@ -228,7 +228,7 @@ class MszaListaPDFView(MszaListaView):
 #  INTENCJE
 # =============================================================================
 class IntencjaNowaView(RolaWymaganaMixin, FormView):
-    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     template_name = "msze/intencja_formularz.html"
     form_class = IntencjaForm
 
@@ -261,7 +261,7 @@ class IntencjaNowaView(RolaWymaganaMixin, FormView):
 
 
 class IntencjaEdycjaView(RolaWymaganaMixin, UpdateView):
-    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = IntencjaMszy
     form_class = IntencjaForm
     template_name = "msze/intencja_formularz.html"
@@ -292,7 +292,7 @@ class IntencjaEdycjaView(RolaWymaganaMixin, UpdateView):
 
 
 class IntencjaUsunView(RolaWymaganaMixin, DeleteView):
-    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = IntencjaMszy
     template_name = "msze/intencja_usun.html"
 

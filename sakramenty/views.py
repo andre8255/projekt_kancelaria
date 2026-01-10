@@ -90,7 +90,7 @@ class ChrzestSzczegolyView(LoginRequiredMixin, DetailView):
 
 
 class ChrzestNowyView(RolaWymaganaMixin, CreateView):
-    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = Chrzest
     form_class = ChrzestForm
     template_name = "sakramenty/chrzest_formularz.html"
@@ -163,7 +163,7 @@ class ChrzestNowyView(RolaWymaganaMixin, CreateView):
 
 
 class ChrzestEdycjaView(RolaWymaganaMixin, UpdateView):
-    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = Chrzest
     form_class = ChrzestForm
     template_name = "sakramenty/chrzest_formularz.html"
@@ -182,7 +182,7 @@ class ChrzestEdycjaView(RolaWymaganaMixin, UpdateView):
 
 
 class ChrzestUsunView(RolaWymaganaMixin, DeleteView):
-    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = Chrzest
     template_name = "sakramenty/chrzest_usun.html"
     success_url = reverse_lazy("chrzest_lista")
@@ -287,7 +287,7 @@ class KomuniaSzczegolyView(LoginRequiredMixin, DetailView):
 
 
 class KomuniaNowaView(RolaWymaganaMixin, CreateView):
-    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = PierwszaKomunia
     form_class = PierwszaKomuniaForm
     template_name = "sakramenty/komunia_formularz.html"
@@ -342,7 +342,7 @@ class KomuniaNowaView(RolaWymaganaMixin, CreateView):
 
 
 class KomuniaEdycjaView(RolaWymaganaMixin, UpdateView):
-    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = PierwszaKomunia
     form_class = PierwszaKomuniaForm
     template_name = "sakramenty/komunia_formularz.html"
@@ -363,7 +363,7 @@ class KomuniaEdycjaView(RolaWymaganaMixin, UpdateView):
 
 
 class KomuniaUsunView(RolaWymaganaMixin, DeleteView):
-    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = PierwszaKomunia
     template_name = "sakramenty/komunia_usun.html"
 
@@ -447,7 +447,7 @@ class BierzmowanieSzczegolyView(LoginRequiredMixin, DetailView):
 
 
 class BierzmowanieNoweView(RolaWymaganaMixin, CreateView):
-    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = Bierzmowanie
     form_class = BierzmowanieForm
     template_name = "sakramenty/bierzmowanie_formularz.html"
@@ -511,7 +511,7 @@ class BierzmowanieNoweView(RolaWymaganaMixin, CreateView):
 
 
 class BierzmowanieEdycjaView(RolaWymaganaMixin, UpdateView):
-    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = Bierzmowanie
     form_class = BierzmowanieForm
     template_name = "sakramenty/bierzmowanie_formularz.html"
@@ -532,7 +532,7 @@ class BierzmowanieEdycjaView(RolaWymaganaMixin, UpdateView):
 
 
 class BierzmowanieUsunView(RolaWymaganaMixin, DeleteView):
-    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = Bierzmowanie
     template_name = "sakramenty/bierzmowanie_usun.html"
 
@@ -628,7 +628,7 @@ class MalzenstwoSzczegolyView(LoginRequiredMixin, DetailView):
 
 
 class MalzenstwoNoweView(RolaWymaganaMixin, CreateView):
-    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = Malzenstwo
     form_class = MalzenstwoForm
     template_name = "sakramenty/malzenstwo_formularz.html"
@@ -677,7 +677,7 @@ class MalzenstwoNoweView(RolaWymaganaMixin, CreateView):
 
 
 class MalzenstwoEdycjaView(RolaWymaganaMixin, UpdateView):
-    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = Malzenstwo
     form_class = MalzenstwoForm
     template_name = "sakramenty/malzenstwo_formularz.html"
@@ -698,7 +698,7 @@ class MalzenstwoEdycjaView(RolaWymaganaMixin, UpdateView):
 
 
 class MalzenstwoUsunView(RolaWymaganaMixin, DeleteView):
-    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = Malzenstwo
     template_name = "sakramenty/malzenstwo_usun.html"
 
@@ -788,7 +788,7 @@ class NamaszczenieSzczegolyView(LoginRequiredMixin, DetailView):
 
 
 class NamaszczenieNoweView(RolaWymaganaMixin, CreateView):
-    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = NamaszczenieChorych
     form_class = NamaszczenieChorychForm
     template_name = "sakramenty/namaszczenie_formularz.html"
@@ -844,7 +844,7 @@ class NamaszczenieNoweView(RolaWymaganaMixin, CreateView):
 
 
 class NamaszczenieEdycjaView(RolaWymaganaMixin, UpdateView):
-    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = NamaszczenieChorych
     form_class = NamaszczenieChorychForm
     template_name = "sakramenty/namaszczenie_formularz.html"
@@ -865,7 +865,7 @@ class NamaszczenieEdycjaView(RolaWymaganaMixin, UpdateView):
 
 
 class NamaszczenieUsunView(RolaWymaganaMixin, DeleteView):
-    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = NamaszczenieChorych
     template_name = "sakramenty/namaszczenie_usun.html"
 
@@ -947,7 +947,7 @@ class ZgonSzczegolyView(LoginRequiredMixin, DetailView):
 
 
 class ZgonNowyView(RolaWymaganaMixin, CreateView):
-    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = Zgon
     form_class = ZgonForm
     template_name = "sakramenty/zgon_formularz.html"
@@ -1002,7 +1002,7 @@ class ZgonNowyView(RolaWymaganaMixin, CreateView):
 
 
 class ZgonEdycjaView(RolaWymaganaMixin, UpdateView):
-    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD, Rola.SEKRETARIAT]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = Zgon
     form_class = ZgonForm
     template_name = "sakramenty/zgon_formularz.html"
@@ -1023,7 +1023,7 @@ class ZgonEdycjaView(RolaWymaganaMixin, UpdateView):
 
 
 class ZgonUsunView(RolaWymaganaMixin, DeleteView):
-    dozwolone_role = [Rola.ADMIN, Rola.KSIAZD]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = Zgon
     template_name = "sakramenty/zgon_usun.html"
 

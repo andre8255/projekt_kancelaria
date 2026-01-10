@@ -1,13 +1,14 @@
+{# rodziny/potwierdz_usuniecie.html #}
 {% extends "base_panel.html" %}
 {% block content %}
 <h1 class="h5 mb-3">Usuń rodzinę</h1>
 
 <p>Czy na pewno chcesz usunąć rodzinę:
-<strong>{{ object.nazwisko }}</strong>?</p>
+<strong>{{ object.nazwa }}</strong>?</p>
 
-<form method="post">
+<form method="post" action="{% url 'rodzina_usun' object.pk %}">
   {% csrf_token %}
   <button class="btn btn-danger">Usuń</button>
-  <a href="{{ object.get_absolute_url }}" class="btn btn-secondary">Anuluj</a>
+  <a href="{% url 'rodzina_szczegoly' object.pk %}" class="btn btn-secondary">Anuluj</a>
 </form>
 {% endblock %}

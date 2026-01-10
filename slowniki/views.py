@@ -59,7 +59,7 @@ class ParafiaNowaView(RolaWymaganaMixin, CreateView):
     Dodanie nowej parafii (słownik).
     """
 
-    dozwolone_role = [Rola.ADMIN]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = Parafia
     form_class = ParafiaForm
     template_name = "slowniki/parafia_formularz.html"
@@ -75,7 +75,7 @@ class ParafiaEdycjaView(RolaWymaganaMixin, UpdateView):
     Edycja parafii.
     """
 
-    dozwolone_role = [Rola.ADMIN]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = Parafia
     form_class = ParafiaForm
     template_name = "slowniki/parafia_formularz.html"
@@ -91,7 +91,7 @@ class ParafiaUsunView(RolaWymaganaMixin, DeleteView):
     Usunięcie parafii z obsługą ProtectedError (gdy używana w sakramentach).
     """
 
-    dozwolone_role = [Rola.ADMIN]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = Parafia
     template_name = "slowniki/parafia_usun.html"
     success_url = reverse_lazy("slownik_parafia_lista")
@@ -155,7 +155,7 @@ class DuchownyNowyView(RolaWymaganaMixin, CreateView):
     Dodanie duchownego do słownika.
     """
 
-    dozwolone_role = [Rola.ADMIN]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = Duchowny
     form_class = DuchownyForm
     template_name = "slowniki/duchowny_formularz.html"
@@ -171,7 +171,7 @@ class DuchownyEdycjaView(RolaWymaganaMixin, UpdateView):
     Edycja danych duchownego.
     """
 
-    dozwolone_role = [Rola.ADMIN]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = Duchowny
     form_class = DuchownyForm
     template_name = "slowniki/duchowny_formularz.html"
@@ -187,7 +187,7 @@ class DuchownyUsunView(RolaWymaganaMixin, DeleteView):
     Usunięcie duchownego z obsługą ProtectedError (gdy używany w sakramentach).
     """
 
-    dozwolone_role = [Rola.ADMIN]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = Duchowny
     template_name = "slowniki/duchowny_usun.html"
     success_url = reverse_lazy("slownik_duchowny_lista")
@@ -230,7 +230,7 @@ class WyznanieNoweView(RolaWymaganaMixin, CreateView):
     Dodanie nowego wyznania.
     """
 
-    dozwolone_role = [Rola.ADMIN]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = Wyznanie
     form_class = WyznanieForm
     template_name = "slowniki/wyznanie_formularz.html"
@@ -246,7 +246,7 @@ class WyznanieEdycjaView(RolaWymaganaMixin, UpdateView):
     Edycja wyznania.
     """
 
-    dozwolone_role = [Rola.ADMIN]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = Wyznanie
     form_class = WyznanieForm
     template_name = "slowniki/wyznanie_formularz.html"
@@ -262,7 +262,7 @@ class WyznanieUsunView(RolaWymaganaMixin, DeleteView):
     Usunięcie wyznania z obsługą ProtectedError (gdy powiązane z osobami).
     """
 
-    dozwolone_role = [Rola.ADMIN]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = Wyznanie
     template_name = "slowniki/wyznanie_usun.html"
     success_url = reverse_lazy("slownik_wyznanie_lista")
