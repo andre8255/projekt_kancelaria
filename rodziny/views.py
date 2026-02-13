@@ -463,6 +463,13 @@ class DodajCzlonkaView(RolaWymaganaMixin, FormView):
         czlonek.rodzina = self.rodzina
         czlonek.save()
 
+        osoba_txt = f"{czlonek.osoba.nazwisko} {czlonek.osoba.imie_pierwsze}"
+        zapisz_log(
+            self.request,
+            "DODANIE_CZLONKA_RODZINY",
+            czlonek,
+            opis=f"Dodano osobę {osoba_txt} do rodziny {self.rodzina.nazwa}",
+        )
         messages.success(self.request, "Osoba została przypisana do rodziny.")
         return redirect(self.rodzina.get_absolute_url())
 
@@ -472,103 +479,76 @@ class DodajCzlonkaView(RolaWymaganaMixin, FormView):
         return ctx
 
 class CzlonkostwoEdycjaView(RolaWymaganaMixin, UpdateView):
-    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ, Rola.SEKRETARIAT]
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = CzlonkostwoRodziny
     form_class = DodajCzlonkaForm
-    template_name = "rodziny/dodaj_czlonka.html"  # możesz zrobić osobny template, ale ten też zadziała
+    template_name = "rodziny/dodaj_czlonka.html"  # możesz mieć osobny szablon, ale ten też działa
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        # przekażemy rodzinę do formularza, żeby walidacja duplikatu działała jak przy dodawaniu
+        # żeby walidacja "czy już jest w tej rodzinie" działała poprawnie,
+        # nadal przekazujemy rodzinę:
         kwargs["rodzina"] = self.object.rodzina
         return kwargs
 
-    def get_form(self, form_class=None):
-        form = super().get_form(form_class)
-        # przy edycji NIE pozwalamy zmieniać osoby, tylko rolę/status/uwagi
-        if "osoba" in form.fields:
-            form.fields["osoba"].disabled = True
-        return form
+    def form_valid(self, form):
+        before = self.get_object()
+        old_rola = before.get_rola_display()
+        old_status = before.get_status_display()
 
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        ctx["rodzina"] = self.object.rodzina
-        return ctx
+        response = super().form_valid(form)
 
-    def get_success_url(self):
-        messages.success(self.request, "Zaktualizowano rolę i status w rodzinie.")
-        return self.object.rodzina.get_absolute_url()
+        # po zapisie:
+        after = self.object
+        new_rola = after.get_rola_display()
+        new_status = after.get_status_display()
 
-class UsunCzlonkaZRodzinyView(RolaWymaganaMixin, View):
-    """
-    Prosty widok potwierdzenia usunięcia członka z konkretnej rodziny.
-    """
-    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
-    template_name = "rodziny/usun_czlonka.html"
+        osoba_txt = f"{after.osoba.nazwisko} {after.osoba.imie_pierwsze}"
+        rodzina_txt = after.rodzina.nazwa
 
-    def dispatch(self, request, *args, **kwargs):
-        # pobieramy rodzinę i członkostwo na starcie (używane w GET i POST)
-        self.rodzina = get_object_or_404(Rodzina, pk=kwargs["rodzina_pk"])
-        self.czlonek = get_object_or_404(
-            CzlonkostwoRodziny,
-            pk=kwargs["czlonek_pk"],
-            rodzina=self.rodzina,  # zabezpieczenie: członek MUSI należeć do tej rodziny
-        )
-        return super().dispatch(request, *args, **kwargs)
-
-    def get(self, request, rodzina_pk, czlonek_pk):
-        # wyświetlenie strony z potwierdzeniem
-        return render(
-            request,
-            self.template_name,
-            {
-                "rodzina": self.rodzina,
-                "czlonek": self.czlonek,
-            },
-        )
-
-    def post(self, request, rodzina_pk, czlonek_pk):
-        osoba_txt = f"{self.czlonek.osoba.nazwisko} {self.czlonek.osoba.imie_pierwsze}"
+        opis = f"Edycja członkostwa: {osoba_txt} w rodzinie {rodzina_txt}."
+        if old_rola != new_rola:
+            opis += f" Rola: {old_rola} → {new_rola}."
+        if old_status != new_status:
+            opis += f" Status: {old_status} → {new_status}."
 
         zapisz_log(
-            request,
-            "USUNIECIE_CZLONKA_RODZINY",
-            self.czlonek,
-            opis=f"Usunięto osobę {osoba_txt} z rodziny {self.rodzina.nazwa}",
+            self.request,
+            "EDYCJA_CZLONKA_RODZINY",
+            after,
+            opis=opis,
         )
 
-        self.czlonek.delete()
-        messages.success(
-            request,
-            f"Osoba {osoba_txt} została usunięta z tej rodziny.",
-        )
-        return redirect(self.rodzina.get_absolute_url())
+        messages.success(self.request, "Zapisano zmiany członka rodziny.")
+        return response
 
+    def get_success_url(self):
+        return self.object.rodzina.get_absolute_url()
 
 class CzlonkostwoUsunView(RolaWymaganaMixin, DeleteView):
-    """
-    Klasyczny DeleteView dla CzlonkostwoRodziny (gdy nie używamy wariantu z rodzina_pk).
-    """
     dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
     model = CzlonkostwoRodziny
     template_name = "rodziny/czlonek_usun.html"
     context_object_name = "czlonkostwo"
 
-    def delete(self, request, *args, **kwargs):
-        self.object = self.get_object()
+    def get_success_url(self):
+        # self.object jest już ustawiony, ale jeszcze NIE usunięty
+        rodzina = self.object.rodzina
+        osoba = self.object.osoba
 
+        # LOG – zapisujemy, że tę osobę wypisano z rodziny
         zapisz_log(
-            request,
+            self.request,
             "USUNIECIE_CZLONKA_RODZINY",
             self.object,
-            opis=(
-                f"Usunięto członka rodziny: {self.object.osoba} "
-                f"z rodziny {self.object.rodzina.nazwa}"
-            ),
+            opis=f"Usunięto osobę {osoba} z rodziny {rodzina.nazwa}",
         )
 
-        return super().delete(request, *args, **kwargs)
+        # KOMUNIKAT
+        messages.success(
+            self.request,
+            f"Osoba {osoba} została usunięta z rodziny {rodzina.nazwa}."
+        )
 
-    def get_success_url(self):
-        messages.success(self.request, "Osoba została usunięta z rodziny.")
-        return self.object.rodzina.get_absolute_url()
+        # Po usunięciu rekordu czlonkostwa wracamy do szczegółów rodziny
+        return rodzina.get_absolute_url()

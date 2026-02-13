@@ -7,10 +7,17 @@ from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views import View
-from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
+from django.views.generic import (
+    CreateView,
+    DeleteView,
+    DetailView,
+    ListView,
+    UpdateView,
+)
 
 from konta.mixins import RolaWymaganaMixin
 from konta.models import Rola
+from konta.utils import zapisz_log          # <<< DODANY IMPORT
 from parafia.utils_pdf import render_to_pdf
 
 from .forms import GrobForm, PochowanyForm, SektorForm
@@ -21,7 +28,6 @@ from .models import Grob, Pochowany, Sektor
 # GROBY
 # =============================================================================
 
-
 class GrobListaView(LoginRequiredMixin, ListView):
     model = Grob
     template_name = "cmentarz/lista.html"
@@ -29,11 +35,14 @@ class GrobListaView(LoginRequiredMixin, ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        qs = Grob.objects.select_related("sektor", "dysponent").prefetch_related("pochowani__osoba")
+        qs = (
+            Grob.objects
+            .select_related("sektor", "dysponent")
+            .prefetch_related("pochowani__osoba")
+        )
 
-        q = self.request.GET.get("q")
+        q = (self.request.GET.get("q") or "").strip()
         if q:
-            # Wyszukiwanie po: rzędzie, numerze grobu oraz danych osoby pochowanej
             qs = qs.filter(
                 Q(rzad__icontains=q)
                 | Q(numer__icontains=q)
@@ -65,6 +74,20 @@ class GrobNowyView(RolaWymaganaMixin, CreateView):
     form_class = GrobForm
     template_name = "cmentarz/formularz.html"
 
+    def form_valid(self, form):
+        response = super().form_valid(form)
+
+        # LOG
+        zapisz_log(
+            self.request,
+            "DODANIE_GROBU",
+            self.object,
+            opis=f"Dodano grób: sektor {self.object.sektor} nr {self.object.numer}",
+        )
+
+        messages.success(self.request, "Dodano nowy grób.")
+        return response
+
     def get_success_url(self):
         return reverse_lazy("cmentarz:grob_szczegoly", args=[self.object.pk])
 
@@ -75,8 +98,21 @@ class GrobEdycjaView(RolaWymaganaMixin, UpdateView):
     form_class = GrobForm
     template_name = "cmentarz/formularz.html"
 
-    def get_success_url(self):
+    def form_valid(self, form):
+        response = super().form_valid(form)
+
+        # LOG
+        zapisz_log(
+            self.request,
+            "EDYCJA_GROBU",
+            self.object,
+            opis=f"Zmieniono dane grobu: sektor {self.object.sektor} nr {self.object.numer}",
+        )
+
         messages.success(self.request, "Zapisano zmiany w karcie grobu.")
+        return response
+
+    def get_success_url(self):
         return reverse_lazy("cmentarz:grob_szczegoly", args=[self.object.pk])
 
 
@@ -86,15 +122,33 @@ class GrobUsunView(RolaWymaganaMixin, DeleteView):
     template_name = "cmentarz/grob_usun.html"
     success_url = reverse_lazy("cmentarz:grob_lista")
 
-    def delete(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
+        # pobieramy obiekt PRZED usunięciem
+        self.object = self.get_object()
+
+        grob_id = self.object.pk
+        sektor = self.object.sektor
+        numer = self.object.numer
+
+        # najpierw wykonujemy standardowe usunięcie
+        response = super().post(request, *args, **kwargs)
+
+        # a teraz zapisujemy log – obiekt już nie istnieje, więc:
+        zapisz_log(
+            request,
+            "USUNIECIE_GROBU",
+            None,  # obiektu już nie ma
+            opis=f"Usunięto grób: sektor {sektor} / nr {numer}",
+            model="Grob",
+            obiekt_id=grob_id,
+        )
+
         messages.success(request, "Grób został usunięty z ewidencji.")
-        return super().delete(request, *args, **kwargs)
-
+        return response
 
 # =============================================================================
-# POCHOWANI (powiązanie osoby z grobem)
+# POCHOWANI
 # =============================================================================
-
 
 class PochowanyNowyView(RolaWymaganaMixin, CreateView):
     dozwolone_role = [Rola.ADMIN, Rola.KSIADZ]
@@ -111,6 +165,15 @@ class PochowanyNowyView(RolaWymaganaMixin, CreateView):
         pochowany.grob = self.grob
         pochowany.save()
 
+        # LOG
+        osoba_txt = f"{pochowany.osoba.nazwisko} {pochowany.osoba.imie_pierwsze}"
+        zapisz_log(
+            self.request,
+            "DODANIE_POCHOWANEGO",
+            pochowany,
+            opis=f"Dodano osobę {osoba_txt} do grobu sektor {self.grob.sektor} nr {self.grob.numer}",
+        )
+
         messages.success(self.request, "Dodano osobę do grobu.")
         return redirect(self.grob.get_absolute_url())
 
@@ -125,17 +188,35 @@ class PochowanyUsunView(RolaWymaganaMixin, DeleteView):
     model = Pochowany
     template_name = "cmentarz/pochowany_usun.html"
 
-    def get_success_url(self):
+    def post(self, request, *args, **kwargs):
+        # pobieramy obiekt PRZED usunięciem
+        self.object = self.get_object()
         grob = self.object.grob
-        messages.success(self.request, "Osoba została usunięta z grobu.")
-        # Powrót do szczegółów grobu, z którego usunięto wpis pochówku
-        return reverse_lazy("cmentarz:grob_szczegoly", args=[grob.pk])
+        osoba = self.object.osoba
 
+        # LOG
+        zapisz_log(
+            request,
+            "USUNIECIE_POCHOWANEGO_Z_GROBU",
+            self.object,
+            opis=(
+                f"Usunięto pochowanego {osoba} "
+                f"z grobu sektor {grob.sektor} / nr {grob.numer}"
+            ),
+        )
+
+        # usuwamy wpis pochówku
+        self.object.delete()
+
+        # POWIADOMIENIE
+        messages.success(request, "Osoba została usunięta z grobu.")
+
+        # powrót do karty grobu
+        return redirect("cmentarz:grob_szczegoly", grob.pk)
 
 # =============================================================================
 # WYDRUKI (PDF)
 # =============================================================================
-
 
 class GrobPDFView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
@@ -153,7 +234,6 @@ class GrobPDFView(LoginRequiredMixin, View):
 # SEKTORY
 # =============================================================================
 
-
 class SektorListaView(LoginRequiredMixin, ListView):
     model = Sektor
     template_name = "cmentarz/sektor_lista.html"
@@ -165,8 +245,17 @@ class SektorNowyView(RolaWymaganaMixin, CreateView):
     model = Sektor
     form_class = SektorForm
     template_name = "cmentarz/sektor_formularz.html"
-    success_url = reverse_lazy("cmentarz:sektor_lista")  # Pamiętaj o namespace!
+    success_url = reverse_lazy("cmentarz:sektor_lista")
 
     def form_valid(self, form):
+        response = super().form_valid(form)
+
+        zapisz_log(
+            self.request,
+            "DODANIE_SEKTORA",
+            self.object,
+            opis=f"Dodano sektor cmentarza: {self.object.nazwa}",
+        )
+
         messages.success(self.request, "Dodano nowy sektor.")
-        return super().form_valid(form)
+        return response
