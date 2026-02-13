@@ -471,6 +471,33 @@ class DodajCzlonkaView(RolaWymaganaMixin, FormView):
         ctx["rodzina"] = self.rodzina
         return ctx
 
+class CzlonkostwoEdycjaView(RolaWymaganaMixin, UpdateView):
+    dozwolone_role = [Rola.ADMIN, Rola.KSIADZ, Rola.SEKRETARIAT]
+    model = CzlonkostwoRodziny
+    form_class = DodajCzlonkaForm
+    template_name = "rodziny/dodaj_czlonka.html"  # możesz zrobić osobny template, ale ten też zadziała
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        # przekażemy rodzinę do formularza, żeby walidacja duplikatu działała jak przy dodawaniu
+        kwargs["rodzina"] = self.object.rodzina
+        return kwargs
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        # przy edycji NIE pozwalamy zmieniać osoby, tylko rolę/status/uwagi
+        if "osoba" in form.fields:
+            form.fields["osoba"].disabled = True
+        return form
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["rodzina"] = self.object.rodzina
+        return ctx
+
+    def get_success_url(self):
+        messages.success(self.request, "Zaktualizowano rolę i status w rodzinie.")
+        return self.object.rodzina.get_absolute_url()
 
 class UsunCzlonkaZRodzinyView(RolaWymaganaMixin, View):
     """

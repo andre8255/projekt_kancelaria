@@ -36,7 +36,7 @@ class SektorForm(BootstrapFormMixin, forms.ModelForm):
         widgets = { "opis": forms.Textarea(attrs={"rows": 2}) }
 
 class GrobForm(BootstrapFormMixin, forms.ModelForm):
-    # Używamy naszego ulepszonego pola
+    
     dysponent = OsobaChoiceField(
         queryset=Osoba.objects.all().order_by('nazwisko', 'imie_pierwsze'),
         required=False,
@@ -63,7 +63,7 @@ class GrobForm(BootstrapFormMixin, forms.ModelForm):
             w = self.fields["dysponent"].widget
             css = w.attrs.get("class", "")
             w.attrs["class"] = (css + " js-osoba-select").strip()
-        # to pole, na którym chcesz mieć „live search”
+        # to pole, na którym chce mieć „live search”
         if "osoba" in self.fields:
             css = self.fields["osoba"].widget.attrs.get("class", "")
             self.fields["osoba"].widget.attrs["class"] = (css + " js-osoba-select").strip()
@@ -85,9 +85,9 @@ class GrobForm(BootstrapFormMixin, forms.ModelForm):
         
         return cleaned_data
 
-# --- 2. POPRAWIONY FORMULARZ POCHOWANEGO ---
+# --- 2. FORMULARZ POCHOWANEGO ---
 class PochowanyForm(BootstrapFormMixin, forms.ModelForm):
-    # Używamy ulepszonego pola wyboru
+    # Ulepszone pole wyboru
     osoba = OsobaChoiceField(
         queryset=Osoba.objects.all().order_by('nazwisko', 'imie_pierwsze'),
         label="Wybierz osobę zmarłą",
@@ -107,7 +107,7 @@ class PochowanyForm(BootstrapFormMixin, forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # to pole, na którym chcesz mieć „live search”
+        # pole,  „live search”
         if "osoba" in self.fields:
             css = self.fields["osoba"].widget.attrs.get("class", "")
             self.fields["osoba"].widget.attrs["class"] = (css + " js-osoba-select").strip()
@@ -118,7 +118,7 @@ class PochowanyForm(BootstrapFormMixin, forms.ModelForm):
         data_form = cleaned_data.get("data_pochowania")
 
         if osoba:
-            # Sprawdzamy akt zgonu
+            # Sprawdza akt zgonu
             zgon_db = Zgon.objects.filter(osoba=osoba).first()
 
             # Jeśli w formularzu PUSTO, a w bazie JEST -> Pobierz z bazy
@@ -156,7 +156,7 @@ class PochowanyForm(BootstrapFormMixin, forms.ModelForm):
             # Aktualizujemy dane
             if data:
                 zgon.data_pogrzebu = data
-                zgon.data_zgonu = data # Często tożsame lub bliskie
+                zgon.data_zgonu = data 
             
             # Dopisujemy miejsce
             if zgon.cmentarz:

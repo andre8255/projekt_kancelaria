@@ -220,6 +220,11 @@
                           <i class="bi bi-eye"></i> Szczegóły osoby
                         </a>
 
+
+                        <a href="{% url 'rodzina_czlonek_edytuj' w.relacja.pk %}"
+                         class="btn btn-outline-primary">
+                               <i class="bi bi-pencil-square"></i> Edytuj w rodzinie
+                          </a>
                         <a href="{% url 'rodzina_czlonek_usun' w.relacja.pk %}"
                            class="btn btn-outline-danger">
                          <i class="bi bi-trash"></i> Usuń z rodziny
